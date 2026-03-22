@@ -47,6 +47,17 @@ function getExperience(totalSeconds) {
   return 'Feels batch-first'
 }
 
+function getModelScaling(model) {
+  const paramsB = Math.max(model.paramsB ?? 8, 0.5)
+  const sizeRatio = paramsB / 8
+
+  return {
+    prefillFactor: model.prefillFactor ?? Math.max(0.2, sizeRatio ** 0.92),
+    decodeFactor: model.decodeFactor ?? Math.max(0.22, sizeRatio ** 0.88),
+    ttftFactor: model.ttftFactor ?? Math.max(0.3, sizeRatio ** 0.72),
+  }
+}
+
 function calculateMetrics(hardware, model, workload, customMetrics) {
   let prefillTps
   let decodeTps
@@ -65,10 +76,11 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
     ttftMs = benchmark.ttftMs
     source = benchmark.source
   } else {
-    prefillTps = hardware.prefillBase / model.prefillFactor
-    decodeTps = hardware.decodeBase / model.decodeFactor
-    ttftMs = hardware.ttftBase * model.ttftFactor
-    source = 'Estimated from LocalScore baseline'
+    const scaling = getModelScaling(model)
+    prefillTps = hardware.prefillBase / scaling.prefillFactor
+    decodeTps = hardware.decodeBase / scaling.decodeFactor
+    ttftMs = hardware.ttftBase * scaling.ttftFactor
+    source = 'Estimated from LocalScore baseline + model size'
   }
 
   ttftMs += workload.promptTokens * 0.16
