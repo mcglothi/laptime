@@ -1,28 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg: #081218;
-  --bg-top: #0f2330;
-  --panel: rgba(10, 19, 24, 0.78);
-  --border: rgba(155, 202, 214, 0.18);
-  --heading: #f2f7f7;
-  --text: #c7d6d9;
-  --text-soft: #86a2a9;
-  --accent: #54c7d1;
-  --accent-strong: #e4b86a;
-  --panel-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --sans: 'Instrument Sans', 'Segoe UI', sans-serif;
-  --heading-font: 'Sora', 'Avenir Next', sans-serif;
-  --mono: 'SFMono-Regular', 'JetBrains Mono', monospace;
+  --sans: 'Inter', 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+}
 
+:root[data-theme='dark'] {
+  --bg: #090b10;
+  --bg-alt: #11141b;
+  --panel: rgba(17, 20, 27, 0.88);
+  --panel-soft: rgba(24, 28, 37, 0.95);
+  --border: rgba(126, 143, 176, 0.16);
+  --border-soft: rgba(126, 143, 176, 0.1);
+  --border-strong: rgba(132, 153, 193, 0.3);
+  --heading: #f5f7fb;
+  --text: #c1c8d6;
+  --text-soft: #7f8aa3;
+  --accent: #5b8cff;
+  --accent-strong: #7d6bff;
+  --button-muted: rgba(20, 24, 34, 0.98);
+  --input-bg: rgba(20, 24, 34, 0.98);
+  --track: rgba(255, 255, 255, 0.08);
+  --panel-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.03) inset;
+}
+
+:root[data-theme='light'] {
+  --bg: #f5f7fb;
+  --bg-alt: #eef2f8;
+  --panel: rgba(255, 255, 255, 0.88);
+  --panel-soft: rgba(248, 250, 255, 0.96);
+  --border: rgba(95, 114, 150, 0.16);
+  --border-soft: rgba(95, 114, 150, 0.1);
+  --border-strong: rgba(95, 114, 150, 0.28);
+  --heading: #111827;
+  --text: #4b5565;
+  --text-soft: #7a8598;
+  --accent: #336dff;
+  --accent-strong: #6b52ff;
+  --button-muted: rgba(255, 255, 255, 0.98);
+  --input-bg: rgba(255, 255, 255, 0.98);
+  --track: rgba(69, 86, 122, 0.12);
+  --panel-shadow:
+    0 18px 40px rgba(70, 89, 126, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
+}
+
+:root {
   color: var(--text);
-  background:
-    radial-gradient(circle at top, rgba(84, 199, 209, 0.12), transparent 28%),
-    radial-gradient(circle at 80% 10%, rgba(228, 184, 106, 0.12), transparent 22%),
-    linear-gradient(180deg, var(--bg-top), var(--bg) 42%);
-  font: 17px/1.6 var(--sans);
+  background: linear-gradient(180deg, var(--bg), var(--bg-alt));
+  font: 16px/1.55 var(--sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -42,27 +70,14 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at top, rgba(84, 199, 209, 0.12), transparent 28%),
-    radial-gradient(circle at 80% 10%, rgba(228, 184, 106, 0.12), transparent 22%),
-    linear-gradient(180deg, var(--bg-top), var(--bg) 42%);
-  background-size:
-    100% 100%,
-    100% 100%,
-    auto,
-    auto,
-    auto;
-  background-position:
-    0 0,
-    0 0,
-    center top,
-    80% 10%,
-    center;
+    radial-gradient(circle at top left, rgba(91, 140, 255, 0.12), transparent 20%),
+    radial-gradient(circle at 88% 8%, rgba(125, 107, 255, 0.1), transparent 16%),
+    linear-gradient(180deg, var(--bg), var(--bg-alt));
 }
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 button,
@@ -71,26 +86,20 @@ select {
 }
 
 #root {
-  width: min(1280px, calc(100% - 2rem));
+  width: min(1180px, calc(100% - 1rem));
   margin: 0 auto;
 }
 
 h1,
 h2 {
-  font-family: var(--heading-font);
   color: var(--heading);
   line-height: 1.05;
   letter-spacing: -0.04em;
   margin: 0;
 }
 
-h1 {
-  font-size: clamp(3rem, 8vw, 5.8rem);
-  max-width: 14ch;
-}
-
 h2 {
-  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-size: clamp(1.28rem, 2.6vw, 1.75rem);
 }
 
 p {
@@ -102,5 +111,5 @@ strong {
 }
 
 ::selection {
-  background: rgba(84, 199, 209, 0.22);
+  background: rgba(91, 140, 255, 0.24);
 }

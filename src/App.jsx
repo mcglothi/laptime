@@ -3,76 +3,154 @@ import './App.css'
 
 const hardwareOptions = [
   {
-    id: 'm4-max',
-    name: 'MacBook Pro M4 Max',
-    spec: '128 GB unified memory',
-    price: '$4,299',
-    buyer: 'Quiet premium workstation for long-context local workflows.',
-    prefillBase: 1090,
-    decodeBase: 92,
-    ttftBase: 260,
+    id: 'custom',
+    name: 'Custom speeds',
+    spec: 'Manual override',
+    price: 'Custom',
+    buyer: 'Set your own prefill, decode, and TTFT like TokenFlow.',
+    prefillBase: 3000,
+    decodeBase: 60,
+    ttftBase: 350,
+    source: 'Manual',
   },
   {
     id: 'rtx-5090',
     name: 'RTX 5090 Tower',
-    spec: '32 GB VRAM, CUDA',
+    spec: '31 GB VRAM, CUDA',
     price: '$3,899',
-    buyer: 'Top-end decode speed for heavy open-weight models.',
-    prefillBase: 1550,
-    decodeBase: 144,
-    ttftBase: 180,
+    buyer: 'Flagship consumer rig with strong prompt throughput.',
+    prefillBase: 6477.08,
+    decodeBase: 65.1,
+    ttftBase: 216.85,
+    source: 'LocalScore',
   },
   {
-    id: 'rtx-4070-ti-super',
-    name: 'RTX 4070 Ti Super Build',
-    spec: '16 GB VRAM, CUDA',
+    id: 'rtx-4090',
+    name: 'RTX 4090',
+    spec: '24 GB VRAM, CUDA',
+    price: '$2,699',
+    buyer: 'Popular high-end local AI card with broad community data.',
+    prefillBase: 6598.53,
+    decodeBase: 89.26,
+    ttftBase: 207.98,
+    source: 'LocalScore',
+  },
+  {
+    id: 'rtx-4080-super',
+    name: 'RTX 4080 SUPER',
+    spec: '16 GB VRAM class build',
+    price: '$1,999',
+    buyer: 'Strong premium tier when 4090 pricing is too steep.',
+    prefillBase: 4978.68,
+    decodeBase: 78.69,
+    ttftBase: 267.04,
+    source: 'LocalScore',
+  },
+  {
+    id: 'rtx-3090-ti',
+    name: 'RTX 3090 Ti',
+    spec: '24 GB VRAM, CUDA',
     price: '$1,899',
-    buyer: 'Strong midrange buyer pick for 7B to 14B experimentation.',
-    prefillBase: 820,
-    decodeBase: 63,
-    ttftBase: 360,
+    buyer: 'Used-market favorite for serious local models on a budget.',
+    prefillBase: 4023.78,
+    decodeBase: 109.78,
+    ttftBase: 320.45,
+    source: 'LocalScore',
   },
   {
-    id: 'mini-pc',
-    name: 'Mini PC CPU-Only',
-    spec: '96 GB RAM, no discrete GPU',
-    price: '$899',
-    buyer: 'Budget entry point that highlights where interactivity breaks down.',
-    prefillBase: 120,
-    decodeBase: 11,
-    ttftBase: 1450,
+    id: 'rtx-3080-ti',
+    name: 'RTX 3080 Ti',
+    spec: '12 GB VRAM, CUDA',
+    price: '$1,199',
+    buyer: 'Older enthusiast tier that still matters for value shoppers.',
+    prefillBase: 3739.43,
+    decodeBase: 103.81,
+    ttftBase: 342.66,
+    source: 'LocalScore',
+  },
+  {
+    id: 'rtx-3070-ti',
+    name: 'RTX 3070 Ti',
+    spec: '8 GB VRAM, CUDA',
+    price: '$699',
+    buyer: 'Lower-cost entry that shows where VRAM limits start to bite.',
+    prefillBase: 2509.44,
+    decodeBase: 83.17,
+    ttftBase: 519.63,
+    source: 'LocalScore',
   },
 ]
 
 const modelOptions = [
   {
-    id: 'llama-3.1-8b-q4',
-    name: 'Llama 3.1 8B',
-    quant: 'Q4_K_M',
-    fit: 'Easy daily-driver chat model',
+    id: 'llama-3.2-1b',
+    name: 'Llama 3.2 1B Instruct',
+    quant: 'Q4_K - Medium',
+    fit: 'Tiny benchmark model for lightweight local chat.',
+    prefillFactor: 0.33,
+    decodeFactor: 0.34,
+    ttftFactor: 0.34,
+  },
+  {
+    id: 'llama-3.1-8b',
+    name: 'Meta Llama 3.1 8B Instruct',
+    quant: 'Q4_K - Medium',
+    fit: 'Most stable baseline for interactive local use.',
     prefillFactor: 1,
     decodeFactor: 1,
     ttftFactor: 1,
   },
   {
-    id: 'qwen-2.5-14b-q6',
-    name: 'Qwen 2.5 14B',
-    quant: 'Q6_K',
-    fit: 'Sharper coding model with heavier memory pressure',
-    prefillFactor: 1.28,
-    decodeFactor: 1.34,
-    ttftFactor: 1.16,
+    id: 'qwen-2.5-14b',
+    name: 'Qwen2.5 14B Instruct',
+    quant: 'Q4_K - Medium',
+    fit: 'Heavier benchmark model that starts exposing memory tradeoffs.',
+    prefillFactor: 1.9,
+    decodeFactor: 1.85,
+    ttftFactor: 2.05,
   },
   {
-    id: 'llama-3.3-70b-q4',
+    id: 'llama-3.3-70b',
     name: 'Llama 3.3 70B',
-    quant: 'Q4_K_M',
-    fit: 'Dream setup model that separates premium rigs from everything else',
-    prefillFactor: 2.7,
-    decodeFactor: 3.05,
-    ttftFactor: 1.55,
+    quant: 'Q4 estimate',
+    fit: 'Extrapolated heavyweight model for dream-rig comparisons.',
+    prefillFactor: 6.4,
+    decodeFactor: 4.2,
+    ttftFactor: 3.6,
   },
 ]
+
+const benchmarkMatrix = {
+  'rtx-5090': {
+    'llama-3.2-1b': { prefillTps: 20305.31, decodeTps: 170.33, ttftMs: 299.93, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 6477.08, decodeTps: 65.1, ttftMs: 216.85, source: 'LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 3678.27, decodeTps: 45.54, ttftMs: 535.86, source: 'LocalScore' },
+  },
+  'rtx-4090': {
+    'llama-3.2-1b': { prefillTps: 18868.67, decodeTps: 193.6, ttftMs: 101.84, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 6598.53, decodeTps: 89.26, ttftMs: 207.98, source: 'LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 3370.69, decodeTps: 45.65, ttftMs: 413.23, source: 'LocalScore' },
+  },
+  'rtx-4080-super': {
+    'llama-3.2-1b': { prefillTps: 17478.95, decodeTps: 247.22, ttftMs: 80.02, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 4978.68, decodeTps: 78.69, ttftMs: 267.04, source: 'LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2802.55, decodeTps: 46.15, ttftMs: 468.4, source: 'LocalScore' },
+  },
+  'rtx-3090-ti': {
+    'llama-3.2-1b': { prefillTps: 15119.73, decodeTps: 353.86, ttftMs: 89.64, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 4023.78, decodeTps: 109.78, ttftMs: 320.45, source: 'LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2202.06, decodeTps: 64.18, ttftMs: 575.42, source: 'LocalScore' },
+  },
+  'rtx-3080-ti': {
+    'llama-3.2-1b': { prefillTps: 14351.58, decodeTps: 326.48, ttftMs: 93.43, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 3739.43, decodeTps: 103.81, ttftMs: 342.66, source: 'LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 1704.09, decodeTps: 41.95, ttftMs: 784.72, source: 'LocalScore' },
+  },
+  'rtx-3070-ti': {
+    'llama-3.2-1b': { prefillTps: 10074.28, decodeTps: 297.33, ttftMs: 137.21, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 2509.44, decodeTps: 83.17, ttftMs: 519.63, source: 'LocalScore' },
+  },
+}
 
 const workloadOptions = [
   {
@@ -109,7 +187,19 @@ const workloadOptions = [
     prompt:
       'Answer a product strategy question using a long context bundle that includes pricing notes, benchmark charts, customer interviews, and prior roadmap decisions.',
     response:
-      'The retrieval-heavy workload shifts the experience dramatically because the system spends most of its time ingesting context before it can say anything useful. Buyers often shop on decode tokens per second alone, but in this scenario prompt processing efficiency and time to first token matter more. A machine that feels almost identical on short chat can feel meaningfully worse once you hand it a dense research packet, long markdown notes, or a large tool trace. That is exactly the kind of gap PromptDrive should make visible.',
+      'The retrieval-heavy workload shifts the experience dramatically because the system spends most of its time ingesting context before it can say anything useful. Buyers often shop on decode tokens per second alone, but in this scenario prompt processing efficiency and time to first token matter more. A machine that feels almost identical on short chat can feel meaningfully worse once you hand it a dense research packet, long markdown notes, or a large tool trace. That is exactly the kind of gap LapTime should make visible.',
+  },
+  {
+    id: 'custom',
+    name: 'Custom Preset',
+    category: 'Manual preset',
+    promptTokens: 1200,
+    responseTokens: 220,
+    accent: 'Tune prompt and response sizes for your own what-if scenario.',
+    prompt:
+      'Use your own token counts to preview how a workload might feel before you buy hardware.',
+    response:
+      'This custom preset lets you model your own workload shape. Increase prompt tokens to simulate longer context ingestion, increase response tokens to simulate longer answers, or combine both to test more demanding sessions.',
   },
 ]
 
@@ -121,21 +211,41 @@ function formatSeconds(value) {
   return `${value.toFixed(value >= 10 ? 1 : 2)}s`
 }
 
-function calculateMetrics(hardware, model, workload) {
-  const prefillTps = hardware.prefillBase / model.prefillFactor
-  const decodeTps = hardware.decodeBase / model.decodeFactor
-  const ttftMs = hardware.ttftBase * model.ttftFactor + workload.promptTokens * 0.16
+function getExperience(totalSeconds) {
+  if (totalSeconds < 4.5) return 'Feels instant'
+  if (totalSeconds < 9) return 'Feels smooth'
+  if (totalSeconds < 18) return 'Feels like waiting'
+  return 'Feels batch-first'
+}
+
+function calculateMetrics(hardware, model, workload, customMetrics) {
+  let prefillTps
+  let decodeTps
+  let ttftMs
+  let source
+
+  if (hardware.id === 'custom') {
+    prefillTps = customMetrics.prefillTps
+    decodeTps = customMetrics.decodeTps
+    ttftMs = customMetrics.ttftMs
+    source = 'Manual'
+  } else if (benchmarkMatrix[hardware.id]?.[model.id]) {
+    const benchmark = benchmarkMatrix[hardware.id][model.id]
+    prefillTps = benchmark.prefillTps
+    decodeTps = benchmark.decodeTps
+    ttftMs = benchmark.ttftMs
+    source = benchmark.source
+  } else {
+    prefillTps = hardware.prefillBase / model.prefillFactor
+    decodeTps = hardware.decodeBase / model.decodeFactor
+    ttftMs = hardware.ttftBase * model.ttftFactor
+    source = 'Estimated from LocalScore baseline'
+  }
+
+  ttftMs += workload.promptTokens * 0.16
   const prefillSeconds = workload.promptTokens / prefillTps
   const streamingSeconds = workload.responseTokens / decodeTps
   const totalSeconds = prefillSeconds + ttftMs / 1000 + streamingSeconds
-  const experience =
-    totalSeconds < 4.5
-      ? 'Feels instant'
-      : totalSeconds < 9
-        ? 'Feels smooth'
-        : totalSeconds < 18
-          ? 'Feels like waiting'
-          : 'Feels batch-first'
 
   return {
     prefillTps,
@@ -144,26 +254,49 @@ function calculateMetrics(hardware, model, workload) {
     prefillSeconds,
     streamingSeconds,
     totalSeconds,
-    experience,
+    experience: getExperience(totalSeconds),
+    source,
   }
 }
 
 function App() {
-  const [hardwareId, setHardwareId] = useState(hardwareOptions[0].id)
+  const [hardwareId, setHardwareId] = useState(hardwareOptions[1].id)
   const [modelId, setModelId] = useState(modelOptions[1].id)
   const [workloadId, setWorkloadId] = useState(workloadOptions[2].id)
+  const [theme, setTheme] = useState('dark')
   const [isPlaying, setIsPlaying] = useState(true)
   const [elapsedMs, setElapsedMs] = useState(0)
+  const [customMetrics, setCustomMetrics] = useState({
+    prefillTps: 3000,
+    decodeTps: 60,
+    ttftMs: 350,
+  })
+  const [customPreset, setCustomPreset] = useState({
+    promptTokens: 1200,
+    responseTokens: 220,
+  })
 
-  const hardware = hardwareOptions.find((item) => item.id === hardwareId) ?? hardwareOptions[0]
+  const hardware = hardwareOptions.find((item) => item.id === hardwareId) ?? hardwareOptions[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
-  const workload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
-  const metrics = calculateMetrics(hardware, model, workload)
+  const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
+  const workload =
+    selectedWorkload.id === 'custom'
+      ? {
+          ...selectedWorkload,
+          promptTokens: customPreset.promptTokens,
+          responseTokens: customPreset.responseTokens,
+        }
+      : selectedWorkload
+  const metrics = calculateMetrics(hardware, model, workload, customMetrics)
 
   function restartSimulation() {
     setElapsedMs(0)
     setIsPlaying(true)
   }
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   useEffect(() => {
     if (!isPlaying) {
@@ -207,93 +340,28 @@ function App() {
 
   return (
     <div className="app-shell">
-      <section className="hero-panel">
-        <div className="hero-copy">
-          <div className="eyebrow">PromptDrive</div>
-          <h1>Test-drive local AI before you buy the hardware.</h1>
-          <p className="hero-text">
-            PromptDrive translates raw benchmark data into a buying experience. Pick
-            a machine, model, and workload, then watch the response arrive with
-            realistic prompt ingest, first-token delay, and streamed output speed.
-          </p>
-          <div className="hero-actions">
-            <button className="primary-button" type="button" onClick={restartSimulation}>
-              Replay simulation
-            </button>
-            <a className="secondary-link" href="#simulator">
-              Explore the simulator
-            </a>
-          </div>
-          <div className="hero-strip">
-            <div>
-              <span className="strip-label">Positioning</span>
-              <strong>PCPartPicker meets a local-LLM test drive</strong>
-            </div>
-            <div>
-              <span className="strip-label">Monetization</span>
-              <strong>Affiliate builds, buyer guides, sponsored comparisons</strong>
-            </div>
-          </div>
+      <section className="masthead">
+        <div className="brand-lockup">
+          <div className="eyebrow">LapTime</div>
+          <h1>Local LLM lap simulator</h1>
         </div>
-
-        <div className="hero-card">
-          <div className="card-header">
-            <span className="status-dot" />
-            Live buyer preview
-          </div>
-          <div className="mini-stats">
-            <div>
-              <span>Scenario</span>
-              <strong>{workload.name}</strong>
-            </div>
-            <div>
-              <span>System</span>
-              <strong>{hardware.name}</strong>
-            </div>
-            <div>
-              <span>Experience</span>
-              <strong>{metrics.experience}</strong>
-            </div>
-          </div>
-          <div className="hero-timeline">
-            <div className="hero-progress">
-              <div style={{ width: `${progress * 100}%` }} />
-            </div>
-            <div className="phase-label">{currentPhase}</div>
-          </div>
-        </div>
+        <button
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="theme-toggle icon-toggle"
+          type="button"
+          onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+        >
+          <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+        </button>
       </section>
 
-      <section className="proof-grid">
-        <article>
-          <span className="proof-kicker">Why it matters</span>
-          <h2>Benchmarks alone do not explain the buying experience.</h2>
-          <p>
-            PromptDrive makes prefill, time-to-first-token, and decode speed legible
-            to real buyers instead of leaving them with a spreadsheet full of jargon.
-          </p>
-        </article>
-        <article>
-          <span className="proof-kicker">What changes</span>
-          <h2>Show where short chat and long-context RAG behave differently.</h2>
-          <p>
-            Two rigs can look similar in a table and still feel radically different
-            once prompt length, quantization, and model size change.
-          </p>
-        </article>
-      </section>
-
-      <section className="simulator-section" id="simulator">
-        <div className="section-heading">
+      <section className="simulator-section">
+        <div className="section-heading compact">
           <div>
             <div className="eyebrow">Simulator</div>
-            <h2>See the same benchmark numbers the way a buyer experiences them.</h2>
+            <h2>Run a playback.</h2>
           </div>
-          <p>
-            This first build uses curated sample hardware, models, and workload
-            presets so we can shape the product before wiring in a larger benchmark
-            corpus.
-          </p>
+          <p>Fast to try, easy to compare, and built for real buying decisions.</p>
         </div>
 
         <div className="simulator-layout">
@@ -318,6 +386,59 @@ function App() {
               </small>
               <p>{hardware.buyer}</p>
             </label>
+
+            {hardware.id === 'custom' ? (
+              <div className="custom-grid">
+                <label className="control-group">
+                  <span>Prefill tok/s</span>
+                  <input
+                    min="1"
+                    step="1"
+                    type="number"
+                    value={customMetrics.prefillTps}
+                    onChange={(event) => {
+                      setCustomMetrics((current) => ({
+                        ...current,
+                        prefillTps: Number(event.target.value) || 1,
+                      }))
+                      restartSimulation()
+                    }}
+                  />
+                </label>
+                <label className="control-group">
+                  <span>Decode tok/s</span>
+                  <input
+                    min="0.1"
+                    step="0.1"
+                    type="number"
+                    value={customMetrics.decodeTps}
+                    onChange={(event) => {
+                      setCustomMetrics((current) => ({
+                        ...current,
+                        decodeTps: Number(event.target.value) || 0.1,
+                      }))
+                      restartSimulation()
+                    }}
+                  />
+                </label>
+                <label className="control-group">
+                  <span>TTFT ms</span>
+                  <input
+                    min="1"
+                    step="1"
+                    type="number"
+                    value={customMetrics.ttftMs}
+                    onChange={(event) => {
+                      setCustomMetrics((current) => ({
+                        ...current,
+                        ttftMs: Number(event.target.value) || 1,
+                      }))
+                      restartSimulation()
+                    }}
+                  />
+                </label>
+              </div>
+            ) : null}
 
             <label className="control-group">
               <span>Model</span>
@@ -357,6 +478,44 @@ function App() {
               <p>{workload.accent}</p>
             </label>
 
+            {workload.id === 'custom' ? (
+              <div className="custom-grid two-up">
+                <label className="control-group">
+                  <span>Prompt tokens</span>
+                  <input
+                    min="1"
+                    step="1"
+                    type="number"
+                    value={customPreset.promptTokens}
+                    onChange={(event) => {
+                      setCustomPreset((current) => ({
+                        ...current,
+                        promptTokens: Number(event.target.value) || 1,
+                      }))
+                      restartSimulation()
+                    }}
+                  />
+                </label>
+                <label className="control-group">
+                  <span>Response tokens</span>
+                  <input
+                    min="1"
+                    step="1"
+                    type="number"
+                    value={customPreset.responseTokens}
+                    onChange={(event) => {
+                      setCustomPreset((current) => ({
+                        ...current,
+                        responseTokens: Number(event.target.value) || 1,
+                      }))
+                      restartSimulation()
+                    }}
+                  />
+                </label>
+              </div>
+            ) : null}
+
+            <div className="metrics-heading">Values used for this run</div>
             <div className="metric-grid">
               <div>
                 <span>Prefill</span>
@@ -374,13 +533,29 @@ function App() {
                 <span>Total</span>
                 <strong>{formatSeconds(metrics.totalSeconds)}</strong>
               </div>
+              <div>
+                <span>Prompt tokens</span>
+                <strong>{workload.promptTokens.toLocaleString()}</strong>
+              </div>
+              <div>
+                <span>Response tokens</span>
+                <strong>{workload.responseTokens.toLocaleString()}</strong>
+              </div>
+            </div>
+
+            <div className="source-note">
+              Source: {metrics.source}
+              {metrics.source === 'LocalScore' ? ` · ${model.name}` : ''}
             </div>
           </aside>
 
           <div className="playback-panel">
             <div className="terminal-card">
               <div className="terminal-topbar">
-                <span>{workload.name} playback</span>
+                <div className="playback-heading">
+                  <span>{workload.name} playback</span>
+                  <small>{currentPhase}</small>
+                </div>
                 <button className="ghost-button" type="button" onClick={restartSimulation}>
                   Restart
                 </button>
@@ -425,24 +600,19 @@ function App() {
         </div>
       </section>
 
-      <section className="feature-band">
-        <div className="feature-card">
-          <div className="eyebrow">V1 roadmap</div>
-          <h2>What we build next</h2>
-          <ul>
-            <li>Real benchmark ingestion and source attribution</li>
-            <li>Side-by-side system comparison view</li>
-            <li>Buyer guides and affiliate-ready hardware pages</li>
-          </ul>
-        </div>
-        <div className="feature-card muted">
-          <div className="eyebrow">Brand promise</div>
-          <h2>Numbers tell you what is faster. PromptDrive shows what it feels like.</h2>
-          <p>
-            That is the wedge that can make the project useful, memorable, and
-            commercially attractive.
-          </p>
-        </div>
+      <section className="quick-notes">
+        <article>
+          <span className="proof-kicker">Why this matters</span>
+          <p>Prefill, TTFT, and decode are separated so buyers can understand where the wait comes from.</p>
+        </article>
+        <article>
+          <span className="proof-kicker">What comes next</span>
+          <p>Real benchmark ingestion, side-by-side comparison, and buyer guides that can carry affiliate revenue.</p>
+        </article>
+        <article>
+          <span className="proof-kicker">Product wedge</span>
+          <p>Numbers tell you what is faster. LapTime shows what it feels like.</p>
+        </article>
       </section>
     </div>
   )

@@ -1,8 +1,8 @@
-# PromptDrive
+# LapTime
 
-PromptDrive is a local-LLM buying simulator that turns benchmark numbers into an
+LapTime is a local-LLM buying simulator that turns benchmark numbers into an
 experience. Instead of asking buyers to interpret raw tokens per second,
-PromptDrive shows how different hardware, models, and workloads feel in practice.
+LapTime shows how different hardware, models, and workloads feel in practice.
 
 ## Current scope
 
