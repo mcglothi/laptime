@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
+:root {
+  --bg: #081218;
+  --bg-top: #0f2330;
+  --panel: rgba(10, 19, 24, 0.78);
+  --border: rgba(155, 202, 214, 0.18);
+  --heading: #f2f7f7;
+  --text: #c7d6d9;
+  --text-soft: #86a2a9;
+  --accent: #54c7d1;
+  --accent-strong: #e4b86a;
+  --panel-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --sans: 'Instrument Sans', 'Segoe UI', sans-serif;
+  --heading-font: 'Sora', 'Avenir Next', sans-serif;
+  --mono: 'SFMono-Regular', 'JetBrains Mono', monospace;
+
+  color: var(--text);
+  background:
+    radial-gradient(circle at top, rgba(84, 199, 209, 0.12), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(228, 184, 106, 0.12), transparent 22%),
+    linear-gradient(180deg, var(--bg-top), var(--bg) 42%);
+  font: 17px/1.6 var(--sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at top, rgba(84, 199, 209, 0.12), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(228, 184, 106, 0.12), transparent 22%),
+    linear-gradient(180deg, var(--bg-top), var(--bg) 42%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    auto,
+    auto,
+    auto;
+  background-position:
+    0 0,
+    0 0,
+    center top,
+    80% 10%,
+    center;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+#root {
+  width: min(1280px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+h1,
+h2 {
+  font-family: var(--heading-font);
+  color: var(--heading);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(3rem, 8vw, 5.8rem);
+  max-width: 14ch;
+}
+
+h2 {
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+}
+
+p {
+  margin: 0;
+}
+
+strong {
+  font-weight: 600;
+}
+
+::selection {
+  background: rgba(84, 199, 209, 0.22);
+}
