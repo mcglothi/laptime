@@ -17,6 +17,20 @@ function formatSeconds(value) {
   return `${value.toFixed(value >= 10 ? 1 : 2)}s`
 }
 
+function buildFilteredOptions(items, query, selectedId, fields) {
+  const normalized = query.trim().toLowerCase()
+  if (!normalized) return items
+
+  const filtered = items.filter((item) =>
+    fields.some((field) => String(item[field] ?? '').toLowerCase().includes(normalized)),
+  )
+
+  if (filtered.some((item) => item.id === selectedId)) return filtered
+
+  const selected = items.find((item) => item.id === selectedId)
+  return selected ? [selected, ...filtered] : filtered
+}
+
 function getExperience(totalSeconds) {
   if (totalSeconds < 4.5) return 'Feels instant'
   if (totalSeconds < 9) return 'Feels smooth'
@@ -81,6 +95,10 @@ function App() {
   const [workloadId, setWorkloadId] = useState(workloadOptions[2].id)
   const [compareHardwareId, setCompareHardwareId] = useState(hardwareOptions[3].id)
   const [compareModelId, setCompareModelId] = useState(modelOptions[2].id)
+  const [hardwareQuery, setHardwareQuery] = useState('')
+  const [modelQuery, setModelQuery] = useState('')
+  const [compareHardwareQuery, setCompareHardwareQuery] = useState('')
+  const [compareModelQuery, setCompareModelQuery] = useState('')
   const [sourceQuery, setSourceQuery] = useState('')
   const [communityFilter, setCommunityFilter] = useState('all')
   const [theme, setTheme] = useState('dark')
@@ -105,6 +123,30 @@ function App() {
     hardwareOptions.find((item) => item.id === compareHardwareId) ?? hardwareOptions[2]
   const compareModel = modelOptions.find((item) => item.id === compareModelId) ?? modelOptions[1]
   const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
+  const visibleHardwareOptions = buildFilteredOptions(
+    hardwareOptions,
+    hardwareQuery,
+    hardwareId,
+    ['name', 'spec', 'buyer'],
+  )
+  const visibleModelOptions = buildFilteredOptions(
+    modelOptions,
+    modelQuery,
+    modelId,
+    ['name', 'family', 'quant', 'fit'],
+  )
+  const visibleCompareHardwareOptions = buildFilteredOptions(
+    hardwareOptions.filter((option) => option.id !== 'custom'),
+    compareHardwareQuery,
+    compareHardwareId,
+    ['name', 'spec', 'buyer'],
+  )
+  const visibleCompareModelOptions = buildFilteredOptions(
+    modelOptions,
+    compareModelQuery,
+    compareModelId,
+    ['name', 'family', 'quant', 'fit'],
+  )
 
   function restartSimulation() {
     setElapsedMs(0)
@@ -203,6 +245,12 @@ function App() {
           <aside className="control-panel">
             <label className="control-group">
               <span>Hardware</span>
+              <input
+                type="text"
+                value={hardwareQuery}
+                placeholder="Search hardware"
+                onChange={(event) => setHardwareQuery(event.target.value)}
+              />
               <select
                 value={hardwareId}
                 onChange={(event) => {
@@ -210,7 +258,7 @@ function App() {
                   restartSimulation()
                 }}
               >
-                {hardwareOptions.map((option) => (
+                {visibleHardwareOptions.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.name}
                   </option>
@@ -277,6 +325,12 @@ function App() {
 
             <label className="control-group">
               <span>Model</span>
+              <input
+                type="text"
+                value={modelQuery}
+                placeholder="Search models"
+                onChange={(event) => setModelQuery(event.target.value)}
+              />
               <select
                 value={modelId}
                 onChange={(event) => {
@@ -284,13 +338,16 @@ function App() {
                   restartSimulation()
                 }}
               >
-                {modelOptions.map((option) => (
+                {visibleModelOptions.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.name} · {option.quant}
                   </option>
                 ))}
               </select>
-              <small>{model.quant}</small>
+              <small>
+                {model.family} · {model.quant}
+                {model.paramsB ? ` · ${model.paramsB}B` : ''}
+              </small>
               <p>{model.fit}</p>
             </label>
 
@@ -384,7 +441,8 @@ function App() {
             </div>
             <div className="source-note">
               Coverage: {Object.keys(benchmarkMatrix).length} exact hardware tiers ·{' '}
-              {communityBenchmarks.length} community references · {dataSources.length} source groups
+              {communityBenchmarks.length} community references · {dataSources.length} source groups ·{' '}
+              {modelOptions.length} models
             </div>
           </aside>
 
@@ -473,26 +531,36 @@ function App() {
             <div className="compare-controls">
               <label className="control-group dense">
                 <span>Hardware</span>
+                <input
+                  type="text"
+                  value={compareHardwareQuery}
+                  placeholder="Search hardware"
+                  onChange={(event) => setCompareHardwareQuery(event.target.value)}
+                />
                 <select
                   value={compareHardwareId}
                   onChange={(event) => setCompareHardwareId(event.target.value)}
                 >
-                  {hardwareOptions
-                    .filter((option) => option.id !== 'custom')
-                    .map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
+                  {visibleCompareHardwareOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
                 </select>
               </label>
               <label className="control-group dense">
                 <span>Model</span>
+                <input
+                  type="text"
+                  value={compareModelQuery}
+                  placeholder="Search models"
+                  onChange={(event) => setCompareModelQuery(event.target.value)}
+                />
                 <select
                   value={compareModelId}
                   onChange={(event) => setCompareModelId(event.target.value)}
                 >
-                  {modelOptions.map((option) => (
+                  {visibleCompareModelOptions.map((option) => (
                     <option key={option.id} value={option.id}>
                       {option.name}
                     </option>
@@ -513,15 +581,15 @@ function App() {
         </div>
 
         <div className="delta-grid">
-          <div>
+          <div className={compareMetrics.decodeTps >= metrics.decodeTps ? 'delta-positive' : 'delta-negative'}>
             <span>Decode delta</span>
             <strong>{(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s</strong>
           </div>
-          <div>
+          <div className={compareMetrics.ttftMs <= metrics.ttftMs ? 'delta-positive' : 'delta-negative'}>
             <span>TTFT delta</span>
             <strong>{Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms</strong>
           </div>
-          <div>
+          <div className={compareMetrics.totalSeconds <= metrics.totalSeconds ? 'delta-positive' : 'delta-negative'}>
             <span>Total time delta</span>
             <strong>{formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}</strong>
           </div>
