@@ -1,207 +1,13 @@
 import { useEffect, useState } from 'react'
+import {
+  benchmarkMatrix,
+  communityBenchmarks,
+  dataSources,
+  hardwareOptions,
+  modelOptions,
+  workloadOptions,
+} from './data/benchmarkData'
 import './App.css'
-
-const hardwareOptions = [
-  {
-    id: 'custom',
-    name: 'Custom speeds',
-    spec: 'Manual override',
-    price: 'Custom',
-    buyer: 'Set your own prefill, decode, and TTFT like TokenFlow.',
-    prefillBase: 3000,
-    decodeBase: 60,
-    ttftBase: 350,
-    source: 'Manual',
-  },
-  {
-    id: 'rtx-5090',
-    name: 'RTX 5090 Tower',
-    spec: '31 GB VRAM, CUDA',
-    price: '$3,899',
-    buyer: 'Flagship consumer rig with strong prompt throughput.',
-    prefillBase: 6477.08,
-    decodeBase: 65.1,
-    ttftBase: 216.85,
-    source: 'LocalScore',
-  },
-  {
-    id: 'rtx-4090',
-    name: 'RTX 4090',
-    spec: '24 GB VRAM, CUDA',
-    price: '$2,699',
-    buyer: 'Popular high-end local AI card with broad community data.',
-    prefillBase: 6598.53,
-    decodeBase: 89.26,
-    ttftBase: 207.98,
-    source: 'LocalScore',
-  },
-  {
-    id: 'rtx-4080-super',
-    name: 'RTX 4080 SUPER',
-    spec: '16 GB VRAM class build',
-    price: '$1,999',
-    buyer: 'Strong premium tier when 4090 pricing is too steep.',
-    prefillBase: 4978.68,
-    decodeBase: 78.69,
-    ttftBase: 267.04,
-    source: 'LocalScore',
-  },
-  {
-    id: 'rtx-3090-ti',
-    name: 'RTX 3090 Ti',
-    spec: '24 GB VRAM, CUDA',
-    price: '$1,899',
-    buyer: 'Used-market favorite for serious local models on a budget.',
-    prefillBase: 4023.78,
-    decodeBase: 109.78,
-    ttftBase: 320.45,
-    source: 'LocalScore',
-  },
-  {
-    id: 'rtx-3080-ti',
-    name: 'RTX 3080 Ti',
-    spec: '12 GB VRAM, CUDA',
-    price: '$1,199',
-    buyer: 'Older enthusiast tier that still matters for value shoppers.',
-    prefillBase: 3739.43,
-    decodeBase: 103.81,
-    ttftBase: 342.66,
-    source: 'LocalScore',
-  },
-  {
-    id: 'rtx-3070-ti',
-    name: 'RTX 3070 Ti',
-    spec: '8 GB VRAM, CUDA',
-    price: '$699',
-    buyer: 'Lower-cost entry that shows where VRAM limits start to bite.',
-    prefillBase: 2509.44,
-    decodeBase: 83.17,
-    ttftBase: 519.63,
-    source: 'LocalScore',
-  },
-]
-
-const modelOptions = [
-  {
-    id: 'llama-3.2-1b',
-    name: 'Llama 3.2 1B Instruct',
-    quant: 'Q4_K - Medium',
-    fit: 'Tiny benchmark model for lightweight local chat.',
-    prefillFactor: 0.33,
-    decodeFactor: 0.34,
-    ttftFactor: 0.34,
-  },
-  {
-    id: 'llama-3.1-8b',
-    name: 'Meta Llama 3.1 8B Instruct',
-    quant: 'Q4_K - Medium',
-    fit: 'Most stable baseline for interactive local use.',
-    prefillFactor: 1,
-    decodeFactor: 1,
-    ttftFactor: 1,
-  },
-  {
-    id: 'qwen-2.5-14b',
-    name: 'Qwen2.5 14B Instruct',
-    quant: 'Q4_K - Medium',
-    fit: 'Heavier benchmark model that starts exposing memory tradeoffs.',
-    prefillFactor: 1.9,
-    decodeFactor: 1.85,
-    ttftFactor: 2.05,
-  },
-  {
-    id: 'llama-3.3-70b',
-    name: 'Llama 3.3 70B',
-    quant: 'Q4 estimate',
-    fit: 'Extrapolated heavyweight model for dream-rig comparisons.',
-    prefillFactor: 6.4,
-    decodeFactor: 4.2,
-    ttftFactor: 3.6,
-  },
-]
-
-const benchmarkMatrix = {
-  'rtx-5090': {
-    'llama-3.2-1b': { prefillTps: 20305.31, decodeTps: 170.33, ttftMs: 299.93, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 6477.08, decodeTps: 65.1, ttftMs: 216.85, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 3678.27, decodeTps: 45.54, ttftMs: 535.86, source: 'LocalScore' },
-  },
-  'rtx-4090': {
-    'llama-3.2-1b': { prefillTps: 18868.67, decodeTps: 193.6, ttftMs: 101.84, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 6598.53, decodeTps: 89.26, ttftMs: 207.98, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 3370.69, decodeTps: 45.65, ttftMs: 413.23, source: 'LocalScore' },
-  },
-  'rtx-4080-super': {
-    'llama-3.2-1b': { prefillTps: 17478.95, decodeTps: 247.22, ttftMs: 80.02, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 4978.68, decodeTps: 78.69, ttftMs: 267.04, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2802.55, decodeTps: 46.15, ttftMs: 468.4, source: 'LocalScore' },
-  },
-  'rtx-3090-ti': {
-    'llama-3.2-1b': { prefillTps: 15119.73, decodeTps: 353.86, ttftMs: 89.64, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 4023.78, decodeTps: 109.78, ttftMs: 320.45, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2202.06, decodeTps: 64.18, ttftMs: 575.42, source: 'LocalScore' },
-  },
-  'rtx-3080-ti': {
-    'llama-3.2-1b': { prefillTps: 14351.58, decodeTps: 326.48, ttftMs: 93.43, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 3739.43, decodeTps: 103.81, ttftMs: 342.66, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 1704.09, decodeTps: 41.95, ttftMs: 784.72, source: 'LocalScore' },
-  },
-  'rtx-3070-ti': {
-    'llama-3.2-1b': { prefillTps: 10074.28, decodeTps: 297.33, ttftMs: 137.21, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 2509.44, decodeTps: 83.17, ttftMs: 519.63, source: 'LocalScore' },
-  },
-}
-
-const workloadOptions = [
-  {
-    id: 'chat',
-    name: 'Quick Chat',
-    category: 'Interactive reply',
-    promptTokens: 180,
-    responseTokens: 140,
-    accent: 'Feels like a premium assistant when decode stays high.',
-    prompt:
-      'Summarize whether a 16 GB GPU is enough for local coding help and note the biggest tradeoff.',
-    response:
-      'A 16 GB GPU is a very workable sweet spot for local coding help, especially if you stay in the 7B to 14B range or use efficient quantizations. The main tradeoff is not just raw speed, but headroom: larger models, longer contexts, and simultaneous tools start squeezing memory quickly, so a setup that feels instant on short chats can feel tight once you lean into serious coding or retrieval-heavy workflows.',
-  },
-  {
-    id: 'code',
-    name: 'Coding Assist',
-    category: 'Long answer',
-    promptTokens: 820,
-    responseTokens: 420,
-    accent: 'This is where first-token delay starts shaping user trust.',
-    prompt:
-      'Review this React component for loading-state bugs, explain the issue, and propose a cleaner pattern with an example.',
-    response:
-      'The biggest issue is that the component can render stale data while a new request is in flight, which makes the UI look responsive but semantically wrong. A cleaner pattern is to separate request status from the displayed result, show a clear pending state, and delay swapping visible content until the newest response wins. In practice that means tracking an active request id, resetting optimistic assumptions when inputs change, and rendering loading, error, and settled states deliberately instead of letting them blur together. The result feels calmer, avoids race-condition flashes, and makes retry behavior easier to reason about.',
-  },
-  {
-    id: 'rag',
-    name: 'RAG Deep Dive',
-    category: 'Large prompt',
-    promptTokens: 6400,
-    responseTokens: 320,
-    accent: 'Prefill dominates here, so flashy decode numbers can be misleading.',
-    prompt:
-      'Answer a product strategy question using a long context bundle that includes pricing notes, benchmark charts, customer interviews, and prior roadmap decisions.',
-    response:
-      'The retrieval-heavy workload shifts the experience dramatically because the system spends most of its time ingesting context before it can say anything useful. Buyers often shop on decode tokens per second alone, but in this scenario prompt processing efficiency and time to first token matter more. A machine that feels almost identical on short chat can feel meaningfully worse once you hand it a dense research packet, long markdown notes, or a large tool trace. That is exactly the kind of gap LapTime should make visible.',
-  },
-  {
-    id: 'custom',
-    name: 'Custom Preset',
-    category: 'Manual preset',
-    promptTokens: 1200,
-    responseTokens: 220,
-    accent: 'Tune prompt and response sizes for your own what-if scenario.',
-    prompt:
-      'Use your own token counts to preview how a workload might feel before you buy hardware.',
-    response:
-      'This custom preset lets you model your own workload shape. Increase prompt tokens to simulate longer context ingestion, increase response tokens to simulate longer answers, or combine both to test more demanding sessions.',
-  },
-]
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
@@ -259,10 +65,24 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
   }
 }
 
+function resolveWorkload(selectedWorkload, customPreset) {
+  return selectedWorkload.id === 'custom'
+    ? {
+        ...selectedWorkload,
+        promptTokens: customPreset.promptTokens,
+        responseTokens: customPreset.responseTokens,
+      }
+    : selectedWorkload
+}
+
 function App() {
   const [hardwareId, setHardwareId] = useState(hardwareOptions[1].id)
   const [modelId, setModelId] = useState(modelOptions[1].id)
   const [workloadId, setWorkloadId] = useState(workloadOptions[2].id)
+  const [compareHardwareId, setCompareHardwareId] = useState(hardwareOptions[3].id)
+  const [compareModelId, setCompareModelId] = useState(modelOptions[2].id)
+  const [sourceQuery, setSourceQuery] = useState('')
+  const [communityFilter, setCommunityFilter] = useState('all')
   const [theme, setTheme] = useState('dark')
   const [isPlaying, setIsPlaying] = useState(true)
   const [elapsedMs, setElapsedMs] = useState(0)
@@ -279,15 +99,12 @@ function App() {
   const hardware = hardwareOptions.find((item) => item.id === hardwareId) ?? hardwareOptions[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
-  const workload =
-    selectedWorkload.id === 'custom'
-      ? {
-          ...selectedWorkload,
-          promptTokens: customPreset.promptTokens,
-          responseTokens: customPreset.responseTokens,
-        }
-      : selectedWorkload
+  const workload = resolveWorkload(selectedWorkload, customPreset)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
+  const compareHardware =
+    hardwareOptions.find((item) => item.id === compareHardwareId) ?? hardwareOptions[2]
+  const compareModel = modelOptions.find((item) => item.id === compareModelId) ?? modelOptions[1]
+  const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
 
   function restartSimulation() {
     setElapsedMs(0)
@@ -335,8 +152,26 @@ function App() {
       : elapsedMs < streamStartMs
         ? 'Preparing first token'
         : isPlaying
-          ? 'Streaming response'
+        ? 'Streaming response'
           : 'Playback complete'
+  const normalizedQuery = sourceQuery.trim().toLowerCase()
+  const filteredStructuredSources = dataSources.filter((source) => {
+    if (!normalizedQuery) return true
+    return [source.name, source.type, source.notes]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedQuery)
+  })
+  const filteredCommunityBenchmarks = communityBenchmarks.filter((entry) => {
+    const matchesFilter = communityFilter === 'all' || entry.quality === communityFilter
+    const matchesQuery =
+      !normalizedQuery ||
+      [entry.hardware, entry.model, entry.source]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedQuery)
+    return matchesFilter && matchesQuery
+  })
 
   return (
     <div className="app-shell">
@@ -547,6 +382,10 @@ function App() {
               Source: {metrics.source}
               {metrics.source === 'LocalScore' ? ` · ${model.name}` : ''}
             </div>
+            <div className="source-note">
+              Coverage: {Object.keys(benchmarkMatrix).length} exact hardware tiers ·{' '}
+              {communityBenchmarks.length} community references · {dataSources.length} source groups
+            </div>
           </aside>
 
           <div className="playback-panel">
@@ -600,6 +439,178 @@ function App() {
         </div>
       </section>
 
+      <section className="compare-section">
+        <div className="section-heading compact">
+          <div>
+            <div className="eyebrow">Comparison</div>
+            <h2>Compare two setups.</h2>
+          </div>
+          <p>Use the same workload to see what actually changes between rigs and models.</p>
+        </div>
+
+        <div className="compare-grid">
+          <article className="compare-card">
+            <div className="compare-header">
+              <span>Lane A</span>
+              <strong>Current run</strong>
+            </div>
+            <div className="compare-title">{hardware.name}</div>
+            <div className="compare-subtitle">{model.name}</div>
+            <div className="metric-list">
+              <div><span>Prefill</span><strong>{metrics.prefillTps.toFixed(0)} tok/s</strong></div>
+              <div><span>Decode</span><strong>{metrics.decodeTps.toFixed(1)} tok/s</strong></div>
+              <div><span>TTFT</span><strong>{Math.round(metrics.ttftMs)} ms</strong></div>
+              <div><span>Total</span><strong>{formatSeconds(metrics.totalSeconds)}</strong></div>
+            </div>
+            <div className="compare-experience">{metrics.experience}</div>
+          </article>
+
+          <article className="compare-card">
+            <div className="compare-header">
+              <span>Lane B</span>
+              <strong>Comparison run</strong>
+            </div>
+            <div className="compare-controls">
+              <label className="control-group dense">
+                <span>Hardware</span>
+                <select
+                  value={compareHardwareId}
+                  onChange={(event) => setCompareHardwareId(event.target.value)}
+                >
+                  {hardwareOptions
+                    .filter((option) => option.id !== 'custom')
+                    .map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label className="control-group dense">
+                <span>Model</span>
+                <select
+                  value={compareModelId}
+                  onChange={(event) => setCompareModelId(event.target.value)}
+                >
+                  {modelOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="compare-title">{compareHardware.name}</div>
+            <div className="compare-subtitle">{compareModel.name}</div>
+            <div className="metric-list">
+              <div><span>Prefill</span><strong>{compareMetrics.prefillTps.toFixed(0)} tok/s</strong></div>
+              <div><span>Decode</span><strong>{compareMetrics.decodeTps.toFixed(1)} tok/s</strong></div>
+              <div><span>TTFT</span><strong>{Math.round(compareMetrics.ttftMs)} ms</strong></div>
+              <div><span>Total</span><strong>{formatSeconds(compareMetrics.totalSeconds)}</strong></div>
+            </div>
+            <div className="compare-experience">{compareMetrics.experience}</div>
+          </article>
+        </div>
+
+        <div className="delta-grid">
+          <div>
+            <span>Decode delta</span>
+            <strong>{(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s</strong>
+          </div>
+          <div>
+            <span>TTFT delta</span>
+            <strong>{Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms</strong>
+          </div>
+          <div>
+            <span>Total time delta</span>
+            <strong>{formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="source-section">
+        <div className="section-heading compact">
+          <div>
+            <div className="eyebrow">Sources</div>
+            <h2>Source explorer.</h2>
+          </div>
+          <p>Exact simulator math uses structured benchmark entries first, with community data kept separate.</p>
+        </div>
+
+        <div className="explorer-controls">
+          <label className="control-group dense">
+            <span>Search</span>
+            <input
+              type="text"
+              value={sourceQuery}
+              placeholder="Search hardware, model, or source"
+              onChange={(event) => setSourceQuery(event.target.value)}
+            />
+          </label>
+          <label className="control-group dense">
+            <span>Community filter</span>
+            <select
+              value={communityFilter}
+              onChange={(event) => setCommunityFilter(event.target.value)}
+            >
+              <option value="all">All qualities</option>
+              <option value="forum">Forum</option>
+              <option value="approximate">Approximate</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="source-grid">
+          <div className="source-card">
+            <div className="metrics-heading">
+              Structured sources · {filteredStructuredSources.length}
+            </div>
+            <div className="source-list">
+              {filteredStructuredSources.map((source) => (
+                <article key={source.name}>
+                  <div className="source-name-row">
+                    <strong>{source.name}</strong>
+                    <span>{source.type}</span>
+                  </div>
+                  <p>{source.notes}</p>
+                  <a href={source.url} target="_blank" rel="noreferrer">
+                    {source.url}
+                  </a>
+                </article>
+              ))}
+              {filteredStructuredSources.length === 0 ? (
+                <div className="empty-state">No structured sources match that search yet.</div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="source-card">
+            <div className="metrics-heading">
+              Community references · {filteredCommunityBenchmarks.length}
+            </div>
+            <div className="community-table">
+              {filteredCommunityBenchmarks.map((entry) => (
+                <article key={`${entry.hardware}-${entry.model}-${entry.metric}`}>
+                  <div className="source-name-row">
+                    <strong>{entry.hardware}</strong>
+                    <span>{entry.quality}</span>
+                  </div>
+                  <p>{entry.model}</p>
+                  <p className="community-value">
+                    {entry.metric === 'decode_tps_range'
+                      ? `${entry.value[0]}-${entry.value[1]} tok/s decode`
+                      : `${entry.value} tok/s decode`}
+                  </p>
+                </article>
+              ))}
+              {filteredCommunityBenchmarks.length === 0 ? (
+                <div className="empty-state">No community references match that filter.</div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="quick-notes">
         <article>
           <span className="proof-kicker">Why this matters</span>
@@ -607,7 +618,7 @@ function App() {
         </article>
         <article>
           <span className="proof-kicker">What comes next</span>
-          <p>Real benchmark ingestion, side-by-side comparison, and buyer guides that can carry affiliate revenue.</p>
+          <p>Deeper ingestion, richer comparison lanes, and buyer guides that can carry affiliate revenue.</p>
         </article>
         <article>
           <span className="proof-kicker">Product wedge</span>
