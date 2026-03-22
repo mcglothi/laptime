@@ -30,6 +30,28 @@ npm run lint
 npm run build
 ```
 
+## Cloudflare Pages
+
+Use these settings when creating the Pages project in Cloudflare:
+
+- Framework preset: `Vite`
+- Production branch: `main`
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Root directory: `/`
+
+Recommended domain setup:
+
+- Primary domain: `laptime.ai`
+- Redirect: `www.laptime.ai` -> `laptime.ai`
+
+After the first deploy, attach the custom domain from the Pages project:
+
+1. Create a new Pages project from the `mcglothi/laptime` GitHub repo.
+2. Deploy `main` with the settings above.
+3. In `Custom domains`, add `laptime.ai`.
+4. Add `www.laptime.ai` and enable redirect to the apex domain.
+
 ## Near-term roadmap
 
 - Replace synthetic metrics with a real benchmark dataset
