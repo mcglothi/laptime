@@ -7,6 +7,11 @@ import {
   modelOptions,
   workloadOptions,
 } from './data/benchmarkData'
+import CatalogSection from './components/CatalogSection'
+import ComparisonSection from './components/ComparisonSection'
+import QuickNotesSection from './components/QuickNotesSection'
+import SimulatorSection from './components/SimulatorSection'
+import SourceExplorerSection from './components/SourceExplorerSection'
 import './App.css'
 
 function clamp(value, min, max) {
@@ -29,6 +34,10 @@ function buildFilteredOptions(items, query, selectedId, fields) {
 
   const selected = items.find((item) => item.id === selectedId)
   return selected ? [selected, ...filtered] : filtered
+}
+
+function uniqueFamilies(items) {
+  return ['all', ...new Set(items.map((item) => item.family).filter(Boolean))]
 }
 
 function getExperience(totalSeconds) {
@@ -99,6 +108,8 @@ function App() {
   const [modelQuery, setModelQuery] = useState('')
   const [compareHardwareQuery, setCompareHardwareQuery] = useState('')
   const [compareModelQuery, setCompareModelQuery] = useState('')
+  const [modelFamilyFilter, setModelFamilyFilter] = useState('all')
+  const [catalogFamilyFilter, setCatalogFamilyFilter] = useState('all')
   const [sourceQuery, setSourceQuery] = useState('')
   const [communityFilter, setCommunityFilter] = useState('all')
   const [theme, setTheme] = useState('dark')
@@ -129,8 +140,13 @@ function App() {
     hardwareId,
     ['name', 'spec', 'buyer'],
   )
+  const modelFamilyOptions = uniqueFamilies(modelOptions)
+  const familyFilteredModels =
+    modelFamilyFilter === 'all'
+      ? modelOptions
+      : modelOptions.filter((option) => option.family === modelFamilyFilter)
   const visibleModelOptions = buildFilteredOptions(
-    modelOptions,
+    familyFilteredModels,
     modelQuery,
     modelId,
     ['name', 'family', 'quant', 'fit'],
@@ -142,11 +158,15 @@ function App() {
     ['name', 'spec', 'buyer'],
   )
   const visibleCompareModelOptions = buildFilteredOptions(
-    modelOptions,
+    familyFilteredModels,
     compareModelQuery,
     compareModelId,
     ['name', 'family', 'quant', 'fit'],
   )
+  const catalogModels =
+    catalogFamilyFilter === 'all'
+      ? modelOptions
+      : modelOptions.filter((option) => option.family === catalogFamilyFilter)
 
   function restartSimulation() {
     setElapsedMs(0)
@@ -232,467 +252,84 @@ function App() {
         </button>
       </section>
 
-      <section className="simulator-section">
-        <div className="section-heading compact">
-          <div>
-            <div className="eyebrow">Simulator</div>
-            <h2>Run a playback.</h2>
-          </div>
-          <p>Fast to try, easy to compare, and built for real buying decisions.</p>
-        </div>
+      <SimulatorSection
+        hardware={hardware}
+        hardwareId={hardwareId}
+        hardwareQuery={hardwareQuery}
+        setHardwareQuery={setHardwareQuery}
+        visibleHardwareOptions={visibleHardwareOptions}
+        setHardwareId={setHardwareId}
+        customMetrics={customMetrics}
+        setCustomMetrics={setCustomMetrics}
+        model={model}
+        modelId={modelId}
+        modelQuery={modelQuery}
+        setModelQuery={setModelQuery}
+        visibleModelOptions={visibleModelOptions}
+        setModelId={setModelId}
+        modelFamilyOptions={modelFamilyOptions}
+        modelFamilyFilter={modelFamilyFilter}
+        setModelFamilyFilter={setModelFamilyFilter}
+        workload={workload}
+        workloadId={workloadId}
+        workloadOptions={workloadOptions}
+        setWorkloadId={setWorkloadId}
+        customPreset={customPreset}
+        setCustomPreset={setCustomPreset}
+        metrics={metrics}
+        benchmarkMatrix={benchmarkMatrix}
+        communityBenchmarks={communityBenchmarks}
+        dataSources={dataSources}
+        modelOptions={modelOptions}
+        isPlaying={isPlaying}
+        currentPhase={currentPhase}
+        restartSimulation={restartSimulation}
+        streamedText={streamedText}
+        elapsedMs={elapsedMs}
+        streamStartMs={streamStartMs}
+        progress={progress}
+        formatSeconds={formatSeconds}
+      />
 
-        <div className="simulator-layout">
-          <aside className="control-panel">
-            <label className="control-group">
-              <span>Hardware</span>
-              <input
-                type="text"
-                value={hardwareQuery}
-                placeholder="Search hardware"
-                onChange={(event) => setHardwareQuery(event.target.value)}
-              />
-              <select
-                value={hardwareId}
-                onChange={(event) => {
-                  setHardwareId(event.target.value)
-                  restartSimulation()
-                }}
-              >
-                {visibleHardwareOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-              <small>
-                {hardware.spec} · {hardware.price}
-              </small>
-              <p>{hardware.buyer}</p>
-            </label>
+      <ComparisonSection
+        hardware={hardware}
+        model={model}
+        metrics={metrics}
+        compareHardware={compareHardware}
+        compareHardwareId={compareHardwareId}
+        compareHardwareQuery={compareHardwareQuery}
+        setCompareHardwareQuery={setCompareHardwareQuery}
+        visibleCompareHardwareOptions={visibleCompareHardwareOptions}
+        setCompareHardwareId={setCompareHardwareId}
+        compareModel={compareModel}
+        compareModelId={compareModelId}
+        compareModelQuery={compareModelQuery}
+        setCompareModelQuery={setCompareModelQuery}
+        visibleCompareModelOptions={visibleCompareModelOptions}
+        setCompareModelId={setCompareModelId}
+        compareMetrics={compareMetrics}
+        formatSeconds={formatSeconds}
+      />
 
-            {hardware.id === 'custom' ? (
-              <div className="custom-grid">
-                <label className="control-group">
-                  <span>Prefill tok/s</span>
-                  <input
-                    min="1"
-                    step="1"
-                    type="number"
-                    value={customMetrics.prefillTps}
-                    onChange={(event) => {
-                      setCustomMetrics((current) => ({
-                        ...current,
-                        prefillTps: Number(event.target.value) || 1,
-                      }))
-                      restartSimulation()
-                    }}
-                  />
-                </label>
-                <label className="control-group">
-                  <span>Decode tok/s</span>
-                  <input
-                    min="0.1"
-                    step="0.1"
-                    type="number"
-                    value={customMetrics.decodeTps}
-                    onChange={(event) => {
-                      setCustomMetrics((current) => ({
-                        ...current,
-                        decodeTps: Number(event.target.value) || 0.1,
-                      }))
-                      restartSimulation()
-                    }}
-                  />
-                </label>
-                <label className="control-group">
-                  <span>TTFT ms</span>
-                  <input
-                    min="1"
-                    step="1"
-                    type="number"
-                    value={customMetrics.ttftMs}
-                    onChange={(event) => {
-                      setCustomMetrics((current) => ({
-                        ...current,
-                        ttftMs: Number(event.target.value) || 1,
-                      }))
-                      restartSimulation()
-                    }}
-                  />
-                </label>
-              </div>
-            ) : null}
+      <CatalogSection
+        modelFamilyOptions={modelFamilyOptions}
+        catalogFamilyFilter={catalogFamilyFilter}
+        setCatalogFamilyFilter={setCatalogFamilyFilter}
+        catalogModels={catalogModels}
+        benchmarkMatrix={benchmarkMatrix}
+        hardwareId={hardwareId}
+      />
 
-            <label className="control-group">
-              <span>Model</span>
-              <input
-                type="text"
-                value={modelQuery}
-                placeholder="Search models"
-                onChange={(event) => setModelQuery(event.target.value)}
-              />
-              <select
-                value={modelId}
-                onChange={(event) => {
-                  setModelId(event.target.value)
-                  restartSimulation()
-                }}
-              >
-                {visibleModelOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} · {option.quant}
-                  </option>
-                ))}
-              </select>
-              <small>
-                {model.family} · {model.quant}
-                {model.paramsB ? ` · ${model.paramsB}B` : ''}
-              </small>
-              <p>{model.fit}</p>
-            </label>
+      <SourceExplorerSection
+        sourceQuery={sourceQuery}
+        setSourceQuery={setSourceQuery}
+        communityFilter={communityFilter}
+        setCommunityFilter={setCommunityFilter}
+        filteredStructuredSources={filteredStructuredSources}
+        filteredCommunityBenchmarks={filteredCommunityBenchmarks}
+      />
 
-            <label className="control-group">
-              <span>Workload</span>
-              <select
-                value={workloadId}
-                onChange={(event) => {
-                  setWorkloadId(event.target.value)
-                  restartSimulation()
-                }}
-              >
-                {workloadOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-              <small>{workload.category}</small>
-              <p>{workload.accent}</p>
-            </label>
-
-            {workload.id === 'custom' ? (
-              <div className="custom-grid two-up">
-                <label className="control-group">
-                  <span>Prompt tokens</span>
-                  <input
-                    min="1"
-                    step="1"
-                    type="number"
-                    value={customPreset.promptTokens}
-                    onChange={(event) => {
-                      setCustomPreset((current) => ({
-                        ...current,
-                        promptTokens: Number(event.target.value) || 1,
-                      }))
-                      restartSimulation()
-                    }}
-                  />
-                </label>
-                <label className="control-group">
-                  <span>Response tokens</span>
-                  <input
-                    min="1"
-                    step="1"
-                    type="number"
-                    value={customPreset.responseTokens}
-                    onChange={(event) => {
-                      setCustomPreset((current) => ({
-                        ...current,
-                        responseTokens: Number(event.target.value) || 1,
-                      }))
-                      restartSimulation()
-                    }}
-                  />
-                </label>
-              </div>
-            ) : null}
-
-            <div className="metrics-heading">Values used for this run</div>
-            <div className="metric-grid">
-              <div>
-                <span>Prefill</span>
-                <strong>{metrics.prefillTps.toFixed(0)} tok/s</strong>
-              </div>
-              <div>
-                <span>Decode</span>
-                <strong>{metrics.decodeTps.toFixed(1)} tok/s</strong>
-              </div>
-              <div>
-                <span>TTFT</span>
-                <strong>{Math.round(metrics.ttftMs)} ms</strong>
-              </div>
-              <div>
-                <span>Total</span>
-                <strong>{formatSeconds(metrics.totalSeconds)}</strong>
-              </div>
-              <div>
-                <span>Prompt tokens</span>
-                <strong>{workload.promptTokens.toLocaleString()}</strong>
-              </div>
-              <div>
-                <span>Response tokens</span>
-                <strong>{workload.responseTokens.toLocaleString()}</strong>
-              </div>
-            </div>
-
-            <div className="source-note">
-              Source: {metrics.source}
-              {metrics.source === 'LocalScore' ? ` · ${model.name}` : ''}
-            </div>
-            <div className="source-note">
-              Coverage: {Object.keys(benchmarkMatrix).length} exact hardware tiers ·{' '}
-              {communityBenchmarks.length} community references · {dataSources.length} source groups ·{' '}
-              {modelOptions.length} models
-            </div>
-          </aside>
-
-          <div className="playback-panel">
-            <div className="terminal-card">
-              <div className="terminal-topbar">
-                <div className="playback-heading">
-                  <span>{workload.name} playback</span>
-                  <small>{currentPhase}</small>
-                </div>
-                <button className="ghost-button" type="button" onClick={restartSimulation}>
-                  Restart
-                </button>
-              </div>
-
-              <div className="prompt-block">
-                <div className="block-label">Prompt</div>
-                <p>{workload.prompt}</p>
-              </div>
-
-              <div className="response-block">
-                <div className="block-label">Response Stream</div>
-                <p>{streamedText || ' '}</p>
-                {isPlaying && elapsedMs >= streamStartMs ? (
-                  <span className="cursor" aria-hidden="true" />
-                ) : null}
-              </div>
-            </div>
-
-            <div className="timeline-card">
-              <div className="timeline-row">
-                <span>Prompt ingest</span>
-                <strong>{formatSeconds(metrics.prefillSeconds)}</strong>
-              </div>
-              <div className="timeline-row">
-                <span>First token delay</span>
-                <strong>{Math.round(metrics.ttftMs)} ms</strong>
-              </div>
-              <div className="timeline-row">
-                <span>Response stream</span>
-                <strong>{formatSeconds(metrics.streamingSeconds)}</strong>
-              </div>
-              <div className="timeline-progress">
-                <div style={{ width: `${progress * 100}%` }} />
-              </div>
-              <div className="timeline-caption">
-                <span>{currentPhase}</span>
-                <span>{metrics.experience}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="compare-section">
-        <div className="section-heading compact">
-          <div>
-            <div className="eyebrow">Comparison</div>
-            <h2>Compare two setups.</h2>
-          </div>
-          <p>Use the same workload to see what actually changes between rigs and models.</p>
-        </div>
-
-        <div className="compare-grid">
-          <article className="compare-card">
-            <div className="compare-header">
-              <span>Lane A</span>
-              <strong>Current run</strong>
-            </div>
-            <div className="compare-title">{hardware.name}</div>
-            <div className="compare-subtitle">{model.name}</div>
-            <div className="metric-list">
-              <div><span>Prefill</span><strong>{metrics.prefillTps.toFixed(0)} tok/s</strong></div>
-              <div><span>Decode</span><strong>{metrics.decodeTps.toFixed(1)} tok/s</strong></div>
-              <div><span>TTFT</span><strong>{Math.round(metrics.ttftMs)} ms</strong></div>
-              <div><span>Total</span><strong>{formatSeconds(metrics.totalSeconds)}</strong></div>
-            </div>
-            <div className="compare-experience">{metrics.experience}</div>
-          </article>
-
-          <article className="compare-card">
-            <div className="compare-header">
-              <span>Lane B</span>
-              <strong>Comparison run</strong>
-            </div>
-            <div className="compare-controls">
-              <label className="control-group dense">
-                <span>Hardware</span>
-                <input
-                  type="text"
-                  value={compareHardwareQuery}
-                  placeholder="Search hardware"
-                  onChange={(event) => setCompareHardwareQuery(event.target.value)}
-                />
-                <select
-                  value={compareHardwareId}
-                  onChange={(event) => setCompareHardwareId(event.target.value)}
-                >
-                  {visibleCompareHardwareOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="control-group dense">
-                <span>Model</span>
-                <input
-                  type="text"
-                  value={compareModelQuery}
-                  placeholder="Search models"
-                  onChange={(event) => setCompareModelQuery(event.target.value)}
-                />
-                <select
-                  value={compareModelId}
-                  onChange={(event) => setCompareModelId(event.target.value)}
-                >
-                  {visibleCompareModelOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="compare-title">{compareHardware.name}</div>
-            <div className="compare-subtitle">{compareModel.name}</div>
-            <div className="metric-list">
-              <div><span>Prefill</span><strong>{compareMetrics.prefillTps.toFixed(0)} tok/s</strong></div>
-              <div><span>Decode</span><strong>{compareMetrics.decodeTps.toFixed(1)} tok/s</strong></div>
-              <div><span>TTFT</span><strong>{Math.round(compareMetrics.ttftMs)} ms</strong></div>
-              <div><span>Total</span><strong>{formatSeconds(compareMetrics.totalSeconds)}</strong></div>
-            </div>
-            <div className="compare-experience">{compareMetrics.experience}</div>
-          </article>
-        </div>
-
-        <div className="delta-grid">
-          <div className={compareMetrics.decodeTps >= metrics.decodeTps ? 'delta-positive' : 'delta-negative'}>
-            <span>Decode delta</span>
-            <strong>{(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s</strong>
-          </div>
-          <div className={compareMetrics.ttftMs <= metrics.ttftMs ? 'delta-positive' : 'delta-negative'}>
-            <span>TTFT delta</span>
-            <strong>{Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms</strong>
-          </div>
-          <div className={compareMetrics.totalSeconds <= metrics.totalSeconds ? 'delta-positive' : 'delta-negative'}>
-            <span>Total time delta</span>
-            <strong>{formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className="source-section">
-        <div className="section-heading compact">
-          <div>
-            <div className="eyebrow">Sources</div>
-            <h2>Source explorer.</h2>
-          </div>
-          <p>Exact simulator math uses structured benchmark entries first, with community data kept separate.</p>
-        </div>
-
-        <div className="explorer-controls">
-          <label className="control-group dense">
-            <span>Search</span>
-            <input
-              type="text"
-              value={sourceQuery}
-              placeholder="Search hardware, model, or source"
-              onChange={(event) => setSourceQuery(event.target.value)}
-            />
-          </label>
-          <label className="control-group dense">
-            <span>Community filter</span>
-            <select
-              value={communityFilter}
-              onChange={(event) => setCommunityFilter(event.target.value)}
-            >
-              <option value="all">All qualities</option>
-              <option value="forum">Forum</option>
-              <option value="approximate">Approximate</option>
-            </select>
-          </label>
-        </div>
-
-        <div className="source-grid">
-          <div className="source-card">
-            <div className="metrics-heading">
-              Structured sources · {filteredStructuredSources.length}
-            </div>
-            <div className="source-list">
-              {filteredStructuredSources.map((source) => (
-                <article key={source.name}>
-                  <div className="source-name-row">
-                    <strong>{source.name}</strong>
-                    <span>{source.type}</span>
-                  </div>
-                  <p>{source.notes}</p>
-                  <a href={source.url} target="_blank" rel="noreferrer">
-                    {source.url}
-                  </a>
-                </article>
-              ))}
-              {filteredStructuredSources.length === 0 ? (
-                <div className="empty-state">No structured sources match that search yet.</div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="source-card">
-            <div className="metrics-heading">
-              Community references · {filteredCommunityBenchmarks.length}
-            </div>
-            <div className="community-table">
-              {filteredCommunityBenchmarks.map((entry) => (
-                <article key={`${entry.hardware}-${entry.model}-${entry.metric}`}>
-                  <div className="source-name-row">
-                    <strong>{entry.hardware}</strong>
-                    <span>{entry.quality}</span>
-                  </div>
-                  <p>{entry.model}</p>
-                  <p className="community-value">
-                    {entry.metric === 'decode_tps_range'
-                      ? `${entry.value[0]}-${entry.value[1]} tok/s decode`
-                      : `${entry.value} tok/s decode`}
-                  </p>
-                </article>
-              ))}
-              {filteredCommunityBenchmarks.length === 0 ? (
-                <div className="empty-state">No community references match that filter.</div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="quick-notes">
-        <article>
-          <span className="proof-kicker">Why this matters</span>
-          <p>Prefill, TTFT, and decode are separated so buyers can understand where the wait comes from.</p>
-        </article>
-        <article>
-          <span className="proof-kicker">What comes next</span>
-          <p>Deeper ingestion, richer comparison lanes, and buyer guides that can carry affiliate revenue.</p>
-        </article>
-        <article>
-          <span className="proof-kicker">Product wedge</span>
-          <p>Numbers tell you what is faster. LapTime shows what it feels like.</p>
-        </article>
-      </section>
+      <QuickNotesSection />
     </div>
   )
 }
