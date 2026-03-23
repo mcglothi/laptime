@@ -17,6 +17,9 @@ function ComparisonSection({
   compareHardwareQuery,
   setCompareHardwareQuery,
   visibleCompareHardwareOptions,
+  hardwarePlatformOptions,
+  compareHardwarePlatformFilter,
+  setCompareHardwarePlatformFilter,
   setCompareHardwareId,
   compareModel,
   compareModelId,
@@ -46,7 +49,9 @@ function ComparisonSection({
             <strong>Current run</strong>
           </div>
           <div className="compare-title">{hardware.name}</div>
-          <div className="compare-subtitle">{model.name}</div>
+          <div className="compare-subtitle">
+            {hardware.platform} · {model.name}
+          </div>
           <div className="metric-list">
             <div>
               <span>Prefill</span>
@@ -84,6 +89,18 @@ function ComparisonSection({
           <div className="compare-controls">
             <label className="control-group dense">
               <span>Hardware</span>
+              <div className="chip-row">
+                {hardwarePlatformOptions.map((platform) => (
+                  <button
+                    key={platform}
+                    className={`filter-chip ${compareHardwarePlatformFilter === platform ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => setCompareHardwarePlatformFilter(platform)}
+                  >
+                    {platform === 'all' ? 'All platforms' : platform}
+                  </button>
+                ))}
+              </div>
               <input
                 type="text"
                 value={compareHardwareQuery}
@@ -93,7 +110,7 @@ function ComparisonSection({
               <select value={compareHardwareId} onChange={(event) => setCompareHardwareId(event.target.value)}>
                 {visibleCompareHardwareOptions.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.name}
+                    {option.platform} · {option.name}
                   </option>
                 ))}
               </select>
@@ -120,7 +137,9 @@ function ComparisonSection({
             </label>
           </div>
           <div className="compare-title">{compareHardware.name}</div>
-          <div className="compare-subtitle">{compareModel.name}</div>
+          <div className="compare-subtitle">
+            {compareHardware.platform} · {compareModel.name}
+          </div>
           <div className={`fit-inline fit-inline-${compareFitAssessment.status}`}>
             {getFitLabel(compareFitAssessment.status)}
           </div>

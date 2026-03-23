@@ -408,6 +408,54 @@ export const hardwareOptions = [
     source: 'Estimated from LocalScore GB10 reference',
   },
   {
+    id: 'framework-desktop-ai-max-395',
+    name: 'Framework Desktop Ryzen AI Max+ 395',
+    spec: '128 GB LPDDR5X unified memory, Strix Halo',
+    price: '$1,999+',
+    memoryGb: 128,
+    buyer: 'High-interest Strix Halo desktop for engineers who want big unified memory without a rack box.',
+    prefillBase: 1720,
+    decodeBase: 33.4,
+    ttftBase: 820,
+    source: 'Estimated from AMD Strix Halo specs',
+  },
+  {
+    id: 'hp-z2-mini-g1a-ai-max-395',
+    name: 'HP Z2 Mini G1a Ryzen AI Max+ 395',
+    spec: '128 GB LPDDR5X unified memory, Strix Halo',
+    price: 'Workstation / channel',
+    memoryGb: 128,
+    buyer: 'Desk-friendly Strix Halo workstation for professional local AI setups.',
+    prefillBase: 1580,
+    decodeBase: 30.6,
+    ttftBase: 880,
+    source: 'Estimated from AMD Strix Halo specs',
+  },
+  {
+    id: 'rog-flow-z13-ai-max-395',
+    name: 'ROG Flow Z13 Ryzen AI Max+ 395',
+    spec: '128 GB LPDDR5X unified memory, Strix Halo',
+    price: '$2,299+',
+    memoryGb: 128,
+    buyer: 'Portable Strix Halo option for people who want laptop-class mobility with large shared memory.',
+    prefillBase: 1450,
+    decodeBase: 27.8,
+    ttftBase: 980,
+    source: 'Estimated from AMD Strix Halo specs',
+  },
+  {
+    id: 'beelink-gtr9-pro',
+    name: 'Beelink GTR9 Pro',
+    spec: 'Ryzen AI Max+ 395 class mini PC, up to 128 GB LPDDR5X',
+    price: 'Vendor launch pricing varies',
+    memoryGb: 128,
+    buyer: 'Community-tracked Strix Halo mini PC that local-LLM shoppers will likely search for by name.',
+    prefillBase: 1520,
+    decodeBase: 29.4,
+    ttftBase: 940,
+    source: 'Estimated from Strix Halo class specs',
+  },
+  {
     id: 'm1-pro-32',
     name: 'MacBook Pro M1 Pro',
     spec: '32 GB unified memory',
@@ -792,6 +840,18 @@ export const benchmarkMatrix = {
   'msi-edgexpert-ms-c931': {
     'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference' },
   },
+  'framework-desktop-ai-max-395': {
+    'llama-3.1-8b': { prefillTps: 1720, decodeTps: 33.4, ttftMs: 820, source: 'Estimated from AMD Strix Halo specs' },
+  },
+  'hp-z2-mini-g1a-ai-max-395': {
+    'llama-3.1-8b': { prefillTps: 1580, decodeTps: 30.6, ttftMs: 880, source: 'Estimated from AMD Strix Halo specs' },
+  },
+  'rog-flow-z13-ai-max-395': {
+    'llama-3.1-8b': { prefillTps: 1450, decodeTps: 27.8, ttftMs: 980, source: 'Estimated from AMD Strix Halo specs' },
+  },
+  'beelink-gtr9-pro': {
+    'llama-3.1-8b': { prefillTps: 1520, decodeTps: 29.4, ttftMs: 940, source: 'Estimated from Strix Halo class specs' },
+  },
 }
 
 export const workloadOptions = [
@@ -863,6 +923,30 @@ export const dataSources = [
     type: 'official specs',
     url: 'https://www.nvidia.com/en-gb/project-digits/',
     notes: 'Used for GB10 memory and bandwidth details and to anchor DGX Spark / partner-variant hardware entries.',
+  },
+  {
+    name: 'AMD Ryzen AI Max / Strix Halo specs',
+    type: 'official specs',
+    url: 'https://www.amd.com/en/products/processors/laptop/ryzen/ai-300-series/amd-ryzen-ai-max-plus-395.html',
+    notes: 'Used to size shared-memory Strix Halo systems and estimate the first batch of AMD AI mini PCs and desktops.',
+  },
+  {
+    name: 'Framework Desktop',
+    type: 'official specs',
+    url: 'https://frame.work/desktop',
+    notes: 'Used for Framework Desktop Strix Halo configuration details.',
+  },
+  {
+    name: 'HP Z2 Mini G1a',
+    type: 'official specs',
+    url: 'https://www.hp.com/us-en/workstations/z2-mini-g1a.html',
+    notes: 'Used for HP workstation-class Strix Halo system details.',
+  },
+  {
+    name: 'ASUS ROG Flow Z13',
+    type: 'official specs',
+    url: 'https://rog.asus.com/laptops/rog-flow/rog-flow-z13-2025/',
+    notes: 'Used for portable Strix Halo hardware coverage.',
   },
   {
     name: 'localai.computer model index',

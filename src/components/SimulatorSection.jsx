@@ -13,6 +13,9 @@ function SimulatorSection({
   hardwareQuery,
   setHardwareQuery,
   visibleHardwareOptions,
+  hardwarePlatformOptions,
+  hardwarePlatformFilter,
+  setHardwarePlatformFilter,
   setHardwareId,
   customMetrics,
   setCustomMetrics,
@@ -63,6 +66,18 @@ function SimulatorSection({
         <aside className="control-panel">
           <label className="control-group">
             <span>Hardware</span>
+            <div className="chip-row">
+              {hardwarePlatformOptions.map((platform) => (
+                <button
+                  key={platform}
+                  className={`filter-chip ${hardwarePlatformFilter === platform ? 'active' : ''}`}
+                  type="button"
+                  onClick={() => setHardwarePlatformFilter(platform)}
+                >
+                  {platform === 'all' ? 'All platforms' : platform}
+                </button>
+              ))}
+            </div>
             <input
               type="text"
               value={hardwareQuery}
@@ -78,12 +93,12 @@ function SimulatorSection({
             >
               {visibleHardwareOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {option.name}
+                  {option.platform} · {option.name}
                 </option>
               ))}
             </select>
             <small>
-              {hardware.spec} · {hardware.price}
+              {hardware.platform} · {hardware.spec} · {hardware.price}
             </small>
             <p>{hardware.buyer}</p>
           </label>
@@ -291,7 +306,7 @@ function SimulatorSection({
             </div>
           ) : null}
           <div className="source-note">
-            Coverage: {Object.keys(benchmarkMatrix).length} exact hardware tiers ·{' '}
+            Coverage: {Object.keys(benchmarkMatrix).length} hardware tiers in the playback matrix ·{' '}
             {communityBenchmarks.length} community references · {dataSources.length} source groups ·{' '}
             {modelOptions.length} models
           </div>

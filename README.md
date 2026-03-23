@@ -1,20 +1,67 @@
 # LapTime
 
-LapTime is a local-LLM buying simulator that turns benchmark numbers into an
-experience. Instead of asking buyers to interpret raw tokens per second,
-LapTime shows how different hardware, models, and workloads feel in practice.
+**Test-drive local LLM hardware before you buy.**
 
-## Current scope
+[Visit the live site: `https://laptime.run`](https://laptime.run)
 
-- Premium landing page and brand direction
-- Interactive simulator shell with curated hardware, model, and workload presets
-- Playback timeline for prompt ingest, time to first token, and streamed output
+LapTime turns benchmark numbers into something engineers can actually feel.
+Instead of staring at isolated `tok/s` figures, you can pick hardware, models,
+and workloads, then watch the tradeoffs play out across prompt ingest, time to
+first token, and streamed output.
+
+## Why it exists
+
+Benchmark tables answer "what is faster?"
+
+LapTime answers:
+
+- How long will I wait before the model starts talking?
+- Which part is slow: prompt processing, TTFT, or generation?
+- Will this rig actually fit the model I want to run?
+- How different will an Apple laptop feel from a GPU tower or a GB10 box?
+
+## Live product
+
+- Production: [https://laptime.run](https://laptime.run)
+- Alternate host: [https://www.laptime.run](https://www.laptime.run)
+
+## Current features
+
+- Interactive simulator for local LLM workloads
+- Hardware, model, and workload selection with searchable controls
+- Platform-aware hardware filtering
+- Color-coded fit warnings for likely broken or risky combinations
+- Segmented playback timeline for prompt ingest, TTFT, and token generation
+- Side-by-side comparison view
+- Broader model browser and source explorer
+- Cloudflare Pages deploys on every push to `main`
+
+## Hardware coverage
+
+The catalog includes a mix of exact benchmark-backed entries and clearly marked
+estimate-based entries across:
+
+- Apple Silicon laptops and desktops
+- NVIDIA consumer, workstation, and datacenter GPUs
+- GB10-class systems such as DGX Spark and partner variants
+- AMD Strix Halo systems, including Framework, HP, ASUS, and community-tracked mini PCs
+
+## Data philosophy
+
+LapTime tries to stay honest about source quality.
+
+- Exact benchmark rows are labeled from structured sources like LocalScore
+- Community/forum observations stay separate from high-confidence benchmark data
+- Newer or harder-to-source systems are included as estimates only when labeled clearly
+- Fit checks are guardrails, not guarantees; long context, KV cache growth, backend choice, and offload behavior still matter
 
 ## Stack
 
 - React 19
 - Vite 8
-- Plain CSS with a custom brand system
+- Plain CSS with a custom design system
+- Cloudflare Pages for hosting
+- GitHub Actions for automatic deploys
 
 ## Local development
 
@@ -30,44 +77,35 @@ npm run lint
 npm run build
 ```
 
-## Cloudflare Pages
+## Deployment
 
-Use these settings when creating the Pages project in Cloudflare:
+LapTime deploys to Cloudflare Pages from GitHub Actions on pushes to `main`.
 
-- Framework preset: `Vite`
-- Production branch: `main`
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Root directory: `/`
-
-Recommended domain setup:
-
-- Primary domain: `laptime.run`
-- Redirect: `www.laptime.run` -> `laptime.run`
-
-After the first deploy, attach the custom domain from the Pages project:
-
-1. Create a new Pages project from the `mcglothi/laptime` GitHub repo.
-2. Deploy `main` with the settings above.
-3. In `Custom domains`, add `laptime.run`.
-4. Add `www.laptime.run` and enable redirect to the apex domain.
-
-## GitHub Actions deploy
-
-This repo can deploy to Cloudflare Pages automatically on every push to `main`.
-
-Required GitHub repository secrets:
+Required repository secrets:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
-Workflow file:
+Workflow:
 
-- [.github/workflows/deploy-cloudflare-pages.yml](/Users/mcglothi/code/laptime/.github/workflows/deploy-cloudflare-pages.yml)
+- [`.github/workflows/deploy-cloudflare-pages.yml`](./.github/workflows/deploy-cloudflare-pages.yml)
 
-## Near-term roadmap
+If you need to create the Pages project manually, use:
 
-- Replace synthetic metrics with a real benchmark dataset
-- Add side-by-side system comparisons
-- Build benchmark explorer and hardware landing pages
-- Add affiliate-ready buyer guides and recommendation content
+- Framework preset: `Vite`
+- Production branch: `main`
+- Build command: `npm run build`
+- Output directory: `dist`
+
+## Roadmap
+
+- Expand benchmark ingestion from more structured sources
+- Add a clearer methodology and source-quality page
+- Broaden buyer flows and hardware landing pages
+- Improve context-aware fit modeling for long prompts and offload-heavy runs
+
+## Contributing ideas
+
+If you have benchmark data, hardware ideas, or real-world validation feedback,
+open an issue or share the site with another engineer and tell us where the
+simulator feels right or wrong.

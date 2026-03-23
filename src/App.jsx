@@ -40,6 +40,46 @@ function uniqueFamilies(items) {
   return ['all', ...new Set(items.map((item) => item.family).filter(Boolean))]
 }
 
+function getHardwarePlatform(hardware) {
+  if (hardware.id === 'custom') return 'Custom'
+  if (
+    hardware.id.startsWith('mac') ||
+    hardware.id.startsWith('m1-') ||
+    hardware.name.includes('Mac')
+  ) {
+    return 'Apple Silicon'
+  }
+  if (
+    hardware.id.includes('dgx-spark') ||
+    hardware.id.includes('gx10') ||
+    hardware.id.includes('pgx') ||
+    hardware.id.includes('ms-c931')
+  ) {
+    return 'GB10 Systems'
+  }
+  if (
+    hardware.id.includes('strix') ||
+    hardware.id.includes('framework-desktop') ||
+    hardware.id.includes('hp-z2-mini-g1a') ||
+    hardware.id.includes('rog-flow-z13') ||
+    hardware.id.includes('beelink-gtr9')
+  ) {
+    return 'AMD Strix Halo'
+  }
+  if (
+    hardware.name.includes('RTX') ||
+    hardware.name.includes('A100') ||
+    hardware.name.includes('H100')
+  ) {
+    return 'NVIDIA GPU'
+  }
+  return 'Other'
+}
+
+function uniqueHardwarePlatforms(items) {
+  return ['all', ...new Set(items.map((item) => item.platform).filter(Boolean))]
+}
+
 function getExperience(totalSeconds) {
   if (totalSeconds < 4.5) return 'Feels instant'
   if (totalSeconds < 9) return 'Feels smooth'
@@ -167,15 +207,23 @@ function resolveWorkload(selectedWorkload, customPreset) {
 }
 
 function App() {
-  const [hardwareId, setHardwareId] = useState(hardwareOptions[1].id)
+  const hardwareEntries = hardwareOptions.map((item) => ({
+    ...item,
+    platform: getHardwarePlatform(item),
+  }))
+  const nonCustomHardwareEntries = hardwareEntries.filter((item) => item.id !== 'custom')
+  const hardwarePlatformOptions = uniqueHardwarePlatforms(nonCustomHardwareEntries)
+  const [hardwareId, setHardwareId] = useState(hardwareEntries[1].id)
   const [modelId, setModelId] = useState(modelOptions[1].id)
   const [workloadId, setWorkloadId] = useState(workloadOptions[2].id)
-  const [compareHardwareId, setCompareHardwareId] = useState(hardwareOptions[3].id)
+  const [compareHardwareId, setCompareHardwareId] = useState(hardwareEntries[3].id)
   const [compareModelId, setCompareModelId] = useState(modelOptions[2].id)
   const [hardwareQuery, setHardwareQuery] = useState('')
   const [modelQuery, setModelQuery] = useState('')
   const [compareHardwareQuery, setCompareHardwareQuery] = useState('')
   const [compareModelQuery, setCompareModelQuery] = useState('')
+  const [hardwarePlatformFilter, setHardwarePlatformFilter] = useState('all')
+  const [compareHardwarePlatformFilter, setCompareHardwarePlatformFilter] = useState('all')
   const [modelFamilyFilter, setModelFamilyFilter] = useState('all')
   const [catalogFamilyFilter, setCatalogFamilyFilter] = useState('all')
   const [sourceQuery, setSourceQuery] = useState('')
@@ -193,22 +241,28 @@ function App() {
     responseTokens: 220,
   })
 
-  const hardware = hardwareOptions.find((item) => item.id === hardwareId) ?? hardwareOptions[1]
+  const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
   const workload = resolveWorkload(selectedWorkload, customPreset)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
   const fitAssessment = assessModelFit(hardware, model)
   const compareHardware =
-    hardwareOptions.find((item) => item.id === compareHardwareId) ?? hardwareOptions[2]
+    hardwareEntries.find((item) => item.id === compareHardwareId) ?? hardwareEntries[2]
   const compareModel = modelOptions.find((item) => item.id === compareModelId) ?? modelOptions[1]
   const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
   const compareFitAssessment = assessModelFit(compareHardware, compareModel)
+  const platformFilteredHardware =
+    hardwarePlatformFilter === 'all'
+      ? hardwareEntries
+      : hardwareEntries.filter(
+          (option) => option.id === 'custom' || option.platform === hardwarePlatformFilter,
+        )
   const visibleHardwareOptions = buildFilteredOptions(
-    hardwareOptions,
+    platformFilteredHardware,
     hardwareQuery,
     hardwareId,
-    ['name', 'spec', 'buyer'],
+    ['name', 'spec', 'buyer', 'platform'],
   )
   const modelFamilyOptions = uniqueFamilies(modelOptions)
   const familyFilteredModels =
@@ -225,11 +279,15 @@ function App() {
     ...option,
     fitAssessment: assessModelFit(hardware, option),
   }))
+  const comparePlatformFilteredHardware =
+    compareHardwarePlatformFilter === 'all'
+      ? nonCustomHardwareEntries
+      : nonCustomHardwareEntries.filter((option) => option.platform === compareHardwarePlatformFilter)
   const visibleCompareHardwareOptions = buildFilteredOptions(
-    hardwareOptions.filter((option) => option.id !== 'custom'),
+    comparePlatformFilteredHardware,
     compareHardwareQuery,
     compareHardwareId,
-    ['name', 'spec', 'buyer'],
+    ['name', 'spec', 'buyer', 'platform'],
   )
   const visibleCompareModelOptions = buildFilteredOptions(
     familyFilteredModels,
@@ -342,6 +400,9 @@ function App() {
         hardwareQuery={hardwareQuery}
         setHardwareQuery={setHardwareQuery}
         visibleHardwareOptions={visibleHardwareOptions}
+        hardwarePlatformOptions={hardwarePlatformOptions}
+        hardwarePlatformFilter={hardwarePlatformFilter}
+        setHardwarePlatformFilter={setHardwarePlatformFilter}
         setHardwareId={setHardwareId}
         customMetrics={customMetrics}
         setCustomMetrics={setCustomMetrics}
@@ -386,6 +447,9 @@ function App() {
         compareHardwareQuery={compareHardwareQuery}
         setCompareHardwareQuery={setCompareHardwareQuery}
         visibleCompareHardwareOptions={visibleCompareHardwareOptions}
+        hardwarePlatformOptions={hardwarePlatformOptions}
+        compareHardwarePlatformFilter={compareHardwarePlatformFilter}
+        setCompareHardwarePlatformFilter={setCompareHardwarePlatformFilter}
         setCompareHardwareId={setCompareHardwareId}
         compareModel={compareModel}
         compareModelId={compareModelId}
