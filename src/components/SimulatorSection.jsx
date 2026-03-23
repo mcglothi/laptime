@@ -79,12 +79,16 @@ function SimulatorSection({
               ))}
             </div>
             <input
+              id="hardware-search"
+              name="hardwareSearch"
               type="text"
               value={hardwareQuery}
               placeholder="Search hardware"
               onChange={(event) => setHardwareQuery(event.target.value)}
             />
             <select
+              id="hardware-select"
+              name="hardware"
               value={hardwareId}
               onChange={(event) => {
                 setHardwareId(event.target.value)
@@ -108,6 +112,8 @@ function SimulatorSection({
               <label className="control-group">
                 <span>Prefill tok/s</span>
                 <input
+                  id="custom-prefill"
+                  name="customPrefillTps"
                   min="1"
                   step="1"
                   type="number"
@@ -124,6 +130,8 @@ function SimulatorSection({
               <label className="control-group">
                 <span>Decode tok/s</span>
                 <input
+                  id="custom-decode"
+                  name="customDecodeTps"
                   min="0.1"
                   step="0.1"
                   type="number"
@@ -140,6 +148,8 @@ function SimulatorSection({
               <label className="control-group">
                 <span>TTFT ms</span>
                 <input
+                  id="custom-ttft"
+                  name="customTtftMs"
                   min="1"
                   step="1"
                   type="number"
@@ -171,12 +181,16 @@ function SimulatorSection({
               ))}
             </div>
             <input
+              id="model-search"
+              name="modelSearch"
               type="text"
               value={modelQuery}
               placeholder="Search models"
               onChange={(event) => setModelQuery(event.target.value)}
             />
             <select
+              id="model-select"
+              name="model"
               className={`select-fit select-fit-${fitAssessment.status}`}
               value={modelId}
               onChange={(event) => {
@@ -203,6 +217,8 @@ function SimulatorSection({
           <label className="control-group">
             <span>Workload</span>
             <select
+              id="workload-select"
+              name="workload"
               value={workloadId}
               onChange={(event) => {
                 setWorkloadId(event.target.value)
@@ -224,6 +240,8 @@ function SimulatorSection({
               <label className="control-group">
                 <span>Prompt tokens</span>
                 <input
+                  id="custom-prompt-tokens"
+                  name="customPromptTokens"
                   min="1"
                   step="1"
                   type="number"
@@ -240,6 +258,8 @@ function SimulatorSection({
               <label className="control-group">
                 <span>Response tokens</span>
                 <input
+                  id="custom-response-tokens"
+                  name="customResponseTokens"
                   min="1"
                   step="1"
                   type="number"
@@ -329,13 +349,20 @@ function SimulatorSection({
               <p>{workload.prompt}</p>
             </div>
 
-            <div className="response-block">
+            <div className={`response-block ${fitAssessment.status === 'unfit' ? 'response-block-blocked' : ''}`}>
               <div className="block-label">Response Stream</div>
               {fitAssessment.status === 'unfit' ? (
-                <p>
-                  This setup is projected to miss memory requirements, so LapTime is showing a guardrail instead
-                  of pretending the model would load normally.
-                </p>
+                <div className="memory-bottleneck">
+                  <strong>Memory bottleneck</strong>
+                  <p>
+                    This setup is projected to miss memory requirements, so LapTime is blocking playback instead
+                    of pretending the model would load normally.
+                  </p>
+                  <p>
+                    Needs about {fitAssessment.requiredGb.toFixed(1)} GB for this model versus{' '}
+                    {fitAssessment.availableGb} GB available on this hardware.
+                  </p>
+                </div>
               ) : (
                 <>
                   <p>{streamedText || ' '}</p>

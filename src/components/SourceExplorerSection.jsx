@@ -20,6 +20,8 @@ function SourceExplorerSection({
         <label className="control-group dense">
           <span>Search</span>
           <input
+            id="source-search"
+            name="sourceSearch"
             type="text"
             value={sourceQuery}
             placeholder="Search hardware, model, or source"
@@ -28,7 +30,12 @@ function SourceExplorerSection({
         </label>
         <label className="control-group dense">
           <span>Community filter</span>
-          <select value={communityFilter} onChange={(event) => setCommunityFilter(event.target.value)}>
+          <select
+            id="community-filter"
+            name="communityFilter"
+            value={communityFilter}
+            onChange={(event) => setCommunityFilter(event.target.value)}
+          >
             <option value="all">All qualities</option>
             <option value="forum">Forum</option>
             <option value="approximate">Approximate</option>

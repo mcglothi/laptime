@@ -102,12 +102,19 @@ function ComparisonSection({
                 ))}
               </div>
               <input
+                id="compare-hardware-search"
+                name="compareHardwareSearch"
                 type="text"
                 value={compareHardwareQuery}
                 placeholder="Search hardware"
                 onChange={(event) => setCompareHardwareQuery(event.target.value)}
               />
-              <select value={compareHardwareId} onChange={(event) => setCompareHardwareId(event.target.value)}>
+              <select
+                id="compare-hardware-select"
+                name="compareHardware"
+                value={compareHardwareId}
+                onChange={(event) => setCompareHardwareId(event.target.value)}
+              >
                 {visibleCompareHardwareOptions.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.platform} · {option.name}
@@ -118,12 +125,16 @@ function ComparisonSection({
             <label className="control-group dense">
               <span>Model</span>
               <input
+                id="compare-model-search"
+                name="compareModelSearch"
                 type="text"
                 value={compareModelQuery}
                 placeholder="Search models"
                 onChange={(event) => setCompareModelQuery(event.target.value)}
               />
               <select
+                id="compare-model-select"
+                name="compareModel"
                 className={`select-fit select-fit-${compareFitAssessment.status}`}
                 value={compareModelId}
                 onChange={(event) => setCompareModelId(event.target.value)}
