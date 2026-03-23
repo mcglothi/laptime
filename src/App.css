@@ -709,8 +709,46 @@
   font: inherit;
 }
 
+.prompt-toggle {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+}
+
 .prompt-block {
   margin-bottom: 0.7rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.prompt-block.collapsed {
+  max-height: 11.5rem;
+}
+
+.prompt-block.expanded {
+  max-height: none;
+}
+
+.prompt-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.8rem;
+  margin-bottom: 0.55rem;
+}
+
+.prompt-hint {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+
+.prompt-fade-hint {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 2.3rem 0.88rem 0.7rem;
+  background: linear-gradient(180deg, rgba(24, 28, 37, 0), var(--panel-soft) 46%);
+  color: var(--text-soft);
+  font-size: 0.8rem;
 }
 
 .response-block {
@@ -788,18 +826,18 @@
 }
 
 .phase-prefill {
-  background: var(--fit-tight-bg);
-  color: var(--fit-tight-text);
+  background: var(--phase-prefill);
+  color: var(--phase-prefill);
 }
 
 .phase-ttft {
-  background: var(--fit-warn-bg);
-  color: var(--fit-warn-text);
+  background: var(--phase-ttft);
+  color: var(--phase-ttft);
 }
 
 .phase-stream {
-  background: var(--fit-good-bg);
-  color: var(--fit-good-text);
+  background: var(--phase-stream);
+  color: var(--phase-stream);
 }
 
 .timeline-progress-overlay {
@@ -916,6 +954,10 @@
 
   .chip-row::-webkit-scrollbar {
     height: 6px;
+  }
+
+  .prompt-block-header {
+    display: grid;
   }
 
   .response-block {

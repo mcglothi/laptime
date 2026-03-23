@@ -295,6 +295,7 @@ function App() {
     responseTokens: 220,
   })
   const [contextTokens, setContextTokens] = useState(workloadOptions[2].promptTokens)
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false)
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
@@ -477,6 +478,8 @@ function App() {
         contextTokens={contextTokens}
         setContextTokens={setContextTokens}
         formatTokenCount={formatTokenCount}
+        isPromptExpanded={isPromptExpanded}
+        setIsPromptExpanded={setIsPromptExpanded}
         customPreset={customPreset}
         setCustomPreset={setCustomPreset}
         metrics={metrics}

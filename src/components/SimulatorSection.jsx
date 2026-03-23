@@ -35,6 +35,8 @@ function SimulatorSection({
   contextTokens,
   setContextTokens,
   formatTokenCount,
+  isPromptExpanded,
+  setIsPromptExpanded,
   customPreset,
   setCustomPreset,
   metrics,
@@ -230,6 +232,7 @@ function SimulatorSection({
                 if (nextWorkload) {
                   setContextTokens(nextWorkload.promptTokens)
                 }
+                setIsPromptExpanded(false)
                 restartSimulation()
               }}
             >
@@ -255,6 +258,7 @@ function SimulatorSection({
               value={contextTokens}
               onChange={(event) => {
                 setContextTokens(Number(event.target.value))
+                setIsPromptExpanded(false)
                 restartSimulation()
               }}
             />
@@ -365,9 +369,29 @@ function SimulatorSection({
               </button>
             </div>
 
-            <div className="prompt-block">
-              <div className="block-label">Prompt</div>
+            <div className={`prompt-block ${isPromptExpanded ? 'expanded' : 'collapsed'}`}>
+              <div className="prompt-block-header">
+                <div>
+                  <div className="block-label">Prompt</div>
+                  <div className="prompt-hint">
+                    {formatTokenCount(workload.promptTokens)} context · {workload.contextDescriptor}
+                  </div>
+                </div>
+                <button
+                  className="ghost-button prompt-toggle"
+                  type="button"
+                  onClick={() => setIsPromptExpanded((current) => !current)}
+                >
+                  {isPromptExpanded ? 'Collapse context' : 'Expand context'}
+                </button>
+              </div>
               <p>{workload.prompt}</p>
+              {!isPromptExpanded ? (
+                <div className="prompt-fade-hint">
+                  More context is hidden here. Expand to inspect the longer prompt shape that drives the
+                  ingest time.
+                </div>
+              ) : null}
             </div>
 
             <div className={`response-block ${fitAssessment.status === 'unfit' ? 'response-block-blocked' : ''}`}>
