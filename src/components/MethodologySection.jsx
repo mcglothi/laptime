@@ -14,7 +14,7 @@ function MethodologySection({
       <SectionHeading
         eyebrow="Method"
         title="How LapTime scores a lap."
-        description="The simulator keeps exact benchmarks, modeled estimates, and community references separate so buyers can tell what is measured versus inferred."
+        description="LapTime keeps benchmark-backed rows, modeled estimates, and community references separate so buyers can see what is measured, what is inferred, and where each lap comes from."
       />
 
       <div className="method-grid">
@@ -23,7 +23,8 @@ function MethodologySection({
           <h3>Exact benchmark rows drive the closest laps.</h3>
           <p>
             When LapTime has a direct benchmark entry for a hardware and model pairing, it uses
-            those measured prompt, generation, and first-token values first.
+            those published prompt, generation, and first-token values first and points back to
+            the source that made the measurement available.
           </p>
           <div className="method-metrics">
             <div>
@@ -43,7 +44,7 @@ function MethodologySection({
           <p>
             If a pairing has no direct row yet, LapTime scales from benchmark-backed baselines using
             model size, quantization, and memory-fit heuristics instead of pretending the result is
-            measured.
+            measured. The goal is to make gaps legible, not to blur estimates into source data.
           </p>
           <div className="method-metrics">
             <div>
@@ -62,7 +63,8 @@ function MethodologySection({
           <h3>Community references add texture, not fake certainty.</h3>
           <p>
             Forum posts and roundup articles help widen coverage and sanity-check expectations, but
-            they stay labeled separately from the exact benchmark path.
+            they stay labeled separately from the exact benchmark path and are treated as community
+            context rather than authoritative replacements for original sources.
           </p>
           <div className="method-metrics">
             <div>
@@ -81,10 +83,11 @@ function MethodologySection({
 
       <div className="method-principles">
         <article>
-          <strong>What the simulator optimizes for</strong>
+          <strong>What LapTime is trying to add</strong>
           <p>
             Buyer feel first: prompt ingest, time to first token, and streamed output matter more
-            than a single tokens-per-second headline.
+            than a single tokens-per-second headline. The simulator is meant to help people explore
+            source data, not replace the people collecting it.
           </p>
         </article>
         <article>
@@ -99,7 +102,7 @@ function MethodologySection({
           <strong>What to audit next</strong>
           <p>
             Use the source explorer below to inspect the links behind the current catalog before you
-            trust a buying decision.
+            trust a buying decision or share a row with someone else.
           </p>
           <a className="source-link" href="#sources">
             Jump to source explorer

@@ -13,7 +13,7 @@ function SourceExplorerSection({
       <SectionHeading
         eyebrow="Sources"
         title="Source explorer."
-        description="Inspect the links behind LapTime's benchmark rows, hardware assumptions, and community reference points."
+        description="Inspect the links behind LapTime's benchmark rows, hardware assumptions, and community references, and click through to the original work whenever you want the primary source."
       />
 
       <div className="explorer-controls">
@@ -91,6 +91,11 @@ function SourceExplorerSection({
           </div>
         </div>
       </div>
+
+      <p className="source-note">
+        If you published one of the benchmark sets, spec pages, or forum measurements referenced
+        here and want attribution adjusted, LapTime welcomes corrections and source feedback.
+      </p>
     </section>
   )
 }

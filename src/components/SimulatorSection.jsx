@@ -342,7 +342,7 @@ function SimulatorSection({
 
           <div className="source-note">
             Source: {metrics.source}
-            {metrics.source === 'LocalScore' ? ` · ${model.name}` : ''}
+            {metrics.source === 'Benchmark-backed via LocalScore' ? ` · ${model.name}` : ''}
           </div>
           {fitAssessment.availableGb ? (
             <div className="source-note">
@@ -353,7 +353,7 @@ function SimulatorSection({
           <div className="source-note">
             Coverage: {Object.keys(benchmarkMatrix).length} hardware tiers in the playback matrix ·{' '}
             {communityBenchmarks.length} community references · {dataSources.length} source groups ·{' '}
-            {modelOptions.length} models
+            {modelOptions.length} models · community-labeled where appropriate
           </div>
         </aside>
 

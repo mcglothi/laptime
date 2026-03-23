@@ -21,7 +21,7 @@ export const hardwareOptions = [
     prefillBase: 8478.63,
     decodeBase: 138.18,
     ttftBase: 146.37,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-5090',
@@ -33,7 +33,7 @@ export const hardwareOptions = [
     prefillBase: 6477.08,
     decodeBase: 65.1,
     ttftBase: 216.85,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-4090',
@@ -45,7 +45,7 @@ export const hardwareOptions = [
     prefillBase: 6598.53,
     decodeBase: 89.26,
     ttftBase: 207.98,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-5080',
@@ -57,7 +57,7 @@ export const hardwareOptions = [
     prefillBase: 4428,
     decodeBase: 44.9,
     ttftBase: 289,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-5070-ti',
@@ -69,7 +69,7 @@ export const hardwareOptions = [
     prefillBase: 2473,
     decodeBase: 36.8,
     ttftBase: 552,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-5070',
@@ -81,7 +81,7 @@ export const hardwareOptions = [
     prefillBase: 2927,
     decodeBase: 55.9,
     ttftBase: 477,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-6000-ada-48',
@@ -93,7 +93,7 @@ export const hardwareOptions = [
     prefillBase: 5487.5,
     decodeBase: 51.29,
     ttftBase: 251.67,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-4080-super',
@@ -105,7 +105,7 @@ export const hardwareOptions = [
     prefillBase: 4978.68,
     decodeBase: 78.69,
     ttftBase: 267.04,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-3090-ti',
@@ -117,7 +117,7 @@ export const hardwareOptions = [
     prefillBase: 4023.78,
     decodeBase: 109.78,
     ttftBase: 320.45,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-a6000',
@@ -129,7 +129,7 @@ export const hardwareOptions = [
     prefillBase: 3447.07,
     decodeBase: 90.48,
     ttftBase: 377.51,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'a100-sxm4-80gb',
@@ -141,7 +141,7 @@ export const hardwareOptions = [
     prefillBase: 3570.51,
     decodeBase: 110.1,
     ttftBase: 335.83,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'h100-pcie',
@@ -153,7 +153,7 @@ export const hardwareOptions = [
     prefillBase: 5202.16,
     decodeBase: 119.97,
     ttftBase: 236.45,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-3080-ti',
@@ -165,7 +165,7 @@ export const hardwareOptions = [
     prefillBase: 3739.43,
     decodeBase: 103.81,
     ttftBase: 342.66,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'rtx-3070-ti',
@@ -177,7 +177,7 @@ export const hardwareOptions = [
     prefillBase: 2509.44,
     decodeBase: 83.17,
     ttftBase: 519.63,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'macbook-pro-m4-max-36',
@@ -189,7 +189,7 @@ export const hardwareOptions = [
     prefillBase: 563,
     decodeBase: 47.8,
     ttftBase: 2180,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'macbook-pro-m4-max-48',
@@ -201,7 +201,7 @@ export const hardwareOptions = [
     prefillBase: 663,
     decodeBase: 55.1,
     ttftBase: 1790,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'macbook-pro-m4-max-64',
@@ -213,7 +213,7 @@ export const hardwareOptions = [
     prefillBase: 636,
     decodeBase: 52.4,
     ttftBase: 1850,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'macbook-pro-m4-max-128',
@@ -225,7 +225,7 @@ export const hardwareOptions = [
     prefillBase: 618,
     decodeBase: 51.6,
     ttftBase: 1940,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'mac-studio-m3-ultra-512',
@@ -237,7 +237,7 @@ export const hardwareOptions = [
     prefillBase: 1109,
     decodeBase: 62.7,
     ttftBase: 1060,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'mac-studio-m1-ultra-128',
@@ -249,7 +249,7 @@ export const hardwareOptions = [
     prefillBase: 534,
     decodeBase: 48.9,
     ttftBase: 2160,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'macbook-pro-m3-max-128',
@@ -261,7 +261,7 @@ export const hardwareOptions = [
     prefillBase: 587,
     decodeBase: 45.8,
     ttftBase: 2050,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'macbook-pro-m2-max-96',
@@ -273,7 +273,7 @@ export const hardwareOptions = [
     prefillBase: 484,
     decodeBase: 46.4,
     ttftBase: 2440,
-    source: 'LocalScore',
+    source: 'Benchmark-backed via LocalScore',
   },
   {
     id: 'mac-mini-m4-32',
@@ -369,7 +369,7 @@ export const hardwareOptions = [
     prefillBase: 2027,
     decodeBase: 34.9,
     ttftBase: 681,
-    source: 'LocalScore GB10 reference',
+    source: 'Benchmark-backed via LocalScore GB10 reference',
   },
   {
     id: 'asus-ascent-gx10',
@@ -381,7 +381,7 @@ export const hardwareOptions = [
     prefillBase: 2027,
     decodeBase: 34.9,
     ttftBase: 681,
-    source: 'Estimated from LocalScore GB10 reference',
+    source: 'Estimated from LocalScore GB10 reference row',
   },
   {
     id: 'lenovo-thinkstation-pgx',
@@ -393,7 +393,7 @@ export const hardwareOptions = [
     prefillBase: 2027,
     decodeBase: 34.9,
     ttftBase: 681,
-    source: 'Estimated from LocalScore GB10 reference',
+    source: 'Estimated from LocalScore GB10 reference row',
   },
   {
     id: 'msi-edgexpert-ms-c931',
@@ -405,7 +405,7 @@ export const hardwareOptions = [
     prefillBase: 2027,
     decodeBase: 34.9,
     ttftBase: 681,
-    source: 'Estimated from LocalScore GB10 reference',
+    source: 'Estimated from LocalScore GB10 reference row',
   },
   {
     id: 'framework-desktop-ai-max-395',
@@ -726,86 +726,86 @@ export const modelOptions = [
 
 export const benchmarkMatrix = {
   'rtx-pro-6000-bwe': {
-    'llama-3.1-8b': { prefillTps: 8478.63, decodeTps: 138.18, ttftMs: 146.37, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 5255.29, decodeTps: 81.85, ttftMs: 239.95, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 8478.63, decodeTps: 138.18, ttftMs: 146.37, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 5255.29, decodeTps: 81.85, ttftMs: 239.95, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-5090': {
-    'llama-3.2-1b': { prefillTps: 20305.31, decodeTps: 170.33, ttftMs: 299.93, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 6477.08, decodeTps: 65.1, ttftMs: 216.85, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 3678.27, decodeTps: 45.54, ttftMs: 535.86, source: 'LocalScore' },
+    'llama-3.2-1b': { prefillTps: 20305.31, decodeTps: 170.33, ttftMs: 299.93, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 6477.08, decodeTps: 65.1, ttftMs: 216.85, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 3678.27, decodeTps: 45.54, ttftMs: 535.86, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-4090': {
-    'llama-3.2-1b': { prefillTps: 18868.67, decodeTps: 193.6, ttftMs: 101.84, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 6598.53, decodeTps: 89.26, ttftMs: 207.98, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 3370.69, decodeTps: 45.65, ttftMs: 413.23, source: 'LocalScore' },
+    'llama-3.2-1b': { prefillTps: 18868.67, decodeTps: 193.6, ttftMs: 101.84, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 6598.53, decodeTps: 89.26, ttftMs: 207.98, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 3370.69, decodeTps: 45.65, ttftMs: 413.23, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-5080': {
-    'llama-3.1-8b': { prefillTps: 4428, decodeTps: 44.9, ttftMs: 289, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 4428, decodeTps: 44.9, ttftMs: 289, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-5070-ti': {
-    'llama-3.1-8b': { prefillTps: 2473, decodeTps: 36.8, ttftMs: 552, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 2473, decodeTps: 36.8, ttftMs: 552, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-5070': {
-    'llama-3.1-8b': { prefillTps: 2927, decodeTps: 55.9, ttftMs: 477, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 2927, decodeTps: 55.9, ttftMs: 477, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-6000-ada-48': {
-    'llama-3.1-8b': { prefillTps: 5487.5, decodeTps: 51.29, ttftMs: 251.67, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2935.63, decodeTps: 28.1, ttftMs: 470.57, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 5487.5, decodeTps: 51.29, ttftMs: 251.67, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2935.63, decodeTps: 28.1, ttftMs: 470.57, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-4080-super': {
-    'llama-3.2-1b': { prefillTps: 17478.95, decodeTps: 247.22, ttftMs: 80.02, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 4978.68, decodeTps: 78.69, ttftMs: 267.04, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2802.55, decodeTps: 46.15, ttftMs: 468.4, source: 'LocalScore' },
+    'llama-3.2-1b': { prefillTps: 17478.95, decodeTps: 247.22, ttftMs: 80.02, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 4978.68, decodeTps: 78.69, ttftMs: 267.04, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2802.55, decodeTps: 46.15, ttftMs: 468.4, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-3090-ti': {
-    'llama-3.2-1b': { prefillTps: 15119.73, decodeTps: 353.86, ttftMs: 89.64, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 4023.78, decodeTps: 109.78, ttftMs: 320.45, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2202.06, decodeTps: 64.18, ttftMs: 575.42, source: 'LocalScore' },
+    'llama-3.2-1b': { prefillTps: 15119.73, decodeTps: 353.86, ttftMs: 89.64, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 4023.78, decodeTps: 109.78, ttftMs: 320.45, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2202.06, decodeTps: 64.18, ttftMs: 575.42, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-a6000': {
-    'llama-3.1-8b': { prefillTps: 3447.07, decodeTps: 90.48, ttftMs: 377.51, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 1882.69, decodeTps: 51.97, ttftMs: 691.82, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 3447.07, decodeTps: 90.48, ttftMs: 377.51, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 1882.69, decodeTps: 51.97, ttftMs: 691.82, source: 'Benchmark-backed via LocalScore' },
   },
   'a100-sxm4-80gb': {
-    'llama-3.1-8b': { prefillTps: 3570.51, decodeTps: 110.1, ttftMs: 335.83, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2068.63, decodeTps: 66.34, ttftMs: 592.4, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 3570.51, decodeTps: 110.1, ttftMs: 335.83, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2068.63, decodeTps: 66.34, ttftMs: 592.4, source: 'Benchmark-backed via LocalScore' },
   },
   'h100-pcie': {
-    'llama-3.1-8b': { prefillTps: 5202.16, decodeTps: 119.97, ttftMs: 236.45, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 2973.34, decodeTps: 72.17, ttftMs: 416.79, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 5202.16, decodeTps: 119.97, ttftMs: 236.45, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 2973.34, decodeTps: 72.17, ttftMs: 416.79, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-3080-ti': {
-    'llama-3.2-1b': { prefillTps: 14351.58, decodeTps: 326.48, ttftMs: 93.43, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 3739.43, decodeTps: 103.81, ttftMs: 342.66, source: 'LocalScore' },
-    'qwen-2.5-14b': { prefillTps: 1704.09, decodeTps: 41.95, ttftMs: 784.72, source: 'LocalScore' },
+    'llama-3.2-1b': { prefillTps: 14351.58, decodeTps: 326.48, ttftMs: 93.43, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 3739.43, decodeTps: 103.81, ttftMs: 342.66, source: 'Benchmark-backed via LocalScore' },
+    'qwen-2.5-14b': { prefillTps: 1704.09, decodeTps: 41.95, ttftMs: 784.72, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-3070-ti': {
-    'llama-3.2-1b': { prefillTps: 10074.28, decodeTps: 297.33, ttftMs: 137.21, source: 'LocalScore' },
-    'llama-3.1-8b': { prefillTps: 2509.44, decodeTps: 83.17, ttftMs: 519.63, source: 'LocalScore' },
+    'llama-3.2-1b': { prefillTps: 10074.28, decodeTps: 297.33, ttftMs: 137.21, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 2509.44, decodeTps: 83.17, ttftMs: 519.63, source: 'Benchmark-backed via LocalScore' },
   },
   'macbook-pro-m4-max-36': {
-    'llama-3.1-8b': { prefillTps: 563, decodeTps: 47.8, ttftMs: 2180, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 563, decodeTps: 47.8, ttftMs: 2180, source: 'Benchmark-backed via LocalScore' },
   },
   'macbook-pro-m4-max-48': {
-    'llama-3.1-8b': { prefillTps: 663, decodeTps: 55.1, ttftMs: 1790, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 663, decodeTps: 55.1, ttftMs: 1790, source: 'Benchmark-backed via LocalScore' },
   },
   'macbook-pro-m4-max-64': {
-    'llama-3.1-8b': { prefillTps: 636, decodeTps: 52.4, ttftMs: 1850, source: 'Estimated from LocalScore M4 Max results' },
+    'llama-3.1-8b': { prefillTps: 636, decodeTps: 52.4, ttftMs: 1850, source: 'Estimated from LocalScore M4 Max benchmark results' },
   },
   'macbook-pro-m4-max-128': {
-    'llama-3.1-8b': { prefillTps: 618, decodeTps: 51.6, ttftMs: 1940, source: 'Estimated from LocalScore M4 Max results' },
+    'llama-3.1-8b': { prefillTps: 618, decodeTps: 51.6, ttftMs: 1940, source: 'Estimated from LocalScore M4 Max benchmark results' },
   },
   'mac-studio-m3-ultra-512': {
-    'llama-3.1-8b': { prefillTps: 1109, decodeTps: 62.7, ttftMs: 1060, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 1109, decodeTps: 62.7, ttftMs: 1060, source: 'Benchmark-backed via LocalScore' },
   },
   'mac-studio-m1-ultra-128': {
-    'llama-3.1-8b': { prefillTps: 534, decodeTps: 48.9, ttftMs: 2160, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 534, decodeTps: 48.9, ttftMs: 2160, source: 'Benchmark-backed via LocalScore' },
   },
   'macbook-pro-m3-max-128': {
-    'llama-3.1-8b': { prefillTps: 587, decodeTps: 45.8, ttftMs: 2050, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 587, decodeTps: 45.8, ttftMs: 2050, source: 'Benchmark-backed via LocalScore' },
   },
   'macbook-pro-m2-max-96': {
-    'llama-3.1-8b': { prefillTps: 484, decodeTps: 46.4, ttftMs: 2440, source: 'LocalScore' },
+    'llama-3.1-8b': { prefillTps: 484, decodeTps: 46.4, ttftMs: 2440, source: 'Benchmark-backed via LocalScore' },
   },
   'mac-mini-m4-32': {
     'llama-3.1-8b': { prefillTps: 240, decodeTps: 18.5, ttftMs: 3600, source: 'Estimated from Apple M4 specs' },
@@ -829,16 +829,16 @@ export const benchmarkMatrix = {
     'llama-3.1-8b': { prefillTps: 1180, decodeTps: 62, ttftMs: 980, source: 'Estimated from Apple M5 Max specs' },
   },
   'dgx-spark-gb10': {
-    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'LocalScore GB10 reference' },
+    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Benchmark-backed via LocalScore GB10 reference' },
   },
   'asus-ascent-gx10': {
-    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference' },
+    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference row' },
   },
   'lenovo-thinkstation-pgx': {
-    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference' },
+    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference row' },
   },
   'msi-edgexpert-ms-c931': {
-    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference' },
+    'llama-3.1-8b': { prefillTps: 2027, decodeTps: 34.9, ttftMs: 681, source: 'Estimated from LocalScore GB10 reference row' },
   },
   'framework-desktop-ai-max-395': {
     'llama-3.1-8b': { prefillTps: 1720, decodeTps: 33.4, ttftMs: 820, source: 'Estimated from AMD Strix Halo specs' },

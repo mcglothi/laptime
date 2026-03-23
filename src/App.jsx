@@ -228,7 +228,7 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
     prefillTps = hardware.prefillBase / scaling.prefillFactor
     decodeTps = hardware.decodeBase / scaling.decodeFactor
     ttftMs = hardware.ttftBase * scaling.ttftFactor
-    source = 'Estimated from LocalScore baseline + model size'
+    source = 'Estimated from benchmark-backed LocalScore baselines + model size'
   }
 
   ttftMs += workload.promptTokens * 0.16
@@ -359,6 +359,24 @@ function App() {
     setIsPlaying(true)
   }
 
+  function handleCompareHardwarePlatformFilterChange(nextFilter) {
+    setCompareHardwarePlatformFilter(nextFilter)
+
+    const nextOptions =
+      nextFilter === 'all'
+        ? nonCustomHardwareEntries
+        : nonCustomHardwareEntries.filter((option) => option.platform === nextFilter)
+
+    if (nextOptions.some((option) => option.id === compareHardwareId)) {
+      return
+    }
+
+    const fallbackHardware = nextOptions[0]
+    if (fallbackHardware) {
+      setCompareHardwareId(fallbackHardware.id)
+    }
+  }
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
@@ -425,7 +443,9 @@ function App() {
     (total, modelMap) => total + Object.keys(modelMap).length,
     0,
   )
-  const exactHardwareCount = hardwareEntries.filter((entry) => entry.source === 'LocalScore').length
+  const exactHardwareCount = hardwareEntries.filter(
+    (entry) => entry.source === 'Benchmark-backed via LocalScore',
+  ).length
   const officialSourceCount = dataSources.filter((source) => source.type === 'official specs').length
   const catalogSourceCount = dataSources.filter((source) => source.type === 'catalog').length
   const forumCount = communityBenchmarks.filter((entry) => entry.quality === 'forum').length
@@ -442,7 +462,7 @@ function App() {
                 <span>LapTime</span>
                 <small>Local LLM Simulator</small>
               </h1>
-              <p>Test-drive local AI rigs with a faster, more visual benchmark feel.</p>
+              <p>Test-drive local AI rigs with a more visual, source-aware benchmark feel.</p>
             </div>
           </div>
         </div>
@@ -516,7 +536,7 @@ function App() {
         visibleCompareHardwareOptions={visibleCompareHardwareOptions}
         hardwarePlatformOptions={hardwarePlatformOptions}
         compareHardwarePlatformFilter={compareHardwarePlatformFilter}
-        setCompareHardwarePlatformFilter={setCompareHardwarePlatformFilter}
+        setCompareHardwarePlatformFilter={handleCompareHardwarePlatformFilterChange}
         setCompareHardwareId={setCompareHardwareId}
         compareModel={compareModel}
         compareMetrics={compareMetrics}
