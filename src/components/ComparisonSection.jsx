@@ -22,11 +22,6 @@ function ComparisonSection({
   setCompareHardwarePlatformFilter,
   setCompareHardwareId,
   compareModel,
-  compareModelId,
-  compareModelQuery,
-  setCompareModelQuery,
-  visibleCompareModelOptions,
-  setCompareModelId,
   compareMetrics,
   compareFitAssessment,
   elapsedMs,
@@ -49,7 +44,7 @@ function ComparisonSection({
       <SectionHeading
         eyebrow="Comparison"
         title="Compare two setups."
-        description="Use the same workload to see what actually changes between rigs and models."
+        description="Use the same model and workload to see what actually changes between hardware choices."
       />
 
       <div className="race-card">
@@ -205,30 +200,6 @@ function ComparisonSection({
                 {visibleCompareHardwareOptions.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.platform} · {option.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="control-group dense">
-              <span>Model</span>
-              <input
-                id="compare-model-search"
-                name="compareModelSearch"
-                type="text"
-                value={compareModelQuery}
-                placeholder="Search models"
-                onChange={(event) => setCompareModelQuery(event.target.value)}
-              />
-              <select
-                id="compare-model-select"
-                name="compareModel"
-                className={`select-fit select-fit-${compareFitAssessment.status}`}
-                value={compareModelId}
-                onChange={(event) => setCompareModelId(event.target.value)}
-              >
-                {visibleCompareModelOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {getFitLabel(option.fitAssessment.status)} · {option.name}
                   </option>
                 ))}
               </select>

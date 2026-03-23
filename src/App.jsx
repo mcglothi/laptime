@@ -271,11 +271,9 @@ function App() {
   const [modelId, setModelId] = useState(modelOptions[1].id)
   const [workloadId, setWorkloadId] = useState(workloadOptions[2].id)
   const [compareHardwareId, setCompareHardwareId] = useState(hardwareEntries[3].id)
-  const [compareModelId, setCompareModelId] = useState(modelOptions[2].id)
   const [hardwareQuery, setHardwareQuery] = useState('')
   const [modelQuery, setModelQuery] = useState('')
   const [compareHardwareQuery, setCompareHardwareQuery] = useState('')
-  const [compareModelQuery, setCompareModelQuery] = useState('')
   const [hardwarePlatformFilter, setHardwarePlatformFilter] = useState('all')
   const [compareHardwarePlatformFilter, setCompareHardwarePlatformFilter] = useState('all')
   const [modelFamilyFilter, setModelFamilyFilter] = useState('all')
@@ -304,7 +302,7 @@ function App() {
   const fitAssessment = assessModelFit(hardware, model)
   const compareHardware =
     hardwareEntries.find((item) => item.id === compareHardwareId) ?? hardwareEntries[2]
-  const compareModel = modelOptions.find((item) => item.id === compareModelId) ?? modelOptions[1]
+  const compareModel = model
   const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
   const compareFitAssessment = assessModelFit(compareHardware, compareModel)
   const platformFilteredHardware =
@@ -344,16 +342,6 @@ function App() {
     compareHardwareId,
     ['name', 'spec', 'buyer', 'platform'],
   )
-  const visibleCompareModelOptions = buildFilteredOptions(
-    familyFilteredModels,
-    compareModelQuery,
-    compareModelId,
-    ['name', 'family', 'quant', 'fit'],
-  )
-  const visibleCompareModelEntries = visibleCompareModelOptions.map((option) => ({
-    ...option,
-    fitAssessment: assessModelFit(compareHardware, option),
-  }))
   const catalogModels =
     catalogFamilyFilter === 'all'
       ? modelOptions
@@ -512,11 +500,6 @@ function App() {
         setCompareHardwarePlatformFilter={setCompareHardwarePlatformFilter}
         setCompareHardwareId={setCompareHardwareId}
         compareModel={compareModel}
-        compareModelId={compareModelId}
-        compareModelQuery={compareModelQuery}
-        setCompareModelQuery={setCompareModelQuery}
-        visibleCompareModelOptions={visibleCompareModelEntries}
-        setCompareModelId={setCompareModelId}
         compareMetrics={compareMetrics}
         compareFitAssessment={compareFitAssessment}
         elapsedMs={elapsedMs}
