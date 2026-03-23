@@ -116,15 +116,12 @@ function ComparisonSection({
 
             <div className="timeline-legend">
               <span className="phase-prefill">
-                <i className="timeline-swatch" />
                 Engine rev / prompt ingest
               </span>
               <span className="phase-ttft">
-                <i className="timeline-swatch" />
                 Launch / first token
               </span>
               <span className="phase-stream">
-                <i className="timeline-swatch" />
                 Top speed / generation
               </span>
             </div>

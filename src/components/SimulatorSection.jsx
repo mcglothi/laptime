@@ -428,15 +428,12 @@ function SimulatorSection({
             </div>
             <div className="timeline-legend">
               <span className="phase-prefill">
-                <i className="timeline-swatch" />
                 Prompt ingest
               </span>
               <span className="phase-ttft">
-                <i className="timeline-swatch" />
                 First token
               </span>
               <span className="phase-stream">
-                <i className="timeline-swatch" />
                 Token stream
               </span>
             </div>

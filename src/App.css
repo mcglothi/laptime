@@ -442,6 +442,7 @@
 
 .race-phase {
   height: 100%;
+  opacity: 0.58;
 }
 
 .race-marker {
@@ -819,10 +820,12 @@
   overflow: hidden;
   border-radius: 999px;
   background: var(--track);
+  border: 1px solid var(--border-soft);
 }
 
 .timeline-segment {
   height: 100%;
+  opacity: 0.58;
 }
 
 .phase-prefill {
@@ -842,9 +845,26 @@
 
 .timeline-progress-overlay {
   position: absolute;
-  inset: 0 auto 0 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
-  border-right: 2px solid rgba(255, 255, 255, 0.65);
+  top: 50%;
+  left: 0;
+  height: 0.32rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14));
+}
+
+.timeline-progress-overlay::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 0.82rem;
+  height: 0.82rem;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--heading);
+  box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.18);
 }
 
 .timeline-legend {
@@ -856,17 +876,8 @@
 .timeline-legend span {
   display: inline-flex;
   align-items: center;
-  gap: 0.38rem;
   font-size: 0.78rem;
   font-weight: 600;
-}
-
-.timeline-swatch {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 999px;
-  background: currentColor;
-  display: inline-block;
 }
 
 .timeline-progress {

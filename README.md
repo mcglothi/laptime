@@ -23,7 +23,6 @@ LapTime answers:
 ## Live product
 
 - Production: [https://laptime.run](https://laptime.run)
-- Alternate host: [https://www.laptime.run](https://www.laptime.run)
 
 ## Current features
 

@@ -438,7 +438,7 @@ function App() {
       <section className="masthead">
         <div className="brand-lockup">
           <div className="eyebrow">LapTime</div>
-          <h1>Local LLM lap simulator</h1>
+          <h1>Local LLM laptime simulator</h1>
         </div>
         <button
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
