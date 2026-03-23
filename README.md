@@ -58,8 +58,8 @@ This repo can deploy to Cloudflare Pages automatically on every push to `main`.
 
 Required GitHub repository secrets:
 
-- `CLOUDFLARE_API_KEY`
-- `CLOUDFLARE_EMAIL`
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
 
 Workflow file:
 
