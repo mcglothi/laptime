@@ -1,8 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Faster+One&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   --sans: 'Inter', 'Segoe UI', sans-serif;
   --mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+  --display: 'Faster One', 'Inter', sans-serif;
 }
 
 :root[data-theme='dark'] {
@@ -19,6 +20,10 @@
   --text-soft: #7f8aa3;
   --accent: #5b8cff;
   --accent-strong: #7d6bff;
+  --brand-hero: #f5f7fb;
+  --brand-shadow: rgba(31, 59, 117, 0.26);
+  --checkered-fade: rgba(255, 255, 255, 0.05);
+  --checkered-clear: rgba(255, 255, 255, 0);
   --phase-prefill: #ff8a1f;
   --phase-ttft: #ffd84d;
   --phase-stream: #1fe08f;
@@ -56,6 +61,10 @@
   --text-soft: #7a8598;
   --accent: #336dff;
   --accent-strong: #6b52ff;
+  --brand-hero: #15305f;
+  --brand-shadow: rgba(51, 109, 255, 0.16);
+  --checkered-fade: rgba(21, 48, 95, 0.06);
+  --checkered-clear: rgba(21, 48, 95, 0);
   --phase-prefill: #f97316;
   --phase-ttft: #facc15;
   --phase-stream: #16a34a;
@@ -140,6 +149,28 @@ select {
   width: min(1180px, calc(100% - 1rem));
   min-height: 100vh;
   margin: 0 auto;
+  position: relative;
+  isolation: isolate;
+}
+
+#root::after {
+  content: '';
+  position: fixed;
+  right: -5vmin;
+  bottom: -8vmin;
+  width: min(42vw, 30rem);
+  aspect-ratio: 1;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.82;
+  background:
+    linear-gradient(45deg, var(--checkered-fade) 25%, var(--checkered-clear) 25%) 0 0 / 2.4rem 2.4rem,
+    linear-gradient(-45deg, var(--checkered-fade) 25%, var(--checkered-clear) 25%) 0 1.2rem / 2.4rem 2.4rem,
+    linear-gradient(45deg, var(--checkered-clear) 75%, var(--checkered-fade) 75%) 1.2rem -1.2rem / 2.4rem 2.4rem,
+    linear-gradient(-45deg, var(--checkered-clear) 75%, var(--checkered-fade) 75%) -1.2rem 0 / 2.4rem 2.4rem;
+  mask-image: radial-gradient(circle at 70% 72%, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.35) 50%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 70% 72%, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.35) 50%, transparent 78%);
+  transform: rotate(-8deg);
 }
 
 h1,
@@ -164,4 +195,13 @@ strong {
 
 ::selection {
   background: rgba(91, 140, 255, 0.24);
+}
+
+@media (max-width: 760px) {
+  #root::after {
+    width: min(48vw, 12rem);
+    right: -2rem;
+    bottom: 7rem;
+    opacity: 0.55;
+  }
 }

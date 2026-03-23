@@ -38,6 +38,9 @@ function ComparisonSection({
   const laneATTFTShare = metrics.ttftMs / laneATotalMs
   const laneBPrefillShare = (compareMetrics.prefillSeconds * 1000) / laneBTotalMs
   const laneBTTFTShare = compareMetrics.ttftMs / laneBTotalMs
+  const winnerThresholdMs = 40
+  const hasWinner = !comparisonLimited && Math.abs(laneATotalMs - laneBTotalMs) > winnerThresholdMs
+  const winnerLane = !hasWinner ? null : laneATotalMs < laneBTotalMs ? 'a' : 'b'
 
   return (
     <section className="compare-section">
@@ -67,21 +70,26 @@ function ComparisonSection({
           <div className="race-lanes">
             <div className="race-lane">
               <div className="race-lane-head">
-                <strong>Lane A</strong>
+                <strong>
+                  Lane A
+                  {winnerLane === 'a' ? <span className="winner-accent-dot" aria-hidden="true" /> : null}
+                </strong>
                 <span>{hardware.name}</span>
               </div>
               <div className="race-track">
-                <div className="race-phase phase-prefill" style={{ width: `${laneAPrefillShare * 100}%` }} />
-                <div className="race-phase phase-ttft" style={{ width: `${laneATTFTShare * 100}%` }} />
-                <div
-                  className="race-phase phase-stream"
-                  style={{ width: `${Math.max(0, 1 - laneAPrefillShare - laneATTFTShare) * 100}%` }}
-                />
+                <div className="race-track-fill">
+                  <div className="race-phase phase-prefill" style={{ width: `${laneAPrefillShare * 100}%` }} />
+                  <div className="race-phase phase-ttft" style={{ width: `${laneATTFTShare * 100}%` }} />
+                  <div
+                    className="race-phase phase-stream"
+                    style={{ width: `${Math.max(0, 1 - laneAPrefillShare - laneATTFTShare) * 100}%` }}
+                  />
+                </div>
                 <div className="race-marker lane-a" style={{ left: `${laneAProgress * 100}%` }}>
                   A
                 </div>
               </div>
-              <div className="race-lane-meta">
+              <div className={`race-lane-meta ${winnerLane === 'a' ? 'race-lane-meta-winner' : ''}`}>
                 <span>{formatSeconds(metrics.totalSeconds)}</span>
                 <span>{metrics.experience}</span>
               </div>
@@ -89,21 +97,26 @@ function ComparisonSection({
 
             <div className="race-lane">
               <div className="race-lane-head">
-                <strong>Lane B</strong>
+                <strong>
+                  Lane B
+                  {winnerLane === 'b' ? <span className="winner-accent-dot" aria-hidden="true" /> : null}
+                </strong>
                 <span>{compareHardware.name}</span>
               </div>
               <div className="race-track">
-                <div className="race-phase phase-prefill" style={{ width: `${laneBPrefillShare * 100}%` }} />
-                <div className="race-phase phase-ttft" style={{ width: `${laneBTTFTShare * 100}%` }} />
-                <div
-                  className="race-phase phase-stream"
-                  style={{ width: `${Math.max(0, 1 - laneBPrefillShare - laneBTTFTShare) * 100}%` }}
-                />
+                <div className="race-track-fill">
+                  <div className="race-phase phase-prefill" style={{ width: `${laneBPrefillShare * 100}%` }} />
+                  <div className="race-phase phase-ttft" style={{ width: `${laneBTTFTShare * 100}%` }} />
+                  <div
+                    className="race-phase phase-stream"
+                    style={{ width: `${Math.max(0, 1 - laneBPrefillShare - laneBTTFTShare) * 100}%` }}
+                  />
+                </div>
                 <div className="race-marker lane-b" style={{ left: `${laneBProgress * 100}%` }}>
                   B
                 </div>
               </div>
-              <div className="race-lane-meta">
+              <div className={`race-lane-meta ${winnerLane === 'b' ? 'race-lane-meta-winner' : ''}`}>
                 <span>{formatSeconds(compareMetrics.totalSeconds)}</span>
                 <span>{compareMetrics.experience}</span>
               </div>
@@ -125,10 +138,13 @@ function ComparisonSection({
       </div>
 
       <div className="compare-grid">
-        <article className="compare-card">
+        <article className={`compare-card ${winnerLane === 'a' ? 'compare-card-winner' : ''}`}>
           <div className="compare-header">
             <span>Lane A</span>
-            <strong>Current run</strong>
+            <strong>
+              Current run
+              {winnerLane === 'a' ? <span className="winner-label">Fastest</span> : null}
+            </strong>
           </div>
           <div className="compare-title">{hardware.name}</div>
           <div className="compare-subtitle">
@@ -163,10 +179,13 @@ function ComparisonSection({
           <div className="compare-experience">{metrics.experience}</div>
         </article>
 
-        <article className="compare-card">
+        <article className={`compare-card ${winnerLane === 'b' ? 'compare-card-winner' : ''}`}>
           <div className="compare-header">
             <span>Lane B</span>
-            <strong>Comparison run</strong>
+            <strong>
+              Comparison run
+              {winnerLane === 'b' ? <span className="winner-label">Fastest</span> : null}
+            </strong>
           </div>
           <div className="compare-controls">
             <label className="control-group dense">
