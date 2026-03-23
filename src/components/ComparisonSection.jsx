@@ -28,18 +28,18 @@ function ComparisonSection({
   restartSimulation,
   formatSeconds,
 }) {
-  const comparisonLimited =
+  const comparisonProjected =
     fitAssessment.status === 'unfit' || compareFitAssessment.status === 'unfit'
   const laneATotalMs = metrics.totalSeconds * 1000
   const laneBTotalMs = compareMetrics.totalSeconds * 1000
-  const laneAProgress = comparisonLimited ? 0 : Math.min(elapsedMs / laneATotalMs, 1)
-  const laneBProgress = comparisonLimited ? 0 : Math.min(elapsedMs / laneBTotalMs, 1)
+  const laneAProgress = Math.min(elapsedMs / laneATotalMs, 1)
+  const laneBProgress = Math.min(elapsedMs / laneBTotalMs, 1)
   const laneAPrefillShare = (metrics.prefillSeconds * 1000) / laneATotalMs
   const laneATTFTShare = metrics.ttftMs / laneATotalMs
   const laneBPrefillShare = (compareMetrics.prefillSeconds * 1000) / laneBTotalMs
   const laneBTTFTShare = compareMetrics.ttftMs / laneBTotalMs
   const winnerThresholdMs = 40
-  const hasWinner = !comparisonLimited && Math.abs(laneATotalMs - laneBTotalMs) > winnerThresholdMs
+  const hasWinner = !comparisonProjected && Math.abs(laneATotalMs - laneBTotalMs) > winnerThresholdMs
   const winnerLane = !hasWinner ? null : laneATotalMs < laneBTotalMs ? 'a' : 'b'
 
   return (
@@ -61,80 +61,80 @@ function ComparisonSection({
           </button>
         </div>
 
-        {comparisonLimited ? (
+        {comparisonProjected ? (
           <div className="compare-caveat">
-            Memory fit blocks a clean apples-to-apples race here. One lane likely will not load the
-            selected model normally.
+            One lane likely will not load the selected model normally. LapTime is still showing the
+            projected race so you can compare the speed profile, but treat it as a hypothetical rather
+            than a clean runnable matchup.
           </div>
-        ) : (
-          <div className="race-lanes">
-            <div className="race-lane">
-              <div className="race-lane-head">
-                <strong>
-                  Lane A
-                  {winnerLane === 'a' ? <span className="winner-accent-dot" aria-hidden="true" /> : null}
-                </strong>
-                <span>{hardware.name}</span>
+        ) : null}
+        <div className="race-lanes">
+          <div className="race-lane">
+            <div className="race-lane-head">
+              <strong>
+                Lane A
+                {winnerLane === 'a' ? <span className="winner-accent-dot" aria-hidden="true" /> : null}
+              </strong>
+              <span>{hardware.name}</span>
+            </div>
+            <div className="race-track">
+              <div className="race-track-fill">
+                <div className="race-phase phase-prefill" style={{ width: `${laneAPrefillShare * 100}%` }} />
+                <div className="race-phase phase-ttft" style={{ width: `${laneATTFTShare * 100}%` }} />
+                <div
+                  className="race-phase phase-stream"
+                  style={{ width: `${Math.max(0, 1 - laneAPrefillShare - laneATTFTShare) * 100}%` }}
+                />
               </div>
-              <div className="race-track">
-                <div className="race-track-fill">
-                  <div className="race-phase phase-prefill" style={{ width: `${laneAPrefillShare * 100}%` }} />
-                  <div className="race-phase phase-ttft" style={{ width: `${laneATTFTShare * 100}%` }} />
-                  <div
-                    className="race-phase phase-stream"
-                    style={{ width: `${Math.max(0, 1 - laneAPrefillShare - laneATTFTShare) * 100}%` }}
-                  />
-                </div>
-                <div className="race-marker lane-a" style={{ left: `${laneAProgress * 100}%` }}>
-                  A
-                </div>
-              </div>
-              <div className={`race-lane-meta ${winnerLane === 'a' ? 'race-lane-meta-winner' : ''}`}>
-                <span>{formatSeconds(metrics.totalSeconds)}</span>
-                <span>{metrics.experience}</span>
+              <div className="race-marker lane-a" style={{ left: `${laneAProgress * 100}%` }}>
+                A
               </div>
             </div>
-
-            <div className="race-lane">
-              <div className="race-lane-head">
-                <strong>
-                  Lane B
-                  {winnerLane === 'b' ? <span className="winner-accent-dot" aria-hidden="true" /> : null}
-                </strong>
-                <span>{compareHardware.name}</span>
-              </div>
-              <div className="race-track">
-                <div className="race-track-fill">
-                  <div className="race-phase phase-prefill" style={{ width: `${laneBPrefillShare * 100}%` }} />
-                  <div className="race-phase phase-ttft" style={{ width: `${laneBTTFTShare * 100}%` }} />
-                  <div
-                    className="race-phase phase-stream"
-                    style={{ width: `${Math.max(0, 1 - laneBPrefillShare - laneBTTFTShare) * 100}%` }}
-                  />
-                </div>
-                <div className="race-marker lane-b" style={{ left: `${laneBProgress * 100}%` }}>
-                  B
-                </div>
-              </div>
-              <div className={`race-lane-meta ${winnerLane === 'b' ? 'race-lane-meta-winner' : ''}`}>
-                <span>{formatSeconds(compareMetrics.totalSeconds)}</span>
-                <span>{compareMetrics.experience}</span>
-              </div>
-            </div>
-
-            <div className="timeline-legend">
-              <span className="phase-prefill">
-                Engine rev / prompt ingest
-              </span>
-              <span className="phase-ttft">
-                Launch / first token
-              </span>
-              <span className="phase-stream">
-                Top speed / generation
-              </span>
+            <div className={`race-lane-meta ${winnerLane === 'a' ? 'race-lane-meta-winner' : ''}`}>
+              <span>{formatSeconds(metrics.totalSeconds)}</span>
+              <span>{metrics.experience}</span>
             </div>
           </div>
-        )}
+
+          <div className="race-lane">
+            <div className="race-lane-head">
+              <strong>
+                Lane B
+                {winnerLane === 'b' ? <span className="winner-accent-dot" aria-hidden="true" /> : null}
+              </strong>
+              <span>{compareHardware.name}</span>
+            </div>
+            <div className="race-track">
+              <div className="race-track-fill">
+                <div className="race-phase phase-prefill" style={{ width: `${laneBPrefillShare * 100}%` }} />
+                <div className="race-phase phase-ttft" style={{ width: `${laneBTTFTShare * 100}%` }} />
+                <div
+                  className="race-phase phase-stream"
+                  style={{ width: `${Math.max(0, 1 - laneBPrefillShare - laneBTTFTShare) * 100}%` }}
+                />
+              </div>
+              <div className="race-marker lane-b" style={{ left: `${laneBProgress * 100}%` }}>
+                B
+              </div>
+            </div>
+            <div className={`race-lane-meta ${winnerLane === 'b' ? 'race-lane-meta-winner' : ''}`}>
+              <span>{formatSeconds(compareMetrics.totalSeconds)}</span>
+              <span>{compareMetrics.experience}</span>
+            </div>
+          </div>
+
+          <div className="timeline-legend">
+            <span className="phase-prefill">
+              Engine rev / prompt ingest
+            </span>
+            <span className="phase-ttft">
+              Launch / first token
+            </span>
+            <span className="phase-stream">
+              Top speed / generation
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="compare-grid">
@@ -264,7 +264,7 @@ function ComparisonSection({
       <div className="delta-grid">
         <div
           className={
-            comparisonLimited
+            comparisonProjected
               ? 'delta-neutral'
               : compareMetrics.decodeTps >= metrics.decodeTps
                 ? 'delta-positive'
@@ -272,13 +272,11 @@ function ComparisonSection({
           }
         >
           <span>Decode delta</span>
-          <strong>
-            {comparisonLimited ? 'Blocked by memory fit' : `${(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s`}
-          </strong>
+          <strong>{`${(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s`}</strong>
         </div>
         <div
           className={
-            comparisonLimited
+            comparisonProjected
               ? 'delta-neutral'
               : compareMetrics.ttftMs <= metrics.ttftMs
                 ? 'delta-positive'
@@ -286,13 +284,11 @@ function ComparisonSection({
           }
         >
           <span>TTFT delta</span>
-          <strong>
-            {comparisonLimited ? 'Blocked by memory fit' : `${Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms`}
-          </strong>
+          <strong>{`${Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms`}</strong>
         </div>
         <div
           className={
-            comparisonLimited
+            comparisonProjected
               ? 'delta-neutral'
               : compareMetrics.totalSeconds <= metrics.totalSeconds
                 ? 'delta-positive'
@@ -300,11 +296,7 @@ function ComparisonSection({
           }
         >
           <span>Total time delta</span>
-          <strong>
-            {comparisonLimited
-              ? 'Blocked by memory fit'
-              : formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}
-          </strong>
+          <strong>{formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}</strong>
         </div>
       </div>
     </section>

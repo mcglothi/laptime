@@ -420,7 +420,7 @@ function App() {
         : isPlaying
         ? 'Streaming response'
           : 'Playback complete'
-  const displayPhase = fitAssessment.status === 'unfit' ? 'Memory limit exceeded' : currentPhase
+  const displayPhase = fitAssessment.status === 'unfit' ? 'Projected memory miss' : currentPhase
   const normalizedQuery = sourceQuery.trim().toLowerCase()
   const filteredStructuredSources = dataSources.filter((source) => {
     if (!normalizedQuery) return true

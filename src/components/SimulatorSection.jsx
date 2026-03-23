@@ -394,28 +394,25 @@ function SimulatorSection({
               ) : null}
             </div>
 
-            <div className={`response-block ${fitAssessment.status === 'unfit' ? 'response-block-blocked' : ''}`}>
+            <div className="response-block">
               <div className="block-label">Response Stream</div>
               {fitAssessment.status === 'unfit' ? (
                 <div className="memory-bottleneck">
-                  <strong>Memory bottleneck</strong>
+                  <strong>Projected memory miss</strong>
                   <p>
-                    This setup is projected to miss memory requirements, so LapTime is blocking playback instead
-                    of pretending the model would load normally.
+                    LapTime is still simulating the timing here so you can get a feel for the speed profile,
+                    but this setup is projected to miss memory requirements in a real local run.
                   </p>
                   <p>
                     Needs about {fitAssessment.requiredGb.toFixed(1)} GB for this model versus{' '}
                     {fitAssessment.availableGb} GB available on this hardware.
                   </p>
                 </div>
-              ) : (
-                <>
-                  <p>{streamedText || ' '}</p>
-                  {isPlaying && elapsedMs >= streamStartMs ? (
-                    <span className="cursor" aria-hidden="true" />
-                  ) : null}
-                </>
-              )}
+              ) : null}
+              <p>{streamedText || ' '}</p>
+              {isPlaying && elapsedMs >= streamStartMs ? (
+                <span className="cursor" aria-hidden="true" />
+              ) : null}
             </div>
           </div>
 
