@@ -52,6 +52,19 @@ After the first deploy, attach the custom domain from the Pages project:
 3. In `Custom domains`, add `laptime.run`.
 4. Add `www.laptime.run` and enable redirect to the apex domain.
 
+## GitHub Actions deploy
+
+This repo can deploy to Cloudflare Pages automatically on every push to `main`.
+
+Required GitHub repository secrets:
+
+- `CLOUDFLARE_API_KEY`
+- `CLOUDFLARE_EMAIL`
+
+Workflow file:
+
+- [.github/workflows/deploy-cloudflare-pages.yml](/Users/mcglothi/code/laptime/.github/workflows/deploy-cloudflare-pages.yml)
+
 ## Near-term roadmap
 
 - Replace synthetic metrics with a real benchmark dataset

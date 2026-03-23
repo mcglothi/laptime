@@ -1,9 +1,17 @@
 import SectionHeading from './SectionHeading'
 
+function getFitLabel(status) {
+  if (status === 'unfit') return "Won't fit"
+  if (status === 'tight') return 'Tight fit'
+  if (status === 'unknown') return 'Unknown fit'
+  return 'Fits'
+}
+
 function ComparisonSection({
   hardware,
   model,
   metrics,
+  fitAssessment,
   compareHardware,
   compareHardwareId,
   compareHardwareQuery,
@@ -17,8 +25,12 @@ function ComparisonSection({
   visibleCompareModelOptions,
   setCompareModelId,
   compareMetrics,
+  compareFitAssessment,
   formatSeconds,
 }) {
+  const comparisonLimited =
+    fitAssessment.status === 'unfit' || compareFitAssessment.status === 'unfit'
+
   return (
     <section className="compare-section">
       <SectionHeading
@@ -53,6 +65,14 @@ function ComparisonSection({
               <strong>{formatSeconds(metrics.totalSeconds)}</strong>
             </div>
           </div>
+          {fitAssessment.status !== 'fit' ? (
+            <div className={`fit-warning compact ${fitAssessment.status}`}>
+              <strong>
+                {fitAssessment.status === 'unfit' ? 'Will likely not fit' : 'Tight fit warning'}
+              </strong>
+              <p>{fitAssessment.message}</p>
+            </div>
+          ) : null}
           <div className="compare-experience">{metrics.experience}</div>
         </article>
 
@@ -86,10 +106,14 @@ function ComparisonSection({
                 placeholder="Search models"
                 onChange={(event) => setCompareModelQuery(event.target.value)}
               />
-              <select value={compareModelId} onChange={(event) => setCompareModelId(event.target.value)}>
+              <select
+                className={`select-fit select-fit-${compareFitAssessment.status}`}
+                value={compareModelId}
+                onChange={(event) => setCompareModelId(event.target.value)}
+              >
                 {visibleCompareModelOptions.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.name}
+                    {getFitLabel(option.fitAssessment.status)} · {option.name}
                   </option>
                 ))}
               </select>
@@ -97,6 +121,9 @@ function ComparisonSection({
           </div>
           <div className="compare-title">{compareHardware.name}</div>
           <div className="compare-subtitle">{compareModel.name}</div>
+          <div className={`fit-inline fit-inline-${compareFitAssessment.status}`}>
+            {getFitLabel(compareFitAssessment.status)}
+          </div>
           <div className="metric-list">
             <div>
               <span>Prefill</span>
@@ -115,26 +142,69 @@ function ComparisonSection({
               <strong>{formatSeconds(compareMetrics.totalSeconds)}</strong>
             </div>
           </div>
+          {compareFitAssessment.status !== 'fit' ? (
+            <div className={`fit-warning compact ${compareFitAssessment.status}`}>
+              <strong>
+                {compareFitAssessment.status === 'unfit' ? 'Will likely not fit' : 'Tight fit warning'}
+              </strong>
+              <p>{compareFitAssessment.message}</p>
+            </div>
+          ) : null}
           <div className="compare-experience">{compareMetrics.experience}</div>
         </article>
       </div>
 
-      <div className="delta-grid">
-        <div className={compareMetrics.decodeTps >= metrics.decodeTps ? 'delta-positive' : 'delta-negative'}>
-          <span>Decode delta</span>
-          <strong>{(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s</strong>
+      {comparisonLimited ? (
+        <div className="compare-caveat">
+          Memory fit blocks a clean apples-to-apples comparison here. One lane likely will not load the
+          selected model normally.
         </div>
-        <div className={compareMetrics.ttftMs <= metrics.ttftMs ? 'delta-positive' : 'delta-negative'}>
-          <span>TTFT delta</span>
-          <strong>{Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms</strong>
+      ) : null}
+
+      <div className="delta-grid">
+        <div
+          className={
+            comparisonLimited
+              ? 'delta-neutral'
+              : compareMetrics.decodeTps >= metrics.decodeTps
+                ? 'delta-positive'
+                : 'delta-negative'
+          }
+        >
+          <span>Decode delta</span>
+          <strong>
+            {comparisonLimited ? 'Blocked by memory fit' : `${(compareMetrics.decodeTps - metrics.decodeTps).toFixed(1)} tok/s`}
+          </strong>
         </div>
         <div
           className={
-            compareMetrics.totalSeconds <= metrics.totalSeconds ? 'delta-positive' : 'delta-negative'
+            comparisonLimited
+              ? 'delta-neutral'
+              : compareMetrics.ttftMs <= metrics.ttftMs
+                ? 'delta-positive'
+                : 'delta-negative'
+          }
+        >
+          <span>TTFT delta</span>
+          <strong>
+            {comparisonLimited ? 'Blocked by memory fit' : `${Math.round(compareMetrics.ttftMs - metrics.ttftMs)} ms`}
+          </strong>
+        </div>
+        <div
+          className={
+            comparisonLimited
+              ? 'delta-neutral'
+              : compareMetrics.totalSeconds <= metrics.totalSeconds
+                ? 'delta-positive'
+                : 'delta-negative'
           }
         >
           <span>Total time delta</span>
-          <strong>{formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}</strong>
+          <strong>
+            {comparisonLimited
+              ? 'Blocked by memory fit'
+              : formatSeconds(compareMetrics.totalSeconds - metrics.totalSeconds)}
+          </strong>
         </div>
       </div>
     </section>

@@ -58,6 +58,62 @@ function getModelScaling(model) {
   }
 }
 
+function getQuantBits(model) {
+  const match = model.quant?.match(/q(\d+(?:\.\d+)?)/i)
+  return match ? Number(match[1]) : 4
+}
+
+function estimateModelMemoryGb(model) {
+  const paramsB = Math.max(model.paramsB ?? 8, 0.5)
+  const quantBits = getQuantBits(model)
+  const baseWeightGb = paramsB * (quantBits / 8)
+  const overheadMultiplier = model.paramsB && model.paramsB >= 30 ? 1.2 : 1.12
+  return baseWeightGb * overheadMultiplier
+}
+
+function assessModelFit(hardware, model) {
+  if (hardware.memoryGb == null) {
+    return {
+      fits: null,
+      availableGb: null,
+      requiredGb: estimateModelMemoryGb(model),
+      message: 'Memory fit is unknown for custom hardware.',
+      status: 'unknown',
+    }
+  }
+
+  const requiredGb = estimateModelMemoryGb(model)
+  const availableGb = hardware.memoryGb
+
+  if (requiredGb > availableGb) {
+    return {
+      fits: false,
+      availableGb,
+      requiredGb,
+      status: 'unfit',
+      message: `This model likely will not fit in memory. Estimated requirement is about ${requiredGb.toFixed(1)} GB versus ${availableGb} GB available.`,
+    }
+  }
+
+  if (requiredGb > availableGb * 0.85) {
+    return {
+      fits: true,
+      availableGb,
+      requiredGb,
+      status: 'tight',
+      message: `This is a tight fit. Estimated requirement is about ${requiredGb.toFixed(1)} GB of the ${availableGb} GB available, so overhead and long contexts could still cause issues.`,
+    }
+  }
+
+  return {
+    fits: true,
+    availableGb,
+    requiredGb,
+    status: 'fit',
+    message: `Estimated model memory is about ${requiredGb.toFixed(1)} GB on ${availableGb} GB available.`,
+  }
+}
+
 function calculateMetrics(hardware, model, workload, customMetrics) {
   let prefillTps
   let decodeTps
@@ -142,10 +198,12 @@ function App() {
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
   const workload = resolveWorkload(selectedWorkload, customPreset)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
+  const fitAssessment = assessModelFit(hardware, model)
   const compareHardware =
     hardwareOptions.find((item) => item.id === compareHardwareId) ?? hardwareOptions[2]
   const compareModel = modelOptions.find((item) => item.id === compareModelId) ?? modelOptions[1]
   const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
+  const compareFitAssessment = assessModelFit(compareHardware, compareModel)
   const visibleHardwareOptions = buildFilteredOptions(
     hardwareOptions,
     hardwareQuery,
@@ -163,6 +221,10 @@ function App() {
     modelId,
     ['name', 'family', 'quant', 'fit'],
   )
+  const visibleModelEntries = visibleModelOptions.map((option) => ({
+    ...option,
+    fitAssessment: assessModelFit(hardware, option),
+  }))
   const visibleCompareHardwareOptions = buildFilteredOptions(
     hardwareOptions.filter((option) => option.id !== 'custom'),
     compareHardwareQuery,
@@ -175,10 +237,19 @@ function App() {
     compareModelId,
     ['name', 'family', 'quant', 'fit'],
   )
+  const visibleCompareModelEntries = visibleCompareModelOptions.map((option) => ({
+    ...option,
+    fitAssessment: assessModelFit(compareHardware, option),
+  }))
   const catalogModels =
     catalogFamilyFilter === 'all'
       ? modelOptions
       : modelOptions.filter((option) => option.family === catalogFamilyFilter)
+  const catalogEntries = catalogModels.map((entry) => ({
+    ...entry,
+    fitAssessment: assessModelFit(hardware, entry),
+    hasExactBenchmark: Boolean(benchmarkMatrix[hardwareId]?.[entry.id]),
+  }))
 
   function restartSimulation() {
     setElapsedMs(0)
@@ -228,6 +299,7 @@ function App() {
         : isPlaying
         ? 'Streaming response'
           : 'Playback complete'
+  const displayPhase = fitAssessment.status === 'unfit' ? 'Memory limit exceeded' : currentPhase
   const normalizedQuery = sourceQuery.trim().toLowerCase()
   const filteredStructuredSources = dataSources.filter((source) => {
     if (!normalizedQuery) return true
@@ -277,7 +349,7 @@ function App() {
         modelId={modelId}
         modelQuery={modelQuery}
         setModelQuery={setModelQuery}
-        visibleModelOptions={visibleModelOptions}
+        visibleModelOptions={visibleModelEntries}
         setModelId={setModelId}
         modelFamilyOptions={modelFamilyOptions}
         modelFamilyFilter={modelFamilyFilter}
@@ -293,8 +365,9 @@ function App() {
         communityBenchmarks={communityBenchmarks}
         dataSources={dataSources}
         modelOptions={modelOptions}
+        fitAssessment={fitAssessment}
         isPlaying={isPlaying}
-        currentPhase={currentPhase}
+        currentPhase={displayPhase}
         restartSimulation={restartSimulation}
         streamedText={streamedText}
         elapsedMs={elapsedMs}
@@ -307,6 +380,7 @@ function App() {
         hardware={hardware}
         model={model}
         metrics={metrics}
+        fitAssessment={fitAssessment}
         compareHardware={compareHardware}
         compareHardwareId={compareHardwareId}
         compareHardwareQuery={compareHardwareQuery}
@@ -317,9 +391,10 @@ function App() {
         compareModelId={compareModelId}
         compareModelQuery={compareModelQuery}
         setCompareModelQuery={setCompareModelQuery}
-        visibleCompareModelOptions={visibleCompareModelOptions}
+        visibleCompareModelOptions={visibleCompareModelEntries}
         setCompareModelId={setCompareModelId}
         compareMetrics={compareMetrics}
+        compareFitAssessment={compareFitAssessment}
         formatSeconds={formatSeconds}
       />
 
@@ -327,9 +402,7 @@ function App() {
         modelFamilyOptions={modelFamilyOptions}
         catalogFamilyFilter={catalogFamilyFilter}
         setCatalogFamilyFilter={setCatalogFamilyFilter}
-        catalogModels={catalogModels}
-        benchmarkMatrix={benchmarkMatrix}
-        hardwareId={hardwareId}
+        catalogEntries={catalogEntries}
       />
 
       <SourceExplorerSection

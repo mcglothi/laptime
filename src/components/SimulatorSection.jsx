@@ -1,5 +1,12 @@
 import SectionHeading from './SectionHeading'
 
+function getFitLabel(status) {
+  if (status === 'unfit') return "Won't fit"
+  if (status === 'tight') return 'Tight fit'
+  if (status === 'unknown') return 'Unknown fit'
+  return 'Fits'
+}
+
 function SimulatorSection({
   hardware,
   hardwareId,
@@ -29,6 +36,7 @@ function SimulatorSection({
   communityBenchmarks,
   dataSources,
   modelOptions,
+  fitAssessment,
   isPlaying,
   currentPhase,
   restartSimulation,
@@ -38,6 +46,11 @@ function SimulatorSection({
   progress,
   formatSeconds,
 }) {
+  const totalTimelineMs = metrics.prefillSeconds * 1000 + metrics.ttftMs + metrics.streamingSeconds * 1000
+  const prefillShare = ((metrics.prefillSeconds * 1000) / totalTimelineMs) * 100
+  const ttftShare = (metrics.ttftMs / totalTimelineMs) * 100
+  const streamShare = ((metrics.streamingSeconds * 1000) / totalTimelineMs) * 100
+
   return (
     <section className="simulator-section">
       <SectionHeading
@@ -149,6 +162,7 @@ function SimulatorSection({
               onChange={(event) => setModelQuery(event.target.value)}
             />
             <select
+              className={`select-fit select-fit-${fitAssessment.status}`}
               value={modelId}
               onChange={(event) => {
                 setModelId(event.target.value)
@@ -157,7 +171,7 @@ function SimulatorSection({
             >
               {visibleModelOptions.map((option) => (
                 <option key={option.id} value={option.id}>
-                  {option.name} · {option.quant}
+                  {getFitLabel(option.fitAssessment.status)} · {option.name} · {option.quant}
                 </option>
               ))}
             </select>
@@ -165,6 +179,9 @@ function SimulatorSection({
               {model.family} · {model.quant}
               {model.paramsB ? ` · ${model.paramsB}B` : ''}
             </small>
+            <div className={`fit-inline fit-inline-${fitAssessment.status}`}>
+              {getFitLabel(fitAssessment.status)}
+            </div>
             <p>{model.fit}</p>
           </label>
 
@@ -222,6 +239,17 @@ function SimulatorSection({
                 />
               </label>
             </div>
+            ) : null}
+
+          {fitAssessment.status !== 'fit' ? (
+            <div className={`fit-warning ${fitAssessment.status}`}>
+              <strong>
+                {fitAssessment.status === 'unfit' ? 'This combo will likely not run' : null}
+                {fitAssessment.status === 'tight' ? 'This combo is a tight fit' : null}
+                {fitAssessment.status === 'unknown' ? 'Memory fit is unknown' : null}
+              </strong>
+              <p>{fitAssessment.message}</p>
+            </div>
           ) : null}
 
           <div className="metrics-heading">Values used for this run</div>
@@ -256,6 +284,12 @@ function SimulatorSection({
             Source: {metrics.source}
             {metrics.source === 'LocalScore' ? ` · ${model.name}` : ''}
           </div>
+          {fitAssessment.availableGb ? (
+            <div className="source-note">
+              Estimated model memory: {fitAssessment.requiredGb.toFixed(1)} GB · available memory:{' '}
+              {fitAssessment.availableGb} GB
+            </div>
+          ) : null}
           <div className="source-note">
             Coverage: {Object.keys(benchmarkMatrix).length} exact hardware tiers ·{' '}
             {communityBenchmarks.length} community references · {dataSources.length} source groups ·{' '}
@@ -282,12 +316,43 @@ function SimulatorSection({
 
             <div className="response-block">
               <div className="block-label">Response Stream</div>
-              <p>{streamedText || ' '}</p>
-              {isPlaying && elapsedMs >= streamStartMs ? <span className="cursor" aria-hidden="true" /> : null}
+              {fitAssessment.status === 'unfit' ? (
+                <p>
+                  This setup is projected to miss memory requirements, so LapTime is showing a guardrail instead
+                  of pretending the model would load normally.
+                </p>
+              ) : (
+                <>
+                  <p>{streamedText || ' '}</p>
+                  {isPlaying && elapsedMs >= streamStartMs ? (
+                    <span className="cursor" aria-hidden="true" />
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
 
           <div className="timeline-card">
+            <div className="timeline-segments" aria-hidden="true">
+              <div className="timeline-segment phase-prefill" style={{ width: `${prefillShare}%` }} />
+              <div className="timeline-segment phase-ttft" style={{ width: `${ttftShare}%` }} />
+              <div className="timeline-segment phase-stream" style={{ width: `${streamShare}%` }} />
+              <div className="timeline-progress-overlay" style={{ width: `${progress * 100}%` }} />
+            </div>
+            <div className="timeline-legend">
+              <span className="phase-prefill">
+                <i className="timeline-swatch" />
+                Prompt ingest
+              </span>
+              <span className="phase-ttft">
+                <i className="timeline-swatch" />
+                First token
+              </span>
+              <span className="phase-stream">
+                <i className="timeline-swatch" />
+                Token stream
+              </span>
+            </div>
             <div className="timeline-row">
               <span>Prompt ingest</span>
               <strong>{formatSeconds(metrics.prefillSeconds)}</strong>
@@ -299,9 +364,6 @@ function SimulatorSection({
             <div className="timeline-row">
               <span>Response stream</span>
               <strong>{formatSeconds(metrics.streamingSeconds)}</strong>
-            </div>
-            <div className="timeline-progress">
-              <div style={{ width: `${progress * 100}%` }} />
             </div>
             <div className="timeline-caption">
               <span>{currentPhase}</span>

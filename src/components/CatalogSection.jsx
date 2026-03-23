@@ -4,9 +4,7 @@ function CatalogSection({
   modelFamilyOptions,
   catalogFamilyFilter,
   setCatalogFamilyFilter,
-  catalogModels,
-  benchmarkMatrix,
-  hardwareId,
+  catalogEntries,
 }) {
   return (
     <section className="catalog-section">
@@ -30,12 +28,12 @@ function CatalogSection({
           ))}
         </div>
         <div className="source-note">
-          {catalogModels.length} models visible · exact playback where structured benchmarks exist
+          {catalogEntries.length} models visible · fit badges reflect the currently selected hardware
         </div>
       </div>
 
       <div className="catalog-grid">
-        {catalogModels.map((entry) => (
+        {catalogEntries.map((entry) => (
           <article key={entry.id} className="catalog-card">
             <div className="catalog-header">
               <strong>{entry.name}</strong>
@@ -45,8 +43,14 @@ function CatalogSection({
             <div className="catalog-meta">
               <span>{entry.quant}</span>
               <span>{entry.paramsB ? `${entry.paramsB}B params` : 'Unknown size'}</span>
-              <span>
-                {benchmarkMatrix[hardwareId]?.[entry.id] ? 'Exact benchmarked' : 'Estimated / catalog only'}
+              <span>{entry.hasExactBenchmark ? 'Exact benchmarked' : 'Estimated / catalog only'}</span>
+              <span
+                className={`fit-chip ${entry.fitAssessment.status === 'fit' ? 'fit' : entry.fitAssessment.status}`}
+              >
+                {entry.fitAssessment.status === 'fit' ? 'Fits' : null}
+                {entry.fitAssessment.status === 'tight' ? 'Tight fit' : null}
+                {entry.fitAssessment.status === 'unfit' ? "Won't fit" : null}
+                {entry.fitAssessment.status === 'unknown' ? 'Unknown fit' : null}
               </span>
             </div>
           </article>
