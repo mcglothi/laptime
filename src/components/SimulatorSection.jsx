@@ -32,6 +32,9 @@ function SimulatorSection({
   workloadId,
   workloadOptions,
   setWorkloadId,
+  contextTokens,
+  setContextTokens,
+  formatTokenCount,
   customPreset,
   setCustomPreset,
   metrics,
@@ -221,7 +224,12 @@ function SimulatorSection({
               name="workload"
               value={workloadId}
               onChange={(event) => {
-                setWorkloadId(event.target.value)
+                const nextId = event.target.value
+                const nextWorkload = workloadOptions.find((option) => option.id === nextId)
+                setWorkloadId(nextId)
+                if (nextWorkload) {
+                  setContextTokens(nextWorkload.promptTokens)
+                }
                 restartSimulation()
               }}
             >
@@ -235,26 +243,39 @@ function SimulatorSection({
             <p>{workload.accent}</p>
           </label>
 
+          <label className="control-group">
+            <span>Context size</span>
+            <input
+              id="context-size"
+              name="contextSize"
+              min="0"
+              max="128000"
+              step="256"
+              type="range"
+              value={contextTokens}
+              onChange={(event) => {
+                setContextTokens(Number(event.target.value))
+                restartSimulation()
+              }}
+            />
+            <div className="slider-meta">
+              <strong>{formatTokenCount(contextTokens)} tokens</strong>
+              <span>{workload.contextDescriptor}</span>
+            </div>
+            <div className="slider-scale" aria-hidden="true">
+              <span>0</span>
+              <span>8k</span>
+              <span>32k</span>
+              <span>128k</span>
+            </div>
+            <p>
+              Estimated prompt ingest: {formatSeconds(metrics.prefillSeconds)} before TTFT. Slide this to
+              see when long-context work starts to feel heavy.
+            </p>
+          </label>
+
           {workload.id === 'custom' ? (
-            <div className="custom-grid two-up">
-              <label className="control-group">
-                <span>Prompt tokens</span>
-                <input
-                  id="custom-prompt-tokens"
-                  name="customPromptTokens"
-                  min="1"
-                  step="1"
-                  type="number"
-                  value={customPreset.promptTokens}
-                  onChange={(event) => {
-                    setCustomPreset((current) => ({
-                      ...current,
-                      promptTokens: Number(event.target.value) || 1,
-                    }))
-                    restartSimulation()
-                  }}
-                />
-              </label>
+            <div className="custom-grid one-up">
               <label className="control-group">
                 <span>Response tokens</span>
                 <input

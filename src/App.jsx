@@ -22,6 +22,14 @@ function formatSeconds(value) {
   return `${value.toFixed(value >= 10 ? 1 : 2)}s`
 }
 
+function formatTokenCount(value) {
+  if (value >= 1000) {
+    const short = value >= 10000 ? Math.round(value / 1000) : Number((value / 1000).toFixed(1))
+    return `${short}k`
+  }
+  return `${value}`
+}
+
 function buildFilteredOptions(items, query, selectedId, fields) {
   const normalized = query.trim().toLowerCase()
   if (!normalized) return items
@@ -85,6 +93,49 @@ function getExperience(totalSeconds) {
   if (totalSeconds < 9) return 'Feels smooth'
   if (totalSeconds < 18) return 'Feels like waiting'
   return 'Feels batch-first'
+}
+
+function getContextDescriptor(promptTokens) {
+  if (promptTokens < 2000) return 'Short prompt'
+  if (promptTokens < 8000) return 'Multi-turn context'
+  if (promptTokens < 32000) return 'Research bundle'
+  if (promptTokens < 96000) return 'Large retrieval pack'
+  return 'Huge context window'
+}
+
+const contextPreviewSegments = [
+  'System note: prioritize factual consistency, cite the strongest evidence first, and surface hardware bottlenecks when they materially change user experience.',
+  'Retrieved benchmark summary: RTX 4090 holds decode speed well on 8B models, but larger prompt bundles expose bigger differences in prefill throughput across platforms.',
+  'Buyer profile: comparing an Apple laptop, a used 3090 tower, and a newer GB10 box for coding, summarization, and retrieval-heavy note synthesis.',
+  'Product notes: latency perception matters more than peak tokens/sec when the workflow involves long markdown context, PDF extracts, or agent traces.',
+  'Interview excerpt: users describe 2 to 4 second TTFT as fine for chat, but anything above that starts to feel like waiting for the machine to wake up.',
+  'Tool trace: retrieved snippets from issue threads, changelog entries, benchmark tables, and hardware spec pages that all need to be ingested before generation.',
+  'Risk note: memory fit, offload behavior, and backend choice can dominate perceived performance even when the advertised GPU appears fast on short prompts.',
+  'Comparison goal: estimate how this setup feels at 8k, 32k, and 128k contexts before buying or recommending a workstation build.',
+]
+
+function buildPromptPreview(basePrompt, promptTokens) {
+  const desiredChars = Math.max(180, Math.round(promptTokens * 3.4))
+  const blocks = [basePrompt]
+  let length = basePrompt.length
+  let index = 0
+
+  while (length < Math.min(desiredChars, 3600) && index < contextPreviewSegments.length) {
+    const segment = contextPreviewSegments[index]
+    blocks.push(segment)
+    length += segment.length
+    index += 1
+  }
+
+  if (promptTokens >= 12000) {
+    blocks.push(
+      `Additional context omitted here: roughly ${formatTokenCount(
+        promptTokens,
+      )} of retrieved notes, code excerpts, benchmark rows, meeting summaries, and tool logs are being ingested before generation begins.`,
+    )
+  }
+
+  return blocks.join('\n\n')
 }
 
 function getModelScaling(model) {
@@ -196,14 +247,18 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
   }
 }
 
-function resolveWorkload(selectedWorkload, customPreset) {
-  return selectedWorkload.id === 'custom'
-    ? {
-        ...selectedWorkload,
-        promptTokens: customPreset.promptTokens,
-        responseTokens: customPreset.responseTokens,
-      }
-    : selectedWorkload
+function resolveWorkload(selectedWorkload, customPreset, contextTokens) {
+  const promptTokens = contextTokens
+  const responseTokens =
+    selectedWorkload.id === 'custom' ? customPreset.responseTokens : selectedWorkload.responseTokens
+
+  return {
+    ...selectedWorkload,
+    promptTokens,
+    responseTokens,
+    prompt: buildPromptPreview(selectedWorkload.prompt, promptTokens),
+    contextDescriptor: getContextDescriptor(promptTokens),
+  }
 }
 
 function App() {
@@ -237,14 +292,14 @@ function App() {
     ttftMs: 350,
   })
   const [customPreset, setCustomPreset] = useState({
-    promptTokens: 1200,
     responseTokens: 220,
   })
+  const [contextTokens, setContextTokens] = useState(workloadOptions[2].promptTokens)
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
-  const workload = resolveWorkload(selectedWorkload, customPreset)
+  const workload = resolveWorkload(selectedWorkload, customPreset, contextTokens)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
   const fitAssessment = assessModelFit(hardware, model)
   const compareHardware =
@@ -419,6 +474,9 @@ function App() {
         workloadId={workloadId}
         workloadOptions={workloadOptions}
         setWorkloadId={setWorkloadId}
+        contextTokens={contextTokens}
+        setContextTokens={setContextTokens}
+        formatTokenCount={formatTokenCount}
         customPreset={customPreset}
         setCustomPreset={setCustomPreset}
         metrics={metrics}
@@ -459,6 +517,8 @@ function App() {
         setCompareModelId={setCompareModelId}
         compareMetrics={compareMetrics}
         compareFitAssessment={compareFitAssessment}
+        elapsedMs={elapsedMs}
+        restartSimulation={restartSimulation}
         formatSeconds={formatSeconds}
       />
 

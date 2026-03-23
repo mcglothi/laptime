@@ -29,10 +29,20 @@ function ComparisonSection({
   setCompareModelId,
   compareMetrics,
   compareFitAssessment,
+  elapsedMs,
+  restartSimulation,
   formatSeconds,
 }) {
   const comparisonLimited =
     fitAssessment.status === 'unfit' || compareFitAssessment.status === 'unfit'
+  const laneATotalMs = metrics.totalSeconds * 1000
+  const laneBTotalMs = compareMetrics.totalSeconds * 1000
+  const laneAProgress = comparisonLimited ? 0 : Math.min(elapsedMs / laneATotalMs, 1)
+  const laneBProgress = comparisonLimited ? 0 : Math.min(elapsedMs / laneBTotalMs, 1)
+  const laneAPrefillShare = (metrics.prefillSeconds * 1000) / laneATotalMs
+  const laneATTFTShare = metrics.ttftMs / laneATotalMs
+  const laneBPrefillShare = (compareMetrics.prefillSeconds * 1000) / laneBTotalMs
+  const laneBTTFTShare = compareMetrics.ttftMs / laneBTotalMs
 
   return (
     <section className="compare-section">
@@ -41,6 +51,86 @@ function ComparisonSection({
         title="Compare two setups."
         description="Use the same workload to see what actually changes between rigs and models."
       />
+
+      <div className="race-card">
+        <div className="race-header">
+          <div>
+            <div className="metrics-heading">Lap race</div>
+            <p>Restart the playback to watch both setups launch, clear TTFT, and race through generation.</p>
+          </div>
+          <button className="ghost-button" type="button" onClick={restartSimulation}>
+            Run the race
+          </button>
+        </div>
+
+        {comparisonLimited ? (
+          <div className="compare-caveat">
+            Memory fit blocks a clean apples-to-apples race here. One lane likely will not load the
+            selected model normally.
+          </div>
+        ) : (
+          <div className="race-lanes">
+            <div className="race-lane">
+              <div className="race-lane-head">
+                <strong>Lane A</strong>
+                <span>{hardware.name}</span>
+              </div>
+              <div className="race-track">
+                <div className="race-phase phase-prefill" style={{ width: `${laneAPrefillShare * 100}%` }} />
+                <div className="race-phase phase-ttft" style={{ width: `${laneATTFTShare * 100}%` }} />
+                <div
+                  className="race-phase phase-stream"
+                  style={{ width: `${Math.max(0, 1 - laneAPrefillShare - laneATTFTShare) * 100}%` }}
+                />
+                <div className="race-marker lane-a" style={{ left: `${laneAProgress * 100}%` }}>
+                  A
+                </div>
+              </div>
+              <div className="race-lane-meta">
+                <span>{formatSeconds(metrics.totalSeconds)}</span>
+                <span>{metrics.experience}</span>
+              </div>
+            </div>
+
+            <div className="race-lane">
+              <div className="race-lane-head">
+                <strong>Lane B</strong>
+                <span>{compareHardware.name}</span>
+              </div>
+              <div className="race-track">
+                <div className="race-phase phase-prefill" style={{ width: `${laneBPrefillShare * 100}%` }} />
+                <div className="race-phase phase-ttft" style={{ width: `${laneBTTFTShare * 100}%` }} />
+                <div
+                  className="race-phase phase-stream"
+                  style={{ width: `${Math.max(0, 1 - laneBPrefillShare - laneBTTFTShare) * 100}%` }}
+                />
+                <div className="race-marker lane-b" style={{ left: `${laneBProgress * 100}%` }}>
+                  B
+                </div>
+              </div>
+              <div className="race-lane-meta">
+                <span>{formatSeconds(compareMetrics.totalSeconds)}</span>
+                <span>{compareMetrics.experience}</span>
+              </div>
+            </div>
+
+            <div className="timeline-legend">
+              <span className="phase-prefill">
+                <i className="timeline-swatch" />
+                Engine rev / prompt ingest
+              </span>
+              <span className="phase-ttft">
+                <i className="timeline-swatch" />
+                Launch / first token
+              </span>
+              <span className="phase-stream">
+                <i className="timeline-swatch" />
+                Top speed / generation
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="compare-grid">
         <article className="compare-card">
@@ -183,13 +273,6 @@ function ComparisonSection({
           <div className="compare-experience">{compareMetrics.experience}</div>
         </article>
       </div>
-
-      {comparisonLimited ? (
-        <div className="compare-caveat">
-          Memory fit blocks a clean apples-to-apples comparison here. One lane likely will not load the
-          selected model normally.
-        </div>
-      ) : null}
 
       <div className="delta-grid">
         <div
