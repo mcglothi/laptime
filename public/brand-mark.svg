@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
   <rect width="256" height="256" rx="56" fill="#0B0E14"/>
   <rect x="18" y="18" width="220" height="220" rx="42" fill="url(#bg)"/>
-  <path d="M60 174V82h14l26 27V82h13v92h-14l-26-26v26H60Z" fill="#F6F8FC"/>
-  <path d="M136 82h62v92h-62V82Z" fill="#121925"/>
-  <path d="M136 82h31v23h-31V82Zm31 0h31v23h-31V82Zm-31 23h31v23h-31v-23Zm31 23h31v23h-31v-23Zm-31 23h31v23h-31v-23Zm31 23h31v-23h-31v23Z" fill="#F6F8FC"/>
-  <path d="M136 82h31v23h-31V82Zm31 23h31v23h-31v-23Zm-31 46h31v23h-31v-23Z" fill="#FF8A1F"/>
-  <path d="M129 64h78" stroke="#5B8CFF" stroke-linecap="round" stroke-width="8"/>
-  <path d="M129 192h58" stroke="#1FE08F" stroke-linecap="round" stroke-width="8"/>
+  <path d="M64 56c0-4.418 3.582-8 8-8s8 3.582 8 8v144c0 4.418-3.582 8-8 8s-8-3.582-8-8V56Z" fill="#F4F7FB"/>
+  <path d="M82 70c26-12 50-12 72 0 22 12 43 12 64 0v92c-21 12-42 12-64 0-22-12-46-12-72 0V70Z" fill="#F4F7FB"/>
+  <path d="M82 70c13-6 25-9 38-9v30H82V70Zm76-5c10 2 20 5 30 11v31h-30V65Zm-38-4c13 0 26 3 38 8v38h-38V61Zm0 46h38v39h-38v-39Zm-38-16h38v39H82V91Zm106 16v39h-30v-39h30Zm-68 39h38v39c-12-2-25-6-38-13v-26Zm-38 0h38v26c-12 7-25 11-38 13v-39Zm76 0h30v31c-10 5-20 9-30 11v-42Z" fill="#0F1824"/>
+  <path d="M82 70c13-6 25-9 38-9v30H82V70Zm76-5c10 2 20 5 30 11v31h-30V65Zm-38 46h38v35h-38v-35Zm-38 35h38v26c-12 7-25 11-38 13v-39Zm106-39v39h-30v-39h30Z" fill="#FF8A1F"/>
+  <path d="M82 70c26-12 50-12 72 0 22 12 43 12 64 0" stroke="#5B8CFF" stroke-linecap="round" stroke-width="8"/>
   <defs>
-    <linearGradient id="bg" x1="32" y1="26" x2="214" y2="226" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="30" y1="24" x2="220" y2="230" gradientUnits="userSpaceOnUse">
       <stop stop-color="#111722"/>
-      <stop offset="1" stop-color="#151D29"/>
+      <stop offset="1" stop-color="#151E2B"/>
     </linearGradient>
   </defs>
 </svg>
