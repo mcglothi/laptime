@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <rect width="256" height="256" rx="56" fill="#0B0E14"/>
+  <rect x="18" y="18" width="220" height="220" rx="42" fill="url(#bg)"/>
+  <path d="M64 184V72h20l44 46V72h20v112h-20l-44-45v45H64Z" fill="#F6F8FC"/>
+  <path d="M154 72h38c24.301 0 44 19.699 44 44v24c0 24.301-19.699 44-44 44h-38V72Z" fill="#101722"/>
+  <path d="M174 92h18c13.255 0 24 10.745 24 24v24c0 13.255-10.745 24-24 24h-18V92Z" fill="url(#speed)"/>
+  <path d="M174 92h34v18h-34V92Zm16 18h18v18h-18v-18Zm-16 18h34v18h-34v-18Zm16 18h18v18h-18v-18Z" fill="#F6F8FC"/>
+  <rect x="160" y="56" width="62" height="8" rx="4" fill="#FF8A1F"/>
+  <rect x="160" y="192" width="44" height="8" rx="4" fill="#1FE08F"/>
+  <defs>
+    <linearGradient id="bg" x1="34" y1="28" x2="218" y2="228" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111722"/>
+      <stop offset="1" stop-color="#151D29"/>
+    </linearGradient>
+    <linearGradient id="speed" x1="174" y1="92" x2="216" y2="164" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5B8CFF"/>
+      <stop offset="0.45" stop-color="#7D6BFF"/>
+      <stop offset="1" stop-color="#1FE08F"/>
+    </linearGradient>
+  </defs>
+</svg>

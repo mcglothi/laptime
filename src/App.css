@@ -20,13 +20,51 @@
   gap: 1rem;
 }
 
+.brand-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.brand-banner img {
+  width: clamp(3rem, 6vw, 3.9rem);
+  height: clamp(3rem, 6vw, 3.9rem);
+  border-radius: 1rem;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
 .brand-lockup h1 {
-  margin-top: 0.12rem;
-  font-size: clamp(1.35rem, 2.6vw, 1.8rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin-top: 0.04rem;
   font-family: var(--sans);
-  font-weight: 650;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+  line-height: 1;
+}
+
+.brand-lockup h1 span {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 760;
+  letter-spacing: -0.06em;
+  color: var(--heading);
+}
+
+.brand-lockup h1 small {
+  font-size: clamp(0.86rem, 1.6vw, 1rem);
+  font-weight: 640;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.brand-lockup p {
+  margin-top: 0.35rem;
+  max-width: 36rem;
+  color: var(--text-soft);
+  font-size: 0.92rem;
 }
 
 .eyebrow,
@@ -963,8 +1001,13 @@
     align-items: center;
   }
 
+  .brand-banner {
+    align-items: start;
+  }
+
   .brand-lockup h1 {
-    font-size: 1.08rem;
+    display: grid;
+    gap: 0.18rem;
   }
 
   .metric-grid,

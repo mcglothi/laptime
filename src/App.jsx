@@ -424,8 +424,16 @@ function App() {
     <div className="app-shell">
       <section className="masthead">
         <div className="brand-lockup">
-          <div className="eyebrow">LapTime</div>
-          <h1>Local LLM laptime simulator</h1>
+          <div className="brand-banner">
+            <img src="/brand-mark.svg" alt="LapTime logo" />
+            <div>
+              <h1>
+                <span>LapTime</span>
+                <small>Local LLM Simulator</small>
+              </h1>
+              <p>Test-drive local AI rigs with a faster, more visual benchmark feel.</p>
+            </div>
+          </div>
         </div>
         <button
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
