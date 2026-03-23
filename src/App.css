@@ -828,18 +828,33 @@
   opacity: 0.58;
 }
 
-.phase-prefill {
+.timeline-segment.phase-prefill,
+.race-phase.phase-prefill {
   background: var(--phase-prefill);
   color: var(--phase-prefill);
 }
 
-.phase-ttft {
+.timeline-segment.phase-ttft,
+.race-phase.phase-ttft {
   background: var(--phase-ttft);
   color: var(--phase-ttft);
 }
 
-.phase-stream {
+.timeline-segment.phase-stream,
+.race-phase.phase-stream {
   background: var(--phase-stream);
+  color: var(--phase-stream);
+}
+
+.timeline-legend .phase-prefill {
+  color: var(--phase-prefill);
+}
+
+.timeline-legend .phase-ttft {
+  color: var(--phase-ttft);
+}
+
+.timeline-legend .phase-stream {
   color: var(--phase-stream);
 }
 
