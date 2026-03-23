@@ -51,10 +51,10 @@ function SourceExplorerSection({
               <article key={source.name}>
                 <div className="source-name-row">
                   <strong>{source.name}</strong>
-                  <span>{source.type}</span>
+                  <span className="source-type-pill">{source.type}</span>
                 </div>
                 <p>{source.notes}</p>
-                <a href={source.url} target="_blank" rel="noreferrer">
+                <a className="source-link" href={source.url} target="_blank" rel="noreferrer">
                   {source.url}
                 </a>
               </article>
@@ -72,7 +72,7 @@ function SourceExplorerSection({
               <article key={`${entry.hardware}-${entry.model}-${entry.metric}`}>
                 <div className="source-name-row">
                   <strong>{entry.hardware}</strong>
-                  <span>{entry.quality}</span>
+                  <span className="source-type-pill">{entry.quality}</span>
                 </div>
                 <p>{entry.model}</p>
                 <p className="community-value">
@@ -80,6 +80,9 @@ function SourceExplorerSection({
                     ? `${entry.value[0]}-${entry.value[1]} tok/s decode`
                     : `${entry.value} tok/s decode`}
                 </p>
+                <a className="source-link" href={entry.url} target="_blank" rel="noreferrer">
+                  {entry.source}
+                </a>
               </article>
             ))}
             {filteredCommunityBenchmarks.length === 0 ? (

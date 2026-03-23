@@ -9,7 +9,6 @@ import {
 } from './data/benchmarkData'
 import CatalogSection from './components/CatalogSection'
 import ComparisonSection from './components/ComparisonSection'
-import QuickNotesSection from './components/QuickNotesSection'
 import SimulatorSection from './components/SimulatorSection'
 import SourceExplorerSection from './components/SourceExplorerSection'
 import './App.css'
@@ -540,8 +539,6 @@ function App() {
         filteredStructuredSources={filteredStructuredSources}
         filteredCommunityBenchmarks={filteredCommunityBenchmarks}
       />
-
-      <QuickNotesSection />
     </div>
   )
 }
