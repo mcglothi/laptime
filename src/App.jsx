@@ -12,6 +12,7 @@ import ComparisonSection from './components/ComparisonSection'
 import SimulatorSection from './components/SimulatorSection'
 import SourceExplorerSection from './components/SourceExplorerSection'
 import './App.css'
+import flagsMark from '../flags.png'
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
@@ -425,7 +426,7 @@ function App() {
       <section className="masthead">
         <div className="brand-lockup">
           <div className="brand-banner">
-            <img src="/brand-mark.svg" alt="LapTime logo" />
+            <img className="brand-banner-mark" src={flagsMark} alt="Checkered flags" />
             <div>
               <h1>
                 <span>LapTime</span>
