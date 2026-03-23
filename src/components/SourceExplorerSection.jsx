@@ -94,7 +94,16 @@ function SourceExplorerSection({
 
       <p className="source-note">
         If you published one of the benchmark sets, spec pages, or forum measurements referenced
-        here and want attribution adjusted, LapTime welcomes corrections and source feedback.
+        here and want attribution adjusted, you can{' '}
+        <a
+          className="source-note-link"
+          href="https://github.com/mcglothi/laptime/issues/new"
+          target="_blank"
+          rel="noreferrer"
+        >
+          open a GitHub issue
+        </a>{' '}
+        with corrections or source feedback.
       </p>
     </section>
   )

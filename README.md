@@ -109,3 +109,12 @@ If you need to create the Pages project manually, use:
 If you have benchmark data, hardware ideas, or real-world validation feedback,
 open an issue or share the site with another engineer and tell us where the
 simulator feels right or wrong.
+
+## License
+
+The code in this repository is licensed under the MIT License.
+
+Benchmark data, source links, and third-party referenced materials remain
+subject to their respective licenses, terms, and attribution requirements.
+LapTime's code license does not imply relicensing of third-party data or
+source content.

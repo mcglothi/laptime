@@ -426,6 +426,10 @@
   font-size: 0.8rem;
 }
 
+.source-note-link {
+  color: var(--accent);
+}
+
 .compare-grid,
 .source-grid {
   display: grid;
