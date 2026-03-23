@@ -9,11 +9,11 @@ function SourceExplorerSection({
   filteredCommunityBenchmarks,
 }) {
   return (
-    <section className="source-section">
+    <section className="source-section" id="sources">
       <SectionHeading
         eyebrow="Sources"
         title="Source explorer."
-        description="Exact simulator math uses structured benchmark entries first, with community data kept separate."
+        description="Inspect the links behind LapTime's benchmark rows, hardware assumptions, and community reference points."
       />
 
       <div className="explorer-controls">

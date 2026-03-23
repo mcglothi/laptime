@@ -33,6 +33,7 @@ LapTime answers:
 - Segmented playback timeline for prompt ingest, TTFT, and token generation
 - Side-by-side comparison view
 - Broader model browser and source explorer
+- In-app methodology section that explains measured versus estimated versus community-backed laps
 - Cloudflare Pages deploys on every push to `main`
 
 ## Hardware coverage
@@ -99,7 +100,7 @@ If you need to create the Pages project manually, use:
 ## Roadmap
 
 - Expand benchmark ingestion from more structured sources
-- Add a clearer methodology and source-quality page
+- Expand the new methodology and source-quality experience into deeper attribution pages
 - Broaden buyer flows and hardware landing pages
 - Improve context-aware fit modeling for long prompts and offload-heavy runs
 

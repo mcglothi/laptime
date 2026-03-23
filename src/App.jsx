@@ -9,6 +9,7 @@ import {
 } from './data/benchmarkData'
 import CatalogSection from './components/CatalogSection'
 import ComparisonSection from './components/ComparisonSection'
+import MethodologySection from './components/MethodologySection'
 import SimulatorSection from './components/SimulatorSection'
 import SourceExplorerSection from './components/SourceExplorerSection'
 import './App.css'
@@ -420,6 +421,15 @@ function App() {
         .includes(normalizedQuery)
     return matchesFilter && matchesQuery
   })
+  const exactBenchmarkCount = Object.values(benchmarkMatrix).reduce(
+    (total, modelMap) => total + Object.keys(modelMap).length,
+    0,
+  )
+  const exactHardwareCount = hardwareEntries.filter((entry) => entry.source === 'LocalScore').length
+  const officialSourceCount = dataSources.filter((source) => source.type === 'official specs').length
+  const catalogSourceCount = dataSources.filter((source) => source.type === 'catalog').length
+  const forumCount = communityBenchmarks.filter((entry) => entry.quality === 'forum').length
+  const approximateCount = communityBenchmarks.filter((entry) => entry.quality === 'approximate').length
 
   return (
     <div className="app-shell">
@@ -521,6 +531,16 @@ function App() {
         catalogFamilyFilter={catalogFamilyFilter}
         setCatalogFamilyFilter={setCatalogFamilyFilter}
         catalogEntries={catalogEntries}
+      />
+
+      <MethodologySection
+        exactBenchmarkCount={exactBenchmarkCount}
+        exactHardwareCount={exactHardwareCount}
+        officialSourceCount={officialSourceCount}
+        catalogSourceCount={catalogSourceCount}
+        communityCount={communityBenchmarks.length}
+        forumCount={forumCount}
+        approximateCount={approximateCount}
       />
 
       <SourceExplorerSection
