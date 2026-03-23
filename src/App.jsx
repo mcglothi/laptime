@@ -269,7 +269,7 @@ function App() {
   const hardwarePlatformOptions = uniqueHardwarePlatforms(nonCustomHardwareEntries)
   const [hardwareId, setHardwareId] = useState(hardwareEntries[1].id)
   const [modelId, setModelId] = useState(modelOptions[1].id)
-  const [workloadId, setWorkloadId] = useState(workloadOptions[2].id)
+  const [workloadId, setWorkloadId] = useState(workloadOptions[0].id)
   const [compareHardwareId, setCompareHardwareId] = useState(hardwareEntries[3].id)
   const [hardwareQuery, setHardwareQuery] = useState('')
   const [modelQuery, setModelQuery] = useState('')
@@ -291,7 +291,7 @@ function App() {
   const [customPreset, setCustomPreset] = useState({
     responseTokens: 220,
   })
-  const [contextTokens, setContextTokens] = useState(workloadOptions[2].promptTokens)
+  const [contextTokens, setContextTokens] = useState(workloadOptions[0].promptTokens)
   const [isPromptExpanded, setIsPromptExpanded] = useState(false)
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]

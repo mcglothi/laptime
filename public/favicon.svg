@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
   <rect width="64" height="64" rx="16" fill="#0B0E14"/>
   <rect x="5" y="5" width="54" height="54" rx="12" fill="#121925"/>
-  <path d="M16 46V18h5.5l10.5 11V18h5v28h-5.5L21 34.75V46H16Z" fill="#F6F8FC"/>
-  <path d="M39 18h9.5C54.299 18 59 22.701 59 28.5v6C59 40.299 54.299 45 48.5 45H39V18Z" fill="#101722"/>
-  <path d="M44 23h4.5c3.59 0 6.5 2.91 6.5 6.5v4c0 3.59-2.91 6.5-6.5 6.5H44V23Z" fill="#FF8A1F"/>
-  <path d="M44 23h9v4.5h-9V23Zm4.5 4.5H53V32h-4.5v-4.5ZM44 32h9v4.5h-9V32Zm4.5 4.5H53V41h-4.5v-4.5Z" fill="#F6F8FC"/>
+  <path d="M14 46V18h6l10 10.5V18h5v28h-6L19 35.5V46h-5Z" fill="#F6F8FC"/>
+  <path d="M38 18h18v28H38V18Z" fill="#121925"/>
+  <path d="M38 18h9v7h-9v-7Zm9 0h9v7h-9v-7Zm-9 7h9v7h-9v-7Zm9 7h9v7h-9v-7Zm-9 7h9v7h-9v-7Zm9 7h9v-7h-9v7Z" fill="#F6F8FC"/>
+  <path d="M38 18h9v7h-9v-7Zm9 7h9v7h-9v-7Zm-9 14h9v7h-9v-7Z" fill="#FF8A1F"/>
 </svg>
