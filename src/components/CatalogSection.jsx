@@ -6,6 +6,12 @@ function CatalogSection({
   setCatalogFamilyFilter,
   catalogEntries,
 }) {
+  function getCoverageLabel(coverage) {
+    if (coverage === 'exact') return 'Exact benchmarked'
+    if (coverage === 'source-backed') return 'Source-backed runtime'
+    return 'Estimated / catalog only'
+  }
+
   return (
     <section className="catalog-section">
       <SectionHeading
@@ -43,7 +49,7 @@ function CatalogSection({
             <div className="catalog-meta">
               <span>{entry.quant}</span>
               <span>{entry.paramsB ? `${entry.paramsB}B params` : 'Unknown size'}</span>
-              <span>{entry.hasExactBenchmark ? 'Exact benchmarked' : 'Estimated / catalog only'}</span>
+              <span>{getCoverageLabel(entry.benchmarkCoverage)}</span>
               <span
                 className={`fit-chip ${entry.fitAssessment.status === 'fit' ? 'fit' : entry.fitAssessment.status}`}
               >

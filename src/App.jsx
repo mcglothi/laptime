@@ -140,7 +140,7 @@ function buildPromptPreview(basePrompt, promptTokens) {
 }
 
 function getModelScaling(model) {
-  const paramsB = Math.max(model.paramsB ?? 8, 0.5)
+  const paramsB = Math.max(model.scalingParamsB ?? model.paramsB ?? 8, 0.5)
   const sizeRatio = paramsB / 8
 
   return {
@@ -156,6 +156,10 @@ function getQuantBits(model) {
 }
 
 function estimateModelMemoryGb(model) {
+  if (typeof model.memoryGb === 'number' && Number.isFinite(model.memoryGb)) {
+    return model.memoryGb
+  }
+
   const paramsB = Math.max(model.paramsB ?? 8, 0.5)
   const quantBits = getQuantBits(model)
   const baseWeightGb = paramsB * (quantBits / 8)
@@ -206,6 +210,15 @@ function assessModelFit(hardware, model) {
   }
 }
 
+function getBenchmarkEntry(hardwareId, modelId) {
+  return benchmarkMatrix[hardwareId]?.[modelId] ?? null
+}
+
+function getBenchmarkCoverage(benchmark) {
+  if (!benchmark) return 'none'
+  return benchmark.coverage ?? 'exact'
+}
+
 function calculateMetrics(hardware, model, workload, customMetrics) {
   let prefillTps
   let decodeTps
@@ -217,18 +230,20 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
     decodeTps = customMetrics.decodeTps
     ttftMs = customMetrics.ttftMs
     source = 'Manual'
-  } else if (benchmarkMatrix[hardware.id]?.[model.id]) {
-    const benchmark = benchmarkMatrix[hardware.id][model.id]
-    prefillTps = benchmark.prefillTps
-    decodeTps = benchmark.decodeTps
-    ttftMs = benchmark.ttftMs
-    source = benchmark.source
   } else {
-    const scaling = getModelScaling(model)
-    prefillTps = hardware.prefillBase / scaling.prefillFactor
-    decodeTps = hardware.decodeBase / scaling.decodeFactor
-    ttftMs = hardware.ttftBase * scaling.ttftFactor
-    source = 'Estimated from benchmark-backed LocalScore baselines + model size'
+    const benchmark = getBenchmarkEntry(hardware.id, model.id)
+    if (benchmark) {
+      prefillTps = benchmark.prefillTps
+      decodeTps = benchmark.decodeTps
+      ttftMs = benchmark.ttftMs
+      source = benchmark.source
+    } else {
+      const scaling = getModelScaling(model)
+      prefillTps = hardware.prefillBase / scaling.prefillFactor
+      decodeTps = hardware.decodeBase / scaling.decodeFactor
+      ttftMs = hardware.ttftBase * scaling.ttftFactor
+      source = 'Estimated from benchmark-backed LocalScore baselines + model size'
+    }
   }
 
   ttftMs += workload.promptTokens * 0.16
@@ -351,7 +366,7 @@ function App() {
   const catalogEntries = catalogModels.map((entry) => ({
     ...entry,
     fitAssessment: assessModelFit(hardware, entry),
-    hasExactBenchmark: Boolean(benchmarkMatrix[hardwareId]?.[entry.id]),
+    benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardwareId, entry.id)),
   }))
 
   function restartSimulation() {
@@ -439,13 +454,21 @@ function App() {
         .includes(normalizedQuery)
     return matchesFilter && matchesQuery
   })
-  const exactBenchmarkCount = Object.values(benchmarkMatrix).reduce(
-    (total, modelMap) => total + Object.keys(modelMap).length,
-    0,
+  const benchmarkRows = Object.entries(benchmarkMatrix).flatMap(([hardwareKey, modelMap]) =>
+    Object.values(modelMap).map((entry) => ({ hardwareKey, coverage: getBenchmarkCoverage(entry) })),
   )
-  const exactHardwareCount = hardwareEntries.filter(
-    (entry) => entry.source === 'Benchmark-backed via LocalScore',
-  ).length
+  const exactBenchmarkCount = benchmarkRows.filter((entry) => entry.coverage === 'exact').length
+  const sourceBackedCount = benchmarkRows.filter((entry) => entry.coverage === 'source-backed').length
+  const exactHardwareCount = new Set(
+    benchmarkRows
+      .filter((entry) => entry.coverage === 'exact')
+      .map((entry) => entry.hardwareKey),
+  ).size
+  const sourceBackedHardwareCount = new Set(
+    benchmarkRows
+      .filter((entry) => entry.coverage === 'source-backed')
+      .map((entry) => entry.hardwareKey),
+  ).size
   const officialSourceCount = dataSources.filter((source) => source.type === 'official specs').length
   const catalogSourceCount = dataSources.filter((source) => source.type === 'catalog').length
   const forumCount = communityBenchmarks.filter((entry) => entry.quality === 'forum').length
@@ -556,6 +579,8 @@ function App() {
       <MethodologySection
         exactBenchmarkCount={exactBenchmarkCount}
         exactHardwareCount={exactHardwareCount}
+        sourceBackedCount={sourceBackedCount}
+        sourceBackedHardwareCount={sourceBackedHardwareCount}
         officialSourceCount={officialSourceCount}
         catalogSourceCount={catalogSourceCount}
         communityCount={communityBenchmarks.length}

@@ -3,6 +3,8 @@ import SectionHeading from './SectionHeading'
 function MethodologySection({
   exactBenchmarkCount,
   exactHardwareCount,
+  sourceBackedCount,
+  sourceBackedHardwareCount,
   officialSourceCount,
   catalogSourceCount,
   communityCount,
@@ -40,41 +42,45 @@ function MethodologySection({
 
         <article className="method-card">
           <div className="method-kicker">Tier 2</div>
-          <h3>Estimated laps stay visible as estimates.</h3>
+          <h3>Source-backed runtime rows bridge the gaps carefully.</h3>
           <p>
-            If a pairing has no direct row yet, LapTime scales from benchmark-backed baselines using
-            model size, quantization, and memory-fit heuristics instead of pretending the result is
-            measured. The goal is to make gaps legible, not to blur estimates into source data.
+            Some Hugging Face model pages publish hardware-specific runtime measurements without a
+            full prompt-throughput and TTFT bundle. LapTime uses those decode measurements when they
+            exist, keeps the row labeled separately, and still models prefill plus first-token
+            behavior from benchmark-backed baselines instead of pretending the entire lap was
+            published.
           </p>
           <div className="method-metrics">
             <div>
-              <span>Official spec sources</span>
-              <strong>{officialSourceCount}</strong>
+              <span>Source-backed runtime rows</span>
+              <strong>{sourceBackedCount}</strong>
             </div>
             <div>
-              <span>Catalog expansion sources</span>
-              <strong>{catalogSourceCount}</strong>
+              <span>Hardware tiers with source-backed rows</span>
+              <strong>{sourceBackedHardwareCount}</strong>
             </div>
           </div>
         </article>
 
         <article className="method-card">
           <div className="method-kicker">Tier 3</div>
-          <h3>Community references add texture, not fake certainty.</h3>
+          <h3>Estimates and community references stay labeled.</h3>
           <p>
-            Forum posts and roundup articles help widen coverage and sanity-check expectations, but
-            they stay labeled separately from the exact benchmark path and are treated as community
-            context rather than authoritative replacements for original sources.
+            If LapTime still has no direct or source-backed row, it falls back to size and quant
+            heuristics. Forum posts and roundup articles help widen coverage and sanity-check
+            expectations, but they stay labeled separately from authoritative benchmark sources.
           </p>
           <div className="method-metrics">
             <div>
-              <span>Total community references</span>
-              <strong>{communityCount}</strong>
+              <span>Official + catalog sources</span>
+              <strong>
+                {officialSourceCount} / {catalogSourceCount}
+              </strong>
             </div>
             <div>
-              <span>Forum vs approximate</span>
+              <span>Community refs: forum / approximate / total</span>
               <strong>
-                {forumCount} / {approximateCount}
+                {forumCount} / {approximateCount} / {communityCount}
               </strong>
             </div>
           </div>
