@@ -171,6 +171,55 @@
   gap: 0.75rem;
 }
 
+.playback-insight-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.playback-insight-card {
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top right, rgba(91, 140, 255, 0.08), transparent 46%),
+    var(--panel);
+  box-shadow: var(--panel-shadow);
+  border-radius: 1.15rem;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.playback-insight-card-story {
+  background:
+    radial-gradient(circle at top right, rgba(255, 95, 133, 0.08), transparent 50%),
+    var(--panel);
+}
+
+.playback-feel-pill {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.34rem 0.68rem;
+  border: 1px solid rgba(255, 120, 170, 0.24);
+  background: rgba(255, 120, 170, 0.12);
+  color: var(--heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.playback-insight-card p {
+  margin: 0;
+  color: var(--heading);
+  line-height: 1.45;
+}
+
+.playback-insight-card small {
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .control-panel,
 .terminal-card,
 .timeline-card,
@@ -1217,7 +1266,8 @@
 }
 
 .prompt-block.collapsed {
-  max-height: 11.5rem;
+  min-height: 19.8rem;
+  max-height: 17.4rem;
 }
 
 .prompt-block.expanded {
@@ -1476,6 +1526,15 @@
     gap: 0.65rem;
   }
 
+  .playback-insight-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .playback-insight-card {
+    padding: 0.82rem;
+  }
+
   .app-shell {
     gap: 0.55rem;
     padding-top: 0.7rem;
@@ -1716,6 +1775,10 @@
   }
 
   .timeline-card {
+    padding: 0.72rem 0.78rem;
+  }
+
+  .playback-insight-card {
     padding: 0.72rem 0.78rem;
   }
 

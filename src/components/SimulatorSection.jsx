@@ -8,6 +8,28 @@ function getFitLabel(status) {
   return 'Fits'
 }
 
+function getBottleneckLabel(metrics) {
+  if (metrics.prefillSeconds >= metrics.streamingSeconds * 1.35 && metrics.prefillSeconds >= metrics.ttftMs / 1000) {
+    return 'Long-context ingest is doing most of the waiting.'
+  }
+  if (metrics.ttftMs / 1000 >= metrics.prefillSeconds && metrics.ttftMs / 1000 >= metrics.streamingSeconds) {
+    return 'First-token latency is the biggest visible pause.'
+  }
+  if (metrics.streamingSeconds >= metrics.prefillSeconds * 1.15) {
+    return 'Decode speed dominates how this lap feels.'
+  }
+  return 'This setup feels fairly balanced across the whole lap.'
+}
+
+function getUseCaseLabel(metrics, fitAssessment) {
+  if (fitAssessment.status === 'unfit') return 'Good for sizing, not for a real local run.'
+  if (fitAssessment.status === 'tight') return 'Viable, but memory headroom may be the real limiter.'
+  if (metrics.totalSeconds < 5) return 'Feels ready for interactive chat and quick agent loops.'
+  if (metrics.totalSeconds < 10) return 'Comfortable for everyday coding, chat, and light retrieval.'
+  if (metrics.totalSeconds < 18) return 'Fine for research-style work where a little waiting is acceptable.'
+  return 'Better suited to batchy or long-context workflows than snappy back-and-forth chat.'
+}
+
 function SimulatorSection({
   hardware,
   hardwareId,
@@ -62,6 +84,8 @@ function SimulatorSection({
   const prefillShare = ((metrics.prefillSeconds * 1000) / totalTimelineMs) * 100
   const ttftShare = (metrics.ttftMs / totalTimelineMs) * 100
   const streamShare = ((metrics.streamingSeconds * 1000) / totalTimelineMs) * 100
+  const bottleneckLabel = getBottleneckLabel(metrics)
+  const useCaseLabel = getUseCaseLabel(metrics, fitAssessment)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -478,6 +502,15 @@ function SimulatorSection({
         <div className="timeline-caption">
           <span>{currentPhase}</span>
           <span>{metrics.experience}</span>
+        </div>
+      </div>
+
+      <div className="playback-insight-grid">
+        <div className="playback-insight-card playback-insight-card-story">
+          <div className="block-label">What This Lap Tells You</div>
+          <div className="playback-feel-pill">{metrics.experience}</div>
+          <p>{bottleneckLabel}</p>
+          <small>{useCaseLabel}</small>
         </div>
       </div>
     </div>

@@ -560,6 +560,33 @@ export const modelOptions = [
     fit: 'Flagship large Qwen model for premium rigs.',
   },
   {
+    id: 'qwen3.5-0.8b-q8-0',
+    name: 'Qwen3.5 0.8B Q8_0',
+    family: 'Qwen',
+    paramsB: 0.8,
+    memoryGb: 0.84,
+    quant: 'Q8_0',
+    fit: 'Tiny Qwen3.5 tier for extremely fast local chat, tool routing, and helper-model workloads. inferencerlabs reports about 231 tok/s on an M3 Ultra 512 GB run.',
+  },
+  {
+    id: 'qwen3.5-2b-q8-0',
+    name: 'Qwen3.5 2B Q8_0',
+    family: 'Qwen',
+    paramsB: 2,
+    memoryGb: 3.1,
+    quant: 'Q8_0',
+    fit: 'Very small Qwen3.5 tier that still leaves room for generous context on modest hardware. inferencerlabs reports about 209.5 tok/s on an M3 Ultra 512 GB run.',
+  },
+  {
+    id: 'qwen3.5-4b-q4-k-m',
+    name: 'Qwen3.5 4B Q4_K_M',
+    family: 'Qwen',
+    paramsB: 4,
+    memoryGb: 3.97,
+    quant: 'Q4_K_M',
+    fit: 'Compact Qwen3.5 option that stays very responsive while offering a step up from 2B-class helpers. inferencerlabs reports about 184.5 tok/s on an M3 Ultra 512 GB run.',
+  },
+  {
     id: 'qwen3.5-9b-q4-k-m',
     name: 'Qwen3.5 9B Q4_K_M',
     family: 'Qwen',
@@ -902,6 +929,27 @@ export const benchmarkMatrix = {
   },
   'mac-studio-m3-ultra-512': {
     'llama-3.1-8b': { prefillTps: 1109, decodeTps: 62.7, ttftMs: 1060, source: 'Benchmark-backed via LocalScore' },
+    'qwen3.5-0.8b-q8-0': {
+      prefillTps: 5545,
+      decodeTps: 231.1,
+      ttftMs: 318,
+      coverage: 'source-backed',
+      source: 'Source-backed via inferencerlabs Qwen3.5-0.8B-MLX-9bit on M3 Ultra (decode benchmark; prefill and TTFT modeled from LocalScore baseline)',
+    },
+    'qwen3.5-2b-q8-0': {
+      prefillTps: 3970.33,
+      decodeTps: 209.5,
+      ttftMs: 391,
+      coverage: 'source-backed',
+      source: 'Source-backed via inferencerlabs Qwen3.5-2B-MLX-9bit on M3 Ultra (decode benchmark; prefill and TTFT modeled from LocalScore baseline)',
+    },
+    'qwen3.5-4b-q4-k-m': {
+      prefillTps: 2098.36,
+      decodeTps: 184.5,
+      ttftMs: 644,
+      coverage: 'source-backed',
+      source: 'Source-backed via inferencerlabs Qwen3.5-4B-MLX-4.5bit on M3 Ultra (decode benchmark; prefill and TTFT modeled from LocalScore baseline)',
+    },
     'qwen3.5-9b-q4-k-m': {
       prefillTps: 1018.83,
       decodeTps: 121.5,
@@ -950,6 +998,13 @@ export const benchmarkMatrix = {
       ttftMs: 1198,
       coverage: 'source-backed',
       source: 'Source-backed via inferencerlabs Qwen3.5-122B-A10B-MLX-9bit on M3 Ultra (decode benchmark proxy for the higher-footprint 122B tier; prefill and TTFT modeled from LocalScore baseline)',
+    },
+    'nemotron-3-super-120b': {
+      prefillTps: 633.71,
+      decodeTps: 49.6,
+      ttftMs: 2014,
+      coverage: 'source-backed',
+      source: 'Source-backed via inferencerlabs NVIDIA-Nemotron-3-Super-120B-A12B-MLX-4.5bit on M3 Ultra (decode benchmark; prefill and TTFT modeled from LocalScore baseline)',
     },
   },
   'mac-studio-m1-ultra-128': {
@@ -1157,6 +1212,24 @@ export const dataSources = [
     notes: 'Used for Q4_K_M and MXFP4_MOE footprint numbers for the 122B-A10B local variants.',
   },
   {
+    name: 'inferencerlabs Qwen3.5 0.8B MLX 9bit',
+    type: 'catalog',
+    url: 'https://huggingface.co/inferencerlabs/Qwen3.5-0.8B-MLX-9bit',
+    notes: 'Provides M3 Ultra 512 GB single-inference runtime and memory data for the smallest Apple-silicon Qwen3.5 local tier.',
+  },
+  {
+    name: 'inferencerlabs Qwen3.5 2B MLX 9bit',
+    type: 'catalog',
+    url: 'https://huggingface.co/inferencerlabs/Qwen3.5-2B-MLX-9bit',
+    notes: 'Provides M3 Ultra 512 GB single-inference runtime and memory data for a compact high-fidelity Apple-silicon Qwen3.5 2B run.',
+  },
+  {
+    name: 'inferencerlabs Qwen3.5 4B MLX 4.5bit',
+    type: 'catalog',
+    url: 'https://huggingface.co/inferencerlabs/Qwen3.5-4B-MLX-4.5bit',
+    notes: 'Provides M3 Ultra 512 GB single-inference runtime and memory data for a lower-footprint Apple-silicon Qwen3.5 4B run.',
+  },
+  {
     name: 'inferencerlabs Qwen3.5 9B MLX 4.5bit',
     type: 'catalog',
     url: 'https://huggingface.co/inferencerlabs/Qwen3.5-9B-MLX-4.5bit',
@@ -1197,6 +1270,12 @@ export const dataSources = [
     type: 'catalog',
     url: 'https://huggingface.co/inferencerlabs/Qwen3.5-122B-A10B-MLX-9bit',
     notes: 'Provides M3 Ultra 512 GB single-inference runtime and memory data for a high-footprint Apple-silicon Qwen3.5 122B-A10B run.',
+  },
+  {
+    name: 'inferencerlabs NVIDIA Nemotron 3 Super 120B-A12B MLX 4.5bit',
+    type: 'catalog',
+    url: 'https://huggingface.co/inferencerlabs/NVIDIA-Nemotron-3-Super-120B-A12B-MLX-4.5bit',
+    notes: 'Provides M3 Ultra 512 GB single-inference runtime and memory data for an Apple-silicon Nemotron 120B-A12B run.',
   },
   {
     name: 'Ajit Singh benchmark article',
