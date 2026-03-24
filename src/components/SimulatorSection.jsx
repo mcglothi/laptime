@@ -165,7 +165,7 @@ function SimulatorSection({
           ))}
         </select>
         <small>
-          {hardware.platform} · {hardware.spec} · {hardware.price}
+          {hardware.platform} · {hardware.spec}
         </small>
         <p>{hardware.buyer}</p>
       </label>
