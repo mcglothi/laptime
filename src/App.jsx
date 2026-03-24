@@ -81,6 +81,85 @@ function parsePositiveNumber(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null
 }
 
+const defaultCustomHardwareProfile = {
+  name: 'Custom speeds',
+  spec: 'Manual override',
+  buyer: 'Set your own prefill, decode, and TTFT like TokenFlow.',
+  source: 'Manual',
+  memoryGb: null,
+}
+
+const defaultCustomMetrics = {
+  prefillTps: 3000,
+  decodeTps: 60,
+  ttftMs: 350,
+}
+
+function getInitialShareState() {
+  const defaults = {
+    customHardwareProfile: defaultCustomHardwareProfile,
+    customMetrics: defaultCustomMetrics,
+    hardwareId: hardwareOptions[1].id,
+    modelId: modelOptions[1].id,
+    workloadId: workloadOptions[0].id,
+    compareHardwareId: hardwareOptions[3].id,
+    contextTokens: workloadOptions[0].promptTokens,
+    isPromptExpanded: false,
+  }
+
+  if (typeof window === 'undefined') return defaults
+
+  const params = new URLSearchParams(window.location.search)
+  if (!params.toString()) return defaults
+
+  const hardwareIds = new Set(hardwareOptions.map((item) => item.id))
+  const modelIds = new Set(modelOptions.map((item) => item.id))
+  const workloadIds = new Set(workloadOptions.map((item) => item.id))
+
+  const customHardwareProfile = {
+    ...defaultCustomHardwareProfile,
+  }
+  const customMetrics = {
+    ...defaultCustomMetrics,
+  }
+
+  if (params.get('cname')) customHardwareProfile.name = params.get('cname')
+  if (params.get('cspec')) customHardwareProfile.spec = params.get('cspec')
+
+  const customMemoryGb = parsePositiveNumber(params.get('cmem'))
+  if (customMemoryGb != null) {
+    customHardwareProfile.memoryGb = customMemoryGb
+  }
+
+  const customPrefillTps = parsePositiveNumber(params.get('cp'))
+  if (customPrefillTps != null) {
+    customMetrics.prefillTps = customPrefillTps
+  }
+
+  const customDecodeTps = parsePositiveNumber(params.get('cd'))
+  if (customDecodeTps != null) {
+    customMetrics.decodeTps = customDecodeTps
+  }
+
+  const customTtftMs = parsePositiveNumber(params.get('ct'))
+  if (customTtftMs != null) {
+    customMetrics.ttftMs = customTtftMs
+  }
+
+  return {
+    customHardwareProfile,
+    customMetrics,
+    hardwareId: hardwareIds.has(params.get('hw')) ? params.get('hw') : defaults.hardwareId,
+    compareHardwareId: hardwareIds.has(params.get('cmp'))
+      ? params.get('cmp')
+      : defaults.compareHardwareId,
+    modelId: modelIds.has(params.get('m')) ? params.get('m') : defaults.modelId,
+    workloadId: workloadIds.has(params.get('w')) ? params.get('w') : defaults.workloadId,
+    contextTokens: parsePositiveNumber(params.get('ctx')) ?? defaults.contextTokens,
+    isPromptExpanded: params.get('prompt') === 'expanded',
+  }
+}
+
 function uniqueFamilies(items) {
   return ['all', ...new Set(items.map((item) => item.family).filter(Boolean))]
 }
@@ -367,13 +446,8 @@ function resolveWorkload(selectedWorkload, customPreset, contextTokens) {
 }
 
 function App() {
-  const [customHardwareProfile, setCustomHardwareProfile] = useState({
-    name: 'Custom speeds',
-    spec: 'Manual override',
-    buyer: 'Set your own prefill, decode, and TTFT like TokenFlow.',
-    source: 'Manual',
-    memoryGb: null,
-  })
+  const [initialShareState] = useState(() => getInitialShareState())
+  const [customHardwareProfile, setCustomHardwareProfile] = useState(initialShareState.customHardwareProfile)
   const hardwareEntries = hardwareOptions
     .map((item) => {
       const mergedItem =
@@ -392,10 +466,10 @@ function App() {
     .sort(compareHardwareEntries)
   const nonCustomHardwareEntries = hardwareEntries.filter((item) => item.id !== 'custom')
   const hardwarePlatformOptions = uniqueHardwarePlatforms(nonCustomHardwareEntries)
-  const [hardwareId, setHardwareId] = useState(hardwareEntries[1].id)
-  const [modelId, setModelId] = useState(modelOptions[1].id)
-  const [workloadId, setWorkloadId] = useState(workloadOptions[0].id)
-  const [compareHardwareId, setCompareHardwareId] = useState(hardwareEntries[3].id)
+  const [hardwareId, setHardwareId] = useState(initialShareState.hardwareId)
+  const [modelId, setModelId] = useState(initialShareState.modelId)
+  const [workloadId, setWorkloadId] = useState(initialShareState.workloadId)
+  const [compareHardwareId, setCompareHardwareId] = useState(initialShareState.compareHardwareId)
   const [hardwareQuery, setHardwareQuery] = useState('')
   const [modelQuery, setModelQuery] = useState('')
   const [compareHardwareQuery, setCompareHardwareQuery] = useState('')
@@ -408,83 +482,12 @@ function App() {
   const [theme, setTheme] = useState('dark')
   const [isPlaying, setIsPlaying] = useState(true)
   const [elapsedMs, setElapsedMs] = useState(0)
-  const [customMetrics, setCustomMetrics] = useState({
-    prefillTps: 3000,
-    decodeTps: 60,
-    ttftMs: 350,
-  })
+  const [customMetrics, setCustomMetrics] = useState(initialShareState.customMetrics)
   const [customPreset, setCustomPreset] = useState({
     responseTokens: 220,
   })
-  const [contextTokens, setContextTokens] = useState(workloadOptions[0].promptTokens)
-  const [isPromptExpanded, setIsPromptExpanded] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const params = new URLSearchParams(window.location.search)
-    if (!params.toString()) return
-
-    const hardwareIds = new Set(hardwareOptions.map((item) => item.id))
-    const modelIds = new Set(modelOptions.map((item) => item.id))
-    const workloadIds = new Set(workloadOptions.map((item) => item.id))
-
-    const customProfileUpdates = {}
-    const customMetricsUpdates = {}
-
-    if (params.get('cname')) customProfileUpdates.name = params.get('cname')
-    if (params.get('cspec')) customProfileUpdates.spec = params.get('cspec')
-    if (params.get('cmem')) customProfileUpdates.memoryGb = parsePositiveNumber(params.get('cmem'))
-    if (params.get('cp')) customMetricsUpdates.prefillTps = parsePositiveNumber(params.get('cp'))
-    if (params.get('cd')) customMetricsUpdates.decodeTps = parsePositiveNumber(params.get('cd'))
-    if (params.get('ct')) customMetricsUpdates.ttftMs = parsePositiveNumber(params.get('ct'))
-
-    if (Object.keys(customProfileUpdates).length > 0) {
-      setCustomHardwareProfile((current) => ({
-        ...current,
-        ...customProfileUpdates,
-      }))
-    }
-
-    if (Object.keys(customMetricsUpdates).length > 0) {
-      setCustomMetrics((current) => ({
-        ...current,
-        ...customMetricsUpdates,
-      }))
-    }
-
-    const nextHardwareId = params.get('hw')
-    if (nextHardwareId && hardwareIds.has(nextHardwareId)) {
-      setHardwareId(nextHardwareId)
-    }
-
-    const nextCompareHardwareId = params.get('cmp')
-    if (nextCompareHardwareId && hardwareIds.has(nextCompareHardwareId)) {
-      setCompareHardwareId(nextCompareHardwareId)
-    }
-
-    const nextModelId = params.get('m')
-    if (nextModelId && modelIds.has(nextModelId)) {
-      setModelId(nextModelId)
-    }
-
-    const nextWorkloadId = params.get('w')
-    if (nextWorkloadId && workloadIds.has(nextWorkloadId)) {
-      setWorkloadId(nextWorkloadId)
-    }
-
-    const nextContextTokens = parsePositiveNumber(params.get('ctx'))
-    if (nextContextTokens != null) {
-      setContextTokens(nextContextTokens)
-    }
-
-    if (params.get('prompt') === 'expanded') {
-      setIsPromptExpanded(true)
-    }
-
-    setElapsedMs(0)
-    setIsPlaying(true)
-  }, [])
+  const [contextTokens, setContextTokens] = useState(initialShareState.contextTokens)
+  const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
