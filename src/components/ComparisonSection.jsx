@@ -41,8 +41,9 @@ function ComparisonSection({
     fitAssessment.status === 'unfit' || compareFitAssessment.status === 'unfit'
   const laneATotalMs = metrics.totalSeconds * 1000
   const laneBTotalMs = compareMetrics.totalSeconds * 1000
-  const laneAProgress = Math.min(elapsedMs / laneATotalMs, 1)
-  const laneBProgress = Math.min(elapsedMs / laneBTotalMs, 1)
+  const raceElapsedMs = Math.min(elapsedMs, laneATotalMs, laneBTotalMs)
+  const laneAProgress = Math.min(raceElapsedMs / laneATotalMs, 1)
+  const laneBProgress = Math.min(raceElapsedMs / laneBTotalMs, 1)
   const laneAPrefillShare = (metrics.prefillSeconds * 1000) / laneATotalMs
   const laneATTFTShare = metrics.ttftMs / laneATotalMs
   const laneBPrefillShare = (compareMetrics.prefillSeconds * 1000) / laneBTotalMs
