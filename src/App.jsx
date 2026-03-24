@@ -76,6 +76,11 @@ function buildFilteredOptions(items, query, selectedId, fields) {
   return selected ? [selected, ...filtered] : filtered
 }
 
+function parsePositiveNumber(value) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
 function uniqueFamilies(items) {
   return ['all', ...new Set(items.map((item) => item.family).filter(Boolean))]
 }
@@ -414,6 +419,91 @@ function App() {
   const [contextTokens, setContextTokens] = useState(workloadOptions[0].promptTokens)
   const [isPromptExpanded, setIsPromptExpanded] = useState(false)
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const params = new URLSearchParams(window.location.search)
+    if (!params.toString()) return
+
+    const hardwareIds = new Set(hardwareOptions.map((item) => item.id))
+    const modelIds = new Set(modelOptions.map((item) => item.id))
+    const workloadIds = new Set(workloadOptions.map((item) => item.id))
+
+    const customProfileUpdates = {}
+    const customMetricsUpdates = {}
+
+    if (params.get('cname')) customProfileUpdates.name = params.get('cname')
+    if (params.get('cspec')) customProfileUpdates.spec = params.get('cspec')
+    if (params.get('cmem')) customProfileUpdates.memoryGb = parsePositiveNumber(params.get('cmem'))
+    if (params.get('cp')) customMetricsUpdates.prefillTps = parsePositiveNumber(params.get('cp'))
+    if (params.get('cd')) customMetricsUpdates.decodeTps = parsePositiveNumber(params.get('cd'))
+    if (params.get('ct')) customMetricsUpdates.ttftMs = parsePositiveNumber(params.get('ct'))
+
+    if (Object.keys(customProfileUpdates).length > 0) {
+      setCustomHardwareProfile((current) => ({
+        ...current,
+        ...customProfileUpdates,
+      }))
+    }
+
+    if (Object.keys(customMetricsUpdates).length > 0) {
+      setCustomMetrics((current) => ({
+        ...current,
+        ...customMetricsUpdates,
+      }))
+    }
+
+    const nextHardwareId = params.get('hw')
+    if (nextHardwareId && hardwareIds.has(nextHardwareId)) {
+      setHardwareId(nextHardwareId)
+    }
+
+    const nextCompareHardwareId = params.get('cmp')
+    if (nextCompareHardwareId && hardwareIds.has(nextCompareHardwareId)) {
+      setCompareHardwareId(nextCompareHardwareId)
+    }
+
+    const nextModelId = params.get('m')
+    if (nextModelId && modelIds.has(nextModelId)) {
+      setModelId(nextModelId)
+    }
+
+    const nextWorkloadId = params.get('w')
+    if (nextWorkloadId && workloadIds.has(nextWorkloadId)) {
+      setWorkloadId(nextWorkloadId)
+    }
+
+    const nextContextTokens = parsePositiveNumber(params.get('ctx'))
+    if (nextContextTokens != null) {
+      setContextTokens(nextContextTokens)
+    }
+
+    if (params.get('prompt') === 'expanded') {
+      setIsPromptExpanded(true)
+    }
+
+    setElapsedMs(0)
+    setIsPlaying(true)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!window.location.hash) return
+
+    const targetId = window.location.hash.replace('#', '')
+    if (!targetId) return
+
+    const scrollToHash = () => {
+      const target = document.getElementById(targetId)
+      if (target) {
+        target.scrollIntoView({ behavior: 'auto', block: 'start' })
+      }
+    }
+
+    const timeoutId = window.setTimeout(scrollToHash, 60)
+    return () => window.clearTimeout(timeoutId)
+  }, [hardwareId, compareHardwareId, modelId, workloadId, contextTokens])
+
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
@@ -642,6 +732,40 @@ function App() {
   const forumCount = communityBenchmarks.filter((entry) => entry.quality === 'forum').length
   const approximateCount = communityBenchmarks.filter((entry) => entry.quality === 'approximate').length
 
+  function buildShareUrl(sectionId) {
+    if (typeof window === 'undefined') return ''
+
+    const params = new URLSearchParams({
+      hw: hardwareId,
+      cmp: compareHardwareId,
+      m: modelId,
+      w: workloadId,
+      ctx: String(contextTokens),
+    })
+
+    if (isPromptExpanded) {
+      params.set('prompt', 'expanded')
+    }
+
+    if (hardwareId === 'custom' || compareHardwareId === 'custom') {
+      params.set('cname', customHardwareProfile.name)
+      params.set('cspec', customHardwareProfile.spec)
+      if (customHardwareProfile.memoryGb != null) {
+        params.set('cmem', String(customHardwareProfile.memoryGb))
+      }
+      params.set('cp', String(customMetrics.prefillTps))
+      params.set('cd', String(customMetrics.decodeTps))
+      params.set('ct', String(customMetrics.ttftMs))
+    }
+
+    return `${window.location.origin}${window.location.pathname}?${params.toString()}#${sectionId}`
+  }
+
+  const simulatorShareUrl = buildShareUrl('simulator')
+  const comparisonShareUrl = buildShareUrl('comparison')
+  const simulatorShareTitle = `${hardware.name} vs ${model.name} on LapTime`
+  const comparisonShareTitle = `${hardware.name} vs ${compareHardware.name} on LapTime`
+
   return (
     <div className="app-shell">
       <section className="masthead">
@@ -713,6 +837,8 @@ function App() {
         streamStartMs={streamStartMs}
         progress={progress}
         formatSeconds={formatSeconds}
+        shareUrl={simulatorShareUrl}
+        shareTitle={simulatorShareTitle}
       />
 
       <ComparisonSection
@@ -735,6 +861,8 @@ function App() {
         elapsedMs={elapsedMs}
         restartSimulation={restartSimulation}
         formatSeconds={formatSeconds}
+        shareUrl={comparisonShareUrl}
+        shareTitle={comparisonShareTitle}
       />
 
       <SubmissionSection

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
+import ShareSheet from './ShareSheet'
 
 function getFitLabel(status) {
   if (status === 'unfit') return "Won't fit"
@@ -76,6 +77,8 @@ function SimulatorSection({
   streamStartMs,
   progress,
   formatSeconds,
+  shareUrl,
+  shareTitle,
 }) {
   const playbackRef = useRef(null)
   const [isCompactMobile, setIsCompactMobile] = useState(false)
@@ -423,9 +426,16 @@ function SimulatorSection({
             <span>{workload.name} playback</span>
             <small>{currentPhase}</small>
           </div>
-          <button className="ghost-button" type="button" onClick={() => handleRestart()}>
-            Restart
-          </button>
+          <div className="playback-actions">
+            <ShareSheet
+              title={shareTitle}
+              text={`${hardware.name} running ${model.name} in LapTime`}
+              url={shareUrl}
+            />
+            <button className="ghost-button" type="button" onClick={() => handleRestart()}>
+              Restart
+            </button>
+          </div>
         </div>
 
         <div className={`prompt-block ${isPromptExpanded ? 'expanded' : 'collapsed'}`}>

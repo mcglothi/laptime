@@ -1,4 +1,5 @@
 import SectionHeading from './SectionHeading'
+import ShareSheet from './ShareSheet'
 
 function getFitLabel(status) {
   if (status === 'unfit') return "Won't fit"
@@ -27,6 +28,8 @@ function ComparisonSection({
   elapsedMs,
   restartSimulation,
   formatSeconds,
+  shareUrl,
+  shareTitle,
 }) {
   const comparisonProjected =
     fitAssessment.status === 'unfit' || compareFitAssessment.status === 'unfit'
@@ -55,9 +58,16 @@ function ComparisonSection({
             <div className="metrics-heading">Lap race</div>
             <p>Restart the playback to watch both setups launch, clear TTFT, and race through generation.</p>
           </div>
-          <button className="ghost-button" type="button" onClick={restartSimulation}>
-            Run the race
-          </button>
+          <div className="playback-actions">
+            <ShareSheet
+              title={shareTitle}
+              text={`${hardware.name} versus ${compareHardware.name} in LapTime`}
+              url={shareUrl}
+            />
+            <button className="ghost-button" type="button" onClick={restartSimulation}>
+              Run the race
+            </button>
+          </div>
         </div>
 
         {comparisonProjected ? (
