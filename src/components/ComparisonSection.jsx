@@ -43,11 +43,10 @@ function ComparisonSection({
   const winnerLane = !hasWinner ? null : laneATotalMs < laneBTotalMs ? 'a' : 'b'
 
   return (
-    <section className="compare-section">
+    <section className="compare-section" id="comparison">
       <SectionHeading
         eyebrow="Comparison"
         title="Compare two setups."
-        description="Use the same model and workload to see what actually changes between hardware choices."
       />
 
       <div className="race-card">

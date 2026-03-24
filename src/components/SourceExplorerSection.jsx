@@ -13,7 +13,6 @@ function SourceExplorerSection({
       <SectionHeading
         eyebrow="Sources"
         title="Source explorer."
-        description="Inspect the links behind LapTime's benchmark rows, hardware assumptions, and community references, and click through to the original work whenever you want the primary source."
       />
 
       <div className="explorer-controls">

@@ -17,7 +17,6 @@ function CatalogSection({
       <SectionHeading
         eyebrow="Catalog"
         title="Model browser."
-        description="Browse the broader model catalog separately from the simulator flow."
       />
 
       <div className="catalog-toolbar">

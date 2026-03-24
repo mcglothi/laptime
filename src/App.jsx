@@ -32,6 +32,36 @@ function formatTokenCount(value) {
   return `${value}`
 }
 
+function normalizeComparableModelName(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/\.gguf$/g, '')
+    .replace(/\bq\d+(?:[_.-]?[a-z0-9]+)?\b/g, ' ')
+    .replace(/\biq\d+(?:[_.-]?[a-z0-9]+)?\b/g, ' ')
+    .replace(/\bmxfp\d+(?:[_.-]?[a-z0-9]+)?\b/g, ' ')
+    .replace(/\bmlx\b/g, ' ')
+    .replace(/\bgguf\b/g, ' ')
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function findBestModelMatch(parsedModelName, models) {
+  const normalizedParsed = normalizeComparableModelName(parsedModelName)
+  if (!normalizedParsed) return null
+
+  return (
+    models.find((item) => {
+      const normalizedCandidate = normalizeComparableModelName(item.name)
+      return (
+        normalizedParsed === normalizedCandidate ||
+        normalizedParsed.includes(normalizedCandidate) ||
+        normalizedCandidate.includes(normalizedParsed)
+      )
+    }) ?? null
+  )
+}
+
 function buildFilteredOptions(items, query, selectedId, fields) {
   const normalized = query.trim().toLowerCase()
   if (!normalized) return items
@@ -230,7 +260,7 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
     prefillTps = customMetrics.prefillTps
     decodeTps = customMetrics.decodeTps
     ttftMs = customMetrics.ttftMs
-    source = 'Manual'
+    source = hardware.source ?? 'Manual'
   } else {
     const benchmark = getBenchmarkEntry(hardware.id, model.id)
     if (benchmark) {
@@ -279,10 +309,27 @@ function resolveWorkload(selectedWorkload, customPreset, contextTokens) {
 }
 
 function App() {
-  const hardwareEntries = hardwareOptions.map((item) => ({
-    ...item,
-    platform: getHardwarePlatform(item),
-  }))
+  const [customHardwareProfile, setCustomHardwareProfile] = useState({
+    name: 'Custom speeds',
+    spec: 'Manual override',
+    buyer: 'Set your own prefill, decode, and TTFT like TokenFlow.',
+    source: 'Manual',
+    memoryGb: null,
+  })
+  const hardwareEntries = hardwareOptions.map((item) => {
+    const mergedItem =
+      item.id === 'custom'
+        ? {
+            ...item,
+            ...customHardwareProfile,
+          }
+        : item
+
+    return {
+      ...mergedItem,
+      platform: getHardwarePlatform(mergedItem),
+    }
+  })
   const nonCustomHardwareEntries = hardwareEntries.filter((item) => item.id !== 'custom')
   const hardwarePlatformOptions = uniqueHardwarePlatforms(nonCustomHardwareEntries)
   const [hardwareId, setHardwareId] = useState(hardwareEntries[1].id)
@@ -354,8 +401,12 @@ function App() {
     compareHardwarePlatformFilter === 'all'
       ? nonCustomHardwareEntries
       : nonCustomHardwareEntries.filter((option) => option.platform === compareHardwarePlatformFilter)
+  const compareHardwareOptionPool =
+    compareHardwareId === 'custom'
+      ? [hardwareEntries.find((item) => item.id === 'custom'), ...comparePlatformFilteredHardware].filter(Boolean)
+      : comparePlatformFilteredHardware
   const visibleCompareHardwareOptions = buildFilteredOptions(
-    comparePlatformFilteredHardware,
+    compareHardwareOptionPool,
     compareHardwareQuery,
     compareHardwareId,
     ['name', 'spec', 'buyer', 'platform'],
@@ -391,6 +442,49 @@ function App() {
     if (fallbackHardware) {
       setCompareHardwareId(fallbackHardware.id)
     }
+  }
+
+  function syncParsedLap(parsedLap) {
+    setCustomMetrics({
+      prefillTps: parsedLap.prefillTps,
+      decodeTps: parsedLap.decodeTps,
+      ttftMs: Math.round(parsedLap.ttftMs),
+    })
+    setCustomHardwareProfile({
+      name: parsedLap.hardware || 'Parsed custom rig',
+      spec: parsedLap.backend ? `${parsedLap.backend} benchmark log` : 'Parsed benchmark log',
+      buyer: 'Loaded from a parsed benchmark log for side-by-side LapTime races.',
+      source: 'Parsed benchmark log',
+      memoryGb: parsedLap.memoryGb ?? null,
+    })
+
+    const matchedModel = findBestModelMatch(parsedLap.model, modelOptions)
+    if (matchedModel) {
+      setModelId(matchedModel.id)
+    }
+  }
+
+  function applyParsedSubmission(parsedLap) {
+    syncParsedLap(parsedLap)
+    if (hardwareId !== 'custom') {
+      setCompareHardwareId(hardwareId)
+    }
+
+    setHardwareId('custom')
+    setHardwarePlatformFilter('all')
+    setHardwareQuery('')
+    setIsPromptExpanded(false)
+    restartSimulation()
+    window.location.hash = 'simulator'
+  }
+
+  function raceParsedSubmission(parsedLap) {
+    syncParsedLap(parsedLap)
+    setCompareHardwareId('custom')
+    setCompareHardwarePlatformFilter('all')
+    setCompareHardwareQuery('')
+    restartSimulation()
+    window.location.hash = 'comparison'
   }
 
   useEffect(() => {
@@ -570,7 +664,10 @@ function App() {
         formatSeconds={formatSeconds}
       />
 
-      <SubmissionSection />
+      <SubmissionSection
+        onLoadParsedSubmission={applyParsedSubmission}
+        onRaceParsedSubmission={raceParsedSubmission}
+      />
 
       <CatalogSection
         modelFamilyOptions={modelFamilyOptions}

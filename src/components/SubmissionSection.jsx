@@ -121,6 +121,7 @@ function buildIssueUrl(parsed, rawLog) {
     `- Hardware: ${parsed.hardware || 'Unknown'}`,
     `- Model: ${parsed.model || 'Unknown'}`,
     `- Backend: ${parsed.backend || 'Unknown'}`,
+    `- Memory GB: ${parsed.memoryGb != null ? parsed.memoryGb : 'Not provided'}`,
     `- Prefill TPS: ${parsed.prefillTps != null ? parsed.prefillTps : 'Missing'}`,
     `- Decode TPS: ${parsed.decodeTps != null ? parsed.decodeTps : 'Missing'}`,
     `- TTFT ms: ${parsed.ttftMs != null ? Math.round(parsed.ttftMs) : 'Missing'}`,
@@ -140,17 +141,24 @@ function buildIssueUrl(parsed, rawLog) {
   return `https://github.com/mcglothi/laptime/issues/new?${params.toString()}`
 }
 
-function SubmissionSection() {
+function SubmissionSection({ onLoadParsedSubmission, onRaceParsedSubmission }) {
   const [draftLog, setDraftLog] = useState(sampleLlamaLog)
+  const [memoryGbInput, setMemoryGbInput] = useState('24')
   const parsed = parseBenchmarkLog(draftLog)
-  const issueUrl = parsed.parsed ? buildIssueUrl(parsed.parsed, draftLog) : null
+  const parsedSubmission =
+    parsed.parsed == null
+      ? null
+      : {
+          ...parsed.parsed,
+          memoryGb: memoryGbInput.trim() ? Number(memoryGbInput) : null,
+        }
+  const issueUrl = parsedSubmission ? buildIssueUrl(parsedSubmission, draftLog) : null
 
   return (
     <section className="submission-section" id="submissions">
       <SectionHeading
         eyebrow="Run What Ya Brung"
         title="Bring your own laps without flooding the grid."
-        description="LapTime can accept real benchmark artifacts without collapsing everything into one noisy community bucket. Parsed logs come first, with the raw benchmark attached so people can audit what was actually measured."
       />
 
       <div className="submission-grid">
@@ -183,6 +191,23 @@ function SubmissionSection() {
             />
           </label>
 
+          <label className="control-group dense submission-memory-field">
+            <span>Available memory (GB)</span>
+            <input
+              id="submission-memory-gb"
+              name="submissionMemoryGb"
+              min="1"
+              step="1"
+              type="number"
+              value={memoryGbInput}
+              onChange={(event) => setMemoryGbInput(event.target.value)}
+              placeholder="24"
+            />
+            <small>
+              Enter VRAM or unified memory so LapTime can give an honest fit comparison.
+            </small>
+          </label>
+
           <div className="submission-result-grid">
             <div className={`submission-result-card submission-result-${parsed.status}`}>
               <div className="metrics-heading">
@@ -201,6 +226,14 @@ function SubmissionSection() {
                   <div>
                     <span>Backend</span>
                     <strong>{parsed.parsed.backend || 'Unknown'}</strong>
+                  </div>
+                  <div>
+                    <span>Memory</span>
+                    <strong>
+                      {parsedSubmission?.memoryGb != null && Number.isFinite(parsedSubmission.memoryGb)
+                        ? `${parsedSubmission.memoryGb} GB`
+                        : 'Add memory'}
+                    </strong>
                   </div>
                   <div>
                     <span>Prefill</span>
@@ -239,15 +272,50 @@ function SubmissionSection() {
               ) : null}
             </div>
 
-            <div className="submission-result-card">
-              <div className="metrics-heading">Trust lane</div>
+            <div className="submission-result-card submission-result-submit">
+              <div className="metrics-heading">Run or submit this lap</div>
               <p className="submission-copy">
-                Parsed logs should land as `Parsed community benchmark` rows, not as benchmark-backed laps. The raw artifact stays attached so people can audit what was actually measured.
+                Use these actions to test your setup locally, race it against a house rig, or propose adding it to
+                LapTime for everyone to explore. GitHub issues are the intake lane for public benchmark proposals so
+                the raw artifact stays attached and reviewable.
               </p>
               {issueUrl ? (
-                <a className="source-link" href={issueUrl} target="_blank" rel="noreferrer">
-                  Open prefilled GitHub issue
-                </a>
+                <>
+                  {parsed.status === 'ready' && parsed.parsed ? (
+                    <div className="submission-action-group">
+                      <div className="submission-action-label">Try it live on this page</div>
+                      <button
+                        className="submission-button submission-button-secondary"
+                        type="button"
+                        onClick={() => onLoadParsedSubmission?.(parsedSubmission)}
+                      >
+                        Run in simulator
+                      </button>
+                      <button
+                        className="submission-button submission-button-race"
+                        type="button"
+                        onClick={() => onRaceParsedSubmission?.(parsedSubmission)}
+                      >
+                        Race my setup
+                      </button>
+                    </div>
+                  ) : null}
+                  <div className="submission-divider" aria-hidden="true" />
+                  <div className="submission-action-label">Send it in for review</div>
+                  <a
+                    className="submission-button"
+                    href={issueUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Submit Entry
+                  </a>
+                  <p className="submission-helper">
+                    This opens a prefilled GitHub issue proposing your parsed benchmark as a public LapTime entry.
+                    The hardware, model, memory, and lap metrics stay attached so the submission can be reviewed
+                    before it shows up for everyone.
+                  </p>
+                </>
               ) : null}
             </div>
           </div>

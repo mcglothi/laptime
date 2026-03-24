@@ -484,11 +484,10 @@ function SimulatorSection({
   )
 
   return (
-    <section className="simulator-section">
+    <section className="simulator-section" id="simulator">
       <SectionHeading
         eyebrow="Simulator"
         title="Run a playback."
-        description="Fast to try, easy to compare, and built for real buying decisions."
       />
 
       <div className="simulator-layout">

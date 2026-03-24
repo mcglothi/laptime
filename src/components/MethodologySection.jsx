@@ -16,7 +16,6 @@ function MethodologySection({
       <SectionHeading
         eyebrow="Method"
         title="How LapTime scores a lap."
-        description="LapTime keeps benchmark-backed rows, modeled estimates, and community references separate so buyers can see what is measured, what is inferred, and where each lap comes from."
       />
 
       <div className="method-grid">
