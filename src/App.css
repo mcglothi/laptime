@@ -307,13 +307,27 @@
   gap: 0.3rem;
 }
 
+.control-label {
+  display: grid;
+  gap: 0.05rem;
+}
+
 .control-group.dense span {
   font-size: 0.78rem;
 }
 
-.control-group span {
+.control-group span,
+.control-label span {
   color: var(--heading);
   font-weight: 600;
+}
+
+.control-label small {
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .control-group select {
@@ -929,6 +943,12 @@
   padding: 0.9rem;
 }
 
+.compare-card {
+  display: grid;
+  align-content: start;
+  gap: 0.72rem;
+}
+
 .submission-card {
   display: grid;
   gap: 0.8rem;
@@ -1315,27 +1335,134 @@
   color: var(--heading);
   font-size: 1.05rem;
   font-weight: 600;
-  margin-top: 0.65rem;
+  margin-top: 0;
 }
 
 .compare-subtitle {
   color: var(--text-soft);
   font-size: 0.88rem;
-  margin-top: 0.2rem;
+  margin-top: -0.04rem;
+}
+
+.compare-setup-block {
+  display: grid;
+  align-content: start;
+  gap: 0.48rem;
+  min-height: 22rem;
+}
+
+.compare-setup-block-selectable {
+  gap: 0.52rem;
+}
+
+.compare-setup-block-disabled {
+  opacity: 0.7;
+}
+
+.compare-setup-label {
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .compare-controls {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
-  margin-top: 0.8rem;
+  margin-top: 0;
+}
+
+.compare-controls-disabled {
+  pointer-events: none;
+}
+
+.compare-controls-disabled .control-group span,
+.compare-controls-disabled input,
+.compare-controls-disabled select {
+  opacity: 0.72;
+}
+
+.compare-controls-disabled .filter-chip {
+  opacity: 0.48;
+}
+
+.compare-controls-disabled .filter-chip.active {
+  opacity: 0.82;
+}
+
+.compare-model-card {
+  display: grid;
+  gap: 0.52rem;
+  padding: 0.82rem 0.88rem;
+  border-radius: 0.98rem;
+  border: 1px solid var(--border-soft);
+  background:
+    radial-gradient(circle at top right, rgba(91, 140, 255, 0.12), transparent 46%),
+    var(--panel-soft);
+  min-height: 7.85rem;
+}
+
+.compare-model-track-card {
+  margin-top: 0.85rem;
+}
+
+.compare-model-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.compare-model-card-header span {
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.compare-model-card-header strong {
+  color: var(--accent);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.compare-model-card-title {
+  color: var(--heading);
+  font-size: 0.96rem;
+  line-height: 1.24;
+  font-weight: 600;
+}
+
+.compare-model-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.compare-model-card-meta span {
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-soft);
+  border-radius: 999px;
+  padding: 0.28rem 0.5rem;
+  font-size: 0.76rem;
+}
+
+.compare-model-card p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  line-height: 1.42;
 }
 
 .metric-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
-  margin-top: 0.85rem;
+  margin-top: 0;
 }
 
 .metric-list div,
@@ -1371,7 +1498,7 @@
 
 .compare-experience {
   color: var(--heading);
-  margin-top: 0.8rem;
+  margin-top: 0;
   font-weight: 600;
 }
 
@@ -1691,6 +1818,10 @@
 
   .race-header {
     display: grid;
+  }
+
+  .compare-setup-block {
+    min-height: auto;
   }
 }
 

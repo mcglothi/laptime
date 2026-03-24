@@ -125,7 +125,10 @@ function SimulatorSection({
   const controlPanel = (
     <aside className={`control-panel${isCompactMobile ? ' control-panel-mobile' : ''}`}>
       <label className="control-group">
-        <span>Hardware</span>
+        <div className="control-label">
+          <span>Hardware</span>
+          <small>Race car</small>
+        </div>
         <div className="chip-row">
           {hardwarePlatformOptions.map((platform) => (
             <button
@@ -227,7 +230,10 @@ function SimulatorSection({
       ) : null}
 
       <label className="control-group">
-        <span>Model</span>
+        <div className="control-label">
+          <span>Model</span>
+          <small>Track</small>
+        </div>
         <div className="chip-row">
           {modelFamilyOptions.map((family) => (
             <button
@@ -275,7 +281,10 @@ function SimulatorSection({
       </label>
 
       <label className="control-group">
-        <span>Workload</span>
+        <div className="control-label">
+          <span>Workload</span>
+          <small>Circuit type</small>
+        </div>
         <select
           id="workload-select"
           name="workload"

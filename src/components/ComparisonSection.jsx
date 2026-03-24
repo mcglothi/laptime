@@ -8,6 +8,12 @@ function getFitLabel(status) {
   return 'Fits'
 }
 
+function getCoverageLabel(coverage) {
+  if (coverage === 'exact') return 'Exact benchmarked'
+  if (coverage === 'source-backed') return 'Source-backed runtime'
+  return 'Estimated / catalog only'
+}
+
 function ComparisonSection({
   hardware,
   model,
@@ -155,9 +161,54 @@ function ComparisonSection({
               {winnerLane === 'a' ? <span className="winner-label">Fastest</span> : null}
             </strong>
           </div>
-          <div className="compare-title">{hardware.name}</div>
-          <div className="compare-subtitle">
-            {hardware.platform} · {model.name}
+          <div className="compare-setup-block compare-setup-block-disabled">
+            <div className="compare-controls compare-controls-disabled" aria-hidden="true">
+              <label className="control-group dense">
+                <span>Hardware</span>
+                <div className="chip-row">
+                  {hardwarePlatformOptions.map((platform) => (
+                    <button
+                      key={platform}
+                      className={`filter-chip ${platform === hardware.platform ? 'active' : ''}`}
+                      type="button"
+                      disabled
+                      tabIndex={-1}
+                    >
+                      {platform === 'all' ? 'All platforms' : platform}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  id="current-hardware-search"
+                  name="currentHardwareSearch"
+                  type="text"
+                  value={hardware.name}
+                  placeholder="Search hardware"
+                  disabled
+                  readOnly
+                  tabIndex={-1}
+                />
+                <select
+                  id="current-hardware-select"
+                  name="currentHardware"
+                  value={hardware.id}
+                  disabled
+                  tabIndex={-1}
+                  onChange={() => {}}
+                >
+                  <option value={hardware.id}>
+                    {hardware.platform} · {hardware.name}
+                  </option>
+                </select>
+              </label>
+            </div>
+            <div className="compare-title">{hardware.name}</div>
+            <div className="compare-subtitle">
+              {hardware.platform} · {model.name}
+            </div>
+            <div className={`fit-inline fit-inline-${fitAssessment.status}`}>
+              {getFitLabel(fitAssessment.status)}
+            </div>
           </div>
           <div className="metric-list">
             <div>
@@ -196,49 +247,51 @@ function ComparisonSection({
               {winnerLane === 'b' ? <span className="winner-label">Fastest</span> : null}
             </strong>
           </div>
-          <div className="compare-controls">
-            <label className="control-group dense">
-              <span>Hardware</span>
-              <div className="chip-row">
-                {hardwarePlatformOptions.map((platform) => (
-                  <button
-                    key={platform}
-                    className={`filter-chip ${compareHardwarePlatformFilter === platform ? 'active' : ''}`}
-                    type="button"
-                    onClick={() => setCompareHardwarePlatformFilter(platform)}
-                  >
-                    {platform === 'all' ? 'All platforms' : platform}
-                  </button>
-                ))}
-              </div>
-              <input
-                id="compare-hardware-search"
-                name="compareHardwareSearch"
-                type="text"
-                value={compareHardwareQuery}
-                placeholder="Search hardware"
-                onChange={(event) => setCompareHardwareQuery(event.target.value)}
-              />
-              <select
-                id="compare-hardware-select"
-                name="compareHardware"
-                value={compareHardwareId}
-                onChange={(event) => setCompareHardwareId(event.target.value)}
-              >
-                {visibleCompareHardwareOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.platform} · {option.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div className="compare-title">{compareHardware.name}</div>
-          <div className="compare-subtitle">
-            {compareHardware.platform} · {compareModel.name}
-          </div>
-          <div className={`fit-inline fit-inline-${compareFitAssessment.status}`}>
-            {getFitLabel(compareFitAssessment.status)}
+          <div className="compare-setup-block compare-setup-block-selectable">
+            <div className="compare-controls">
+              <label className="control-group dense">
+                <span>Hardware</span>
+                <div className="chip-row">
+                  {hardwarePlatformOptions.map((platform) => (
+                    <button
+                      key={platform}
+                      className={`filter-chip ${compareHardwarePlatformFilter === platform ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => setCompareHardwarePlatformFilter(platform)}
+                    >
+                      {platform === 'all' ? 'All platforms' : platform}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  id="compare-hardware-search"
+                  name="compareHardwareSearch"
+                  type="text"
+                  value={compareHardwareQuery}
+                  placeholder="Search hardware"
+                  onChange={(event) => setCompareHardwareQuery(event.target.value)}
+                />
+                <select
+                  id="compare-hardware-select"
+                  name="compareHardware"
+                  value={compareHardwareId}
+                  onChange={(event) => setCompareHardwareId(event.target.value)}
+                >
+                  {visibleCompareHardwareOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.platform} · {option.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="compare-title">{compareHardware.name}</div>
+            <div className="compare-subtitle">
+              {compareHardware.platform} · {compareModel.name}
+            </div>
+            <div className={`fit-inline fit-inline-${compareFitAssessment.status}`}>
+              {getFitLabel(compareFitAssessment.status)}
+            </div>
           </div>
           <div className="metric-list">
             <div>
@@ -269,6 +322,20 @@ function ComparisonSection({
           <div className="compare-experience">{compareMetrics.experience}</div>
         </article>
       </div>
+
+      <article className="compare-model-card compare-model-track-card">
+        <div className="compare-model-card-header">
+          <span>Selected track</span>
+          <strong>{model.family}</strong>
+        </div>
+        <div className="compare-model-card-title">{model.name}</div>
+        <div className="compare-model-card-meta">
+          <span>{model.quant}</span>
+          <span>{model.paramsB ? `${model.paramsB}B params` : 'Unknown size'}</span>
+          <span>{getCoverageLabel(model.benchmarkCoverage)}</span>
+        </div>
+        <p>{model.fit}</p>
+      </article>
 
       <div className="delta-grid">
         <div
