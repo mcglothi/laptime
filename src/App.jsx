@@ -120,6 +120,59 @@ function uniqueHardwarePlatforms(items) {
   return ['all', ...new Set(items.map((item) => item.platform).filter(Boolean))]
 }
 
+function extractChipGeneration(name) {
+  const match = name.match(/\bM(\d+)\b/i)
+  return match ? Number(match[1]) : null
+}
+
+function getAppleTierRank(name) {
+  const normalized = name.toLowerCase()
+  if (normalized.includes('ultra')) return 0
+  if (normalized.includes('max')) return 1
+  if (normalized.includes('pro')) return 2
+  return 3
+}
+
+function getAppleFormFactorRank(name) {
+  const normalized = name.toLowerCase()
+  if (normalized.includes('studio')) return 0
+  if (normalized.includes('macbook pro')) return 1
+  if (normalized.includes('mini')) return 2
+  if (normalized.includes('macbook air')) return 3
+  return 4
+}
+
+function compareHardwareEntries(left, right) {
+  if (left.id === 'custom' || right.id === 'custom') {
+    return left.id === 'custom' ? -1 : 1
+  }
+
+  if (left.platform !== right.platform) {
+    return left.platform.localeCompare(right.platform)
+  }
+
+  if (left.platform === 'Apple Silicon') {
+    const generationDiff = (extractChipGeneration(right.name) ?? -1) - (extractChipGeneration(left.name) ?? -1)
+    if (generationDiff !== 0) return generationDiff
+
+    const formFactorDiff = getAppleFormFactorRank(left.name) - getAppleFormFactorRank(right.name)
+    if (formFactorDiff !== 0) return formFactorDiff
+
+    const tierDiff = getAppleTierRank(left.name) - getAppleTierRank(right.name)
+    if (tierDiff !== 0) return tierDiff
+
+    const memoryDiff = (right.memoryGb ?? -1) - (left.memoryGb ?? -1)
+    if (memoryDiff !== 0) return memoryDiff
+  }
+
+  if (left.platform === 'GB10 Systems') {
+    const memoryDiff = (right.memoryGb ?? -1) - (left.memoryGb ?? -1)
+    if (memoryDiff !== 0) return memoryDiff
+  }
+
+  return left.name.localeCompare(right.name)
+}
+
 function getExperience(totalSeconds) {
   if (totalSeconds < 4.5) return 'Feels instant'
   if (totalSeconds < 9) return 'Feels smooth'
@@ -316,20 +369,22 @@ function App() {
     source: 'Manual',
     memoryGb: null,
   })
-  const hardwareEntries = hardwareOptions.map((item) => {
-    const mergedItem =
-      item.id === 'custom'
-        ? {
-            ...item,
-            ...customHardwareProfile,
-          }
-        : item
+  const hardwareEntries = hardwareOptions
+    .map((item) => {
+      const mergedItem =
+        item.id === 'custom'
+          ? {
+              ...item,
+              ...customHardwareProfile,
+            }
+          : item
 
-    return {
-      ...mergedItem,
-      platform: getHardwarePlatform(mergedItem),
-    }
-  })
+      return {
+        ...mergedItem,
+        platform: getHardwarePlatform(mergedItem),
+      }
+    })
+    .sort(compareHardwareEntries)
   const nonCustomHardwareEntries = hardwareEntries.filter((item) => item.id !== 'custom')
   const hardwarePlatformOptions = uniqueHardwarePlatforms(nonCustomHardwareEntries)
   const [hardwareId, setHardwareId] = useState(hardwareEntries[1].id)
@@ -441,6 +496,24 @@ function App() {
     const fallbackHardware = nextOptions[0]
     if (fallbackHardware) {
       setCompareHardwareId(fallbackHardware.id)
+    }
+  }
+
+  function handleHardwarePlatformFilterChange(nextFilter) {
+    setHardwarePlatformFilter(nextFilter)
+
+    const nextOptions =
+      nextFilter === 'all'
+        ? hardwareEntries
+        : nonCustomHardwareEntries.filter((option) => option.platform === nextFilter)
+
+    if (nextOptions.some((option) => option.id === hardwareId)) {
+      return
+    }
+
+    const fallbackHardware = nextOptions[0]
+    if (fallbackHardware) {
+      setHardwareId(fallbackHardware.id)
     }
   }
 
@@ -602,7 +675,7 @@ function App() {
         visibleHardwareOptions={visibleHardwareOptions}
         hardwarePlatformOptions={hardwarePlatformOptions}
         hardwarePlatformFilter={hardwarePlatformFilter}
-        setHardwarePlatformFilter={setHardwarePlatformFilter}
+        setHardwarePlatformFilter={handleHardwarePlatformFilterChange}
         setHardwareId={setHardwareId}
         customMetrics={customMetrics}
         setCustomMetrics={setCustomMetrics}
