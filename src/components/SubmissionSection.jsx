@@ -150,7 +150,7 @@ function SubmissionSection() {
       <SectionHeading
         eyebrow="Run What Ya Brung"
         title="Bring your own laps without flooding the grid."
-        description="LapTime can accept real benchmark artifacts without collapsing everything into one noisy community bucket. Parsed logs come first. Verified in-browser laps are the next trust lane."
+        description="LapTime can accept real benchmark artifacts without collapsing everything into one noisy community bucket. Parsed logs come first, with the raw benchmark attached so people can audit what was actually measured."
       />
 
       <div className="submission-grid">
@@ -251,30 +251,6 @@ function SubmissionSection() {
               ) : null}
             </div>
           </div>
-        </article>
-
-        <article className="submission-card submission-card-featured">
-          <div className="metrics-heading">Verified by WebLLM</div>
-          <p className="submission-copy">
-            The next lane is a browser-run lap: WebGPU-backed, reproducible, and clearly separated from native backend results.
-          </p>
-          <div className="submission-feature-list">
-            <div>
-              <span>Badge</span>
-              <strong>Verified in-browser</strong>
-            </div>
-            <div>
-              <span>Captures</span>
-              <strong>Hardware name, prefill, decode, TTFT</strong>
-            </div>
-            <div>
-              <span>Rule</span>
-              <strong>Separate trust tier from llama.cpp / MLX native laps</strong>
-            </div>
-          </div>
-          <p className="submission-note">
-            This lane is intentionally not wired yet. The goal is to add signal, not another pile of unverified numbers.
-          </p>
         </article>
       </div>
     </section>

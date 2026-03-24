@@ -10,6 +10,7 @@ import {
 import CatalogSection from './components/CatalogSection'
 import ComparisonSection from './components/ComparisonSection'
 import MethodologySection from './components/MethodologySection'
+import SubmissionSection from './components/SubmissionSection'
 import SimulatorSection from './components/SimulatorSection'
 import SourceExplorerSection from './components/SourceExplorerSection'
 import './App.css'
@@ -568,6 +569,8 @@ function App() {
         restartSimulation={restartSimulation}
         formatSeconds={formatSeconds}
       />
+
+      <SubmissionSection />
 
       <CatalogSection
         modelFamilyOptions={modelFamilyOptions}
