@@ -202,6 +202,8 @@ function SimulatorSection({
   modelFamilyOptions,
   modelFamilyFilter,
   setModelFamilyFilter,
+  modelCoverageFilter,
+  setModelCoverageFilter,
   huggingFaceImportInput,
   setHuggingFaceImportInput,
   huggingFaceQuantOptions,
@@ -359,6 +361,47 @@ function SimulatorSection({
             </button>
           ))}
         </div>
+        <div className="select-dot-legend" aria-label="Model benchmark coverage filters">
+          <button
+            className={`filter-chip coverage-chip ${modelCoverageFilter === 'all' ? 'active' : ''}`}
+            type="button"
+            onClick={() => setModelCoverageFilter('all')}
+          >
+            All coverage
+          </button>
+          <button
+            className={`filter-chip coverage-chip ${modelCoverageFilter === 'exact' ? 'active' : ''}`}
+            type="button"
+            onClick={() => setModelCoverageFilter('exact')}
+          >
+            <span className="select-dot-symbol" aria-hidden="true">🟢</span>
+            Benchmark-backed
+          </button>
+          <button
+            className={`filter-chip coverage-chip ${modelCoverageFilter === 'source-backed' ? 'active' : ''}`}
+            type="button"
+            onClick={() => setModelCoverageFilter('source-backed')}
+          >
+            <span className="select-dot-symbol" aria-hidden="true">🔵</span>
+            Source-backed
+          </button>
+          <button
+            className={`filter-chip coverage-chip ${modelCoverageFilter === 'community-runtime' ? 'active' : ''}`}
+            type="button"
+            onClick={() => setModelCoverageFilter('community-runtime')}
+          >
+            <span className="select-dot-symbol" aria-hidden="true">🟡</span>
+            Community runtime
+          </button>
+          <button
+            className={`filter-chip coverage-chip ${modelCoverageFilter === 'none' ? 'active' : ''}`}
+            type="button"
+            onClick={() => setModelCoverageFilter('none')}
+          >
+            <span className="select-dot-symbol" aria-hidden="true">⚪</span>
+            Estimate
+          </button>
+        </div>
         <input
           id="model-search"
           name="modelSearch"
@@ -387,24 +430,6 @@ function SimulatorSection({
           {model.family} · {model.quant}
           {model.paramsB ? ` · ${model.paramsB}B` : ''}
         </small>
-        <div className="select-dot-legend" aria-label="Model benchmark coverage legend">
-          <span className="select-dot-legend-item">
-            <span className="select-dot-symbol" aria-hidden="true">🟢</span>
-            Benchmark-backed
-          </span>
-          <span className="select-dot-legend-item">
-            <span className="select-dot-symbol" aria-hidden="true">🔵</span>
-            Source-backed
-          </span>
-          <span className="select-dot-legend-item">
-            <span className="select-dot-symbol" aria-hidden="true">🟡</span>
-            Community runtime
-          </span>
-          <span className="select-dot-legend-item">
-            <span className="select-dot-symbol" aria-hidden="true">⚪</span>
-            Estimate
-          </span>
-        </div>
         <div className={`fit-inline fit-inline-${fitAssessment.status}`}>
           {getFitLabel(fitAssessment.status)}
         </div>

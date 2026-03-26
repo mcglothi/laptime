@@ -610,6 +610,11 @@ function getCoverageIndicator(coverage) {
   return { symbol: '⚪', label: 'Estimated only' }
 }
 
+function matchesCoverageFilter(coverage, filter) {
+  if (filter === 'all') return true
+  return coverage === filter
+}
+
 function calculateMetrics(hardware, model, workload, customMetrics) {
   let prefillTps
   let decodeTps
@@ -709,6 +714,7 @@ function App() {
   const [hardwarePlatformFilter, setHardwarePlatformFilter] = useState('all')
   const [compareHardwarePlatformFilter, setCompareHardwarePlatformFilter] = useState('all')
   const [modelFamilyFilter, setModelFamilyFilter] = useState('all')
+  const [modelCoverageFilter, setModelCoverageFilter] = useState('all')
   const [catalogFamilyFilter, setCatalogFamilyFilter] = useState('all')
   const [sourceQuery, setSourceQuery] = useState('')
   const [communityFilter, setCommunityFilter] = useState('all')
@@ -778,8 +784,14 @@ function App() {
     modelFamilyFilter === 'all'
       ? activeModelOptions
       : activeModelOptions.filter((option) => option.family === modelFamilyFilter)
+  const coverageFilteredModels =
+    modelCoverageFilter === 'all'
+      ? familyFilteredModels
+      : familyFilteredModels.filter((option) =>
+          matchesCoverageFilter(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)), modelCoverageFilter),
+        )
   const visibleModelOptions = buildFilteredOptions(
-    familyFilteredModels,
+    coverageFilteredModels,
     modelQuery,
     modelId,
     ['name', 'family', 'quant', 'fit'],
@@ -813,6 +825,12 @@ function App() {
     fitAssessment: assessModelFit(hardware, entry, workload),
     benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardwareId, entry.id)),
   }))
+
+  useEffect(() => {
+    if (!coverageFilteredModels.length) return
+    if (coverageFilteredModels.some((option) => option.id === modelId)) return
+    setModelId(coverageFilteredModels[0].id)
+  }, [coverageFilteredModels, modelId])
 
   function restartSimulation() {
     setElapsedMs(0)
@@ -852,6 +870,30 @@ function App() {
     const fallbackHardware = nextOptions[0]
     if (fallbackHardware) {
       setHardwareId(fallbackHardware.id)
+    }
+  }
+
+  function handleModelCoverageFilterChange(nextFilter) {
+    setModelCoverageFilter(nextFilter)
+
+    const nextFamilyFilteredModels =
+      modelFamilyFilter === 'all'
+        ? activeModelOptions
+        : activeModelOptions.filter((option) => option.family === modelFamilyFilter)
+    const nextCoverageFilteredModels =
+      nextFilter === 'all'
+        ? nextFamilyFilteredModels
+        : nextFamilyFilteredModels.filter((option) =>
+            matchesCoverageFilter(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)), nextFilter),
+          )
+
+    if (nextCoverageFilteredModels.some((option) => option.id === modelId)) {
+      return
+    }
+
+    const fallbackModel = nextCoverageFilteredModels[0]
+    if (fallbackModel) {
+      setModelId(fallbackModel.id)
     }
   }
 
@@ -1259,6 +1301,8 @@ function App() {
         modelFamilyOptions={modelFamilyOptions}
         modelFamilyFilter={modelFamilyFilter}
         setModelFamilyFilter={setModelFamilyFilter}
+        modelCoverageFilter={modelCoverageFilter}
+        setModelCoverageFilter={handleModelCoverageFilterChange}
         huggingFaceImportInput={huggingFaceImportInput}
         setHuggingFaceImportInput={setHuggingFaceImportInput}
         huggingFaceQuantOptions={importedQuantOptions}
