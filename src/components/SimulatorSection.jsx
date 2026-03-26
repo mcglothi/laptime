@@ -602,7 +602,7 @@ function SimulatorSection({
           <span>{workload.contextDescriptor}</span>
         </div>
         <div className="slider-scale" aria-hidden="true">
-          <span>128</span>
+          <span>128 tok</span>
           <span>8k</span>
           <span>32k</span>
           <span>128k</span>
