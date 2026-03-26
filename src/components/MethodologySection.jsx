@@ -5,6 +5,8 @@ function MethodologySection({
   exactHardwareCount,
   sourceBackedCount,
   sourceBackedHardwareCount,
+  communityRuntimeCount,
+  communityRuntimeHardwareCount,
   officialSourceCount,
   catalogSourceCount,
   communityCount,
@@ -63,11 +65,33 @@ function MethodologySection({
 
         <article className="method-card">
           <div className="method-kicker">Tier 3</div>
+          <h3>Community runtime rows stay labeled as community runtime.</h3>
+          <p>
+            Sometimes a forum post or hardware thread publishes a concrete runtime row for a
+            specific machine and model before an official benchmark bundle exists. LapTime can use
+            those rows to replace obviously bad heuristics, but keeps them labeled separately from
+            benchmark-backed and source-backed entries.
+          </p>
+          <div className="method-metrics">
+            <div>
+              <span>Community runtime rows</span>
+              <strong>{communityRuntimeCount}</strong>
+            </div>
+            <div>
+              <span>Hardware tiers with community runtime rows</span>
+              <strong>{communityRuntimeHardwareCount}</strong>
+            </div>
+          </div>
+        </article>
+
+        <article className="method-card">
+          <div className="method-kicker">Tier 4</div>
           <h3>Estimates and community references stay labeled.</h3>
           <p>
-            If LapTime still has no direct or source-backed row, it falls back to size and quant
-            heuristics. Forum posts and roundup articles help widen coverage and sanity-check
-            expectations, but they stay labeled separately from authoritative benchmark sources.
+            If LapTime still has no direct, source-backed, or community-runtime row, it falls back
+            to size and quant heuristics. Forum posts and roundup articles still help widen
+            coverage and sanity-check expectations, but they stay labeled separately from more
+            concrete runtime data.
           </p>
           <div className="method-metrics">
             <div>

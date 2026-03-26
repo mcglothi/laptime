@@ -720,6 +720,7 @@ function App() {
   )
   const exactBenchmarkCount = benchmarkRows.filter((entry) => entry.coverage === 'exact').length
   const sourceBackedCount = benchmarkRows.filter((entry) => entry.coverage === 'source-backed').length
+  const communityRuntimeCount = benchmarkRows.filter((entry) => entry.coverage === 'community-runtime').length
   const exactHardwareCount = new Set(
     benchmarkRows
       .filter((entry) => entry.coverage === 'exact')
@@ -728,6 +729,11 @@ function App() {
   const sourceBackedHardwareCount = new Set(
     benchmarkRows
       .filter((entry) => entry.coverage === 'source-backed')
+      .map((entry) => entry.hardwareKey),
+  ).size
+  const communityRuntimeHardwareCount = new Set(
+    benchmarkRows
+      .filter((entry) => entry.coverage === 'community-runtime')
       .map((entry) => entry.hardwareKey),
   ).size
   const officialSourceCount = dataSources.filter((source) => source.type === 'official specs').length
@@ -885,6 +891,8 @@ function App() {
         exactHardwareCount={exactHardwareCount}
         sourceBackedCount={sourceBackedCount}
         sourceBackedHardwareCount={sourceBackedHardwareCount}
+        communityRuntimeCount={communityRuntimeCount}
+        communityRuntimeHardwareCount={communityRuntimeHardwareCount}
         officialSourceCount={officialSourceCount}
         catalogSourceCount={catalogSourceCount}
         communityCount={communityBenchmarks.length}

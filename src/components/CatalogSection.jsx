@@ -9,6 +9,7 @@ function CatalogSection({
   function getCoverageLabel(coverage) {
     if (coverage === 'exact') return 'Exact benchmarked'
     if (coverage === 'source-backed') return 'Source-backed runtime'
+    if (coverage === 'community-runtime') return 'Community runtime'
     return 'Estimated / catalog only'
   }
 
