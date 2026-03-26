@@ -667,11 +667,11 @@
 .context-slider {
   --context-slider-fill: #61c089;
   --context-slider-fill-soft: rgba(97, 192, 137, 0.18);
-  --context-slider-track: color-mix(in srgb, var(--panel-soft) 74%, transparent);
+  --context-slider-track: color-mix(in srgb, var(--panel-soft) 88%, white 12%);
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 0.72rem;
+  height: 0.82rem;
   padding: 0;
   border: 0;
   border-radius: 999px;
@@ -684,7 +684,9 @@
       var(--context-slider-track) 100%
     );
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--context-slider-fill) 34%, var(--border) 66%),
+    inset 0 0 0 1px color-mix(in srgb, var(--context-slider-fill) 42%, var(--border) 58%),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px color-mix(in srgb, var(--border) 72%, white 28%),
     0 0 0 4px var(--context-slider-fill-soft);
   cursor: pointer;
 }
@@ -695,7 +697,7 @@
 }
 
 .context-slider::-webkit-slider-runnable-track {
-  height: 0.72rem;
+  height: 0.82rem;
   border-radius: 999px;
   background: transparent;
 }
@@ -703,39 +705,39 @@
 .context-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 1.05rem;
-  height: 1.05rem;
-  margin-top: -0.16rem;
+  width: 1.12rem;
+  height: 1.12rem;
+  margin-top: -0.14rem;
   border-radius: 999px;
   border: 2px solid color-mix(in srgb, var(--context-slider-fill) 78%, white 22%);
-  background: var(--heading);
+  background: color-mix(in srgb, var(--heading) 92%, white 8%);
   box-shadow:
     0 0 0 4px var(--context-slider-fill-soft),
-    0 6px 16px rgba(0, 0, 0, 0.22);
+    0 8px 18px rgba(0, 0, 0, 0.24);
 }
 
 .context-slider::-moz-range-track {
-  height: 0.72rem;
+  height: 0.82rem;
   border: 0;
   border-radius: 999px;
   background: var(--context-slider-track);
 }
 
 .context-slider::-moz-range-progress {
-  height: 0.72rem;
+  height: 0.82rem;
   border-radius: 999px;
   background: var(--context-slider-fill);
 }
 
 .context-slider::-moz-range-thumb {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.12rem;
+  height: 1.12rem;
   border-radius: 999px;
   border: 2px solid color-mix(in srgb, var(--context-slider-fill) 78%, white 22%);
-  background: var(--heading);
+  background: color-mix(in srgb, var(--heading) 92%, white 8%);
   box-shadow:
     0 0 0 4px var(--context-slider-fill-soft),
-    0 6px 16px rgba(0, 0, 0, 0.22);
+    0 8px 18px rgba(0, 0, 0, 0.24);
 }
 
 .context-slider-healthy {
