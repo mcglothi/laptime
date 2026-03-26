@@ -178,6 +178,8 @@ function SimulatorSection({
   huggingFaceQuantOverride,
   setHuggingFaceQuantOverride,
   huggingFaceImportState,
+  huggingFaceSearchQuery,
+  huggingFaceSearchResults,
   importHuggingFaceModel,
   workload,
   workloadId,
@@ -344,7 +346,7 @@ function SimulatorSection({
         >
           {visibleModelOptions.map((option) => (
             <option key={option.id} value={option.id}>
-              {getFitLabel(option.fitAssessment.status)} · {option.name} · {option.quant}
+              {option.coverageIndicator.symbol} {getFitLabel(option.fitAssessment.status)} · {option.name} · {option.quant}
             </option>
           ))}
         </select>
@@ -352,6 +354,24 @@ function SimulatorSection({
           {model.family} · {model.quant}
           {model.paramsB ? ` · ${model.paramsB}B` : ''}
         </small>
+        <div className="select-dot-legend" aria-label="Model benchmark coverage legend">
+          <span className="select-dot-legend-item">
+            <span className="select-dot select-dot-exact" aria-hidden="true" />
+            Benchmark-backed
+          </span>
+          <span className="select-dot-legend-item">
+            <span className="select-dot select-dot-source" aria-hidden="true" />
+            Source-backed
+          </span>
+          <span className="select-dot-legend-item">
+            <span className="select-dot select-dot-community" aria-hidden="true" />
+            Community runtime
+          </span>
+          <span className="select-dot-legend-item">
+            <span className="select-dot select-dot-estimate" aria-hidden="true" />
+            Estimate
+          </span>
+        </div>
         <div className={`fit-inline fit-inline-${fitAssessment.status}`}>
           {getFitLabel(fitAssessment.status)}
         </div>
@@ -395,7 +415,7 @@ function SimulatorSection({
               name="huggingFaceModelImport"
               type="text"
               value={huggingFaceImportInput}
-              placeholder="Qwen/Qwen2.5-7B-Instruct or huggingface.co URL"
+              placeholder="Qwen, Qwen/Qwen2.5-7B-Instruct, or huggingface.co URL"
               onChange={(event) => setHuggingFaceImportInput(event.target.value)}
             />
             <div className="submission-actions">
@@ -418,6 +438,31 @@ function SimulatorSection({
             {huggingFaceImportState.message ? (
               <div className={`source-note hf-import-status hf-import-status-${huggingFaceImportState.status}`}>
                 {huggingFaceImportState.message}
+              </div>
+            ) : null}
+            {huggingFaceSearchResults.length > 0 ? (
+              <div className="hf-search-results" role="list" aria-label={`Hugging Face results for ${huggingFaceSearchQuery}`}>
+                {huggingFaceSearchResults.map((result) => (
+                  <button
+                    key={result.id}
+                    className="hf-search-result"
+                    type="button"
+                    onClick={() => {
+                      importHuggingFaceModel(result.id)
+                      handleRestart({ collapseMobile: true })
+                    }}
+                  >
+                    <div className="hf-search-result-header">
+                      <strong>{result.id}</strong>
+                      <span>{result.pipelineTag ?? 'model'}</span>
+                    </div>
+                    <div className="hf-search-result-meta">
+                      <span>{result.familyLabel}</span>
+                      {result.downloads != null ? <span>{result.downloads.toLocaleString()} downloads</span> : null}
+                      {result.likes != null ? <span>{result.likes.toLocaleString()} likes</span> : null}
+                    </div>
+                  </button>
+                ))}
               </div>
             ) : null}
             {model.huggingFaceRepo ? (

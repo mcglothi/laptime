@@ -102,6 +102,13 @@ function parseHuggingFaceRepoReference(value) {
   }
 }
 
+function normalizeHuggingFaceSearchQuery(value) {
+  return String(value ?? '')
+    .trim()
+    .replace(/^https?:\/\/huggingface\.co\//i, '')
+    .replace(/^huggingface\.co\//i, '')
+}
+
 function toTitleCase(value) {
   return String(value ?? '')
     .replace(/[_-]+/g, ' ')
@@ -593,6 +600,13 @@ function getBenchmarkCoverage(benchmark) {
   return benchmark.coverage ?? 'exact'
 }
 
+function getCoverageIndicator(coverage) {
+  if (coverage === 'exact') return { symbol: '🟢', label: 'Benchmark-backed' }
+  if (coverage === 'source-backed') return { symbol: '🔵', label: 'Source-backed runtime' }
+  if (coverage === 'community-runtime') return { symbol: '🟡', label: 'Community runtime' }
+  return { symbol: '⚪', label: 'Estimated only' }
+}
+
 function calculateMetrics(hardware, model, workload, customMetrics) {
   let prefillTps
   let decodeTps
@@ -660,6 +674,8 @@ function App() {
     status: 'idle',
     message: '',
   })
+  const [huggingFaceSearchQuery, setHuggingFaceSearchQuery] = useState('')
+  const [huggingFaceSearchResults, setHuggingFaceSearchResults] = useState([])
   const [importedModel, setImportedModel] = useState(null)
   const [importedModelPayload, setImportedModelPayload] = useState(null)
   const hardwareEntries = hardwareOptions
@@ -766,6 +782,8 @@ function App() {
   const visibleModelEntries = visibleModelOptions.map((option) => ({
     ...option,
     fitAssessment: assessModelFit(hardware, option, workload),
+    benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)),
+    coverageIndicator: getCoverageIndicator(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id))),
   }))
   const comparePlatformFilteredHardware =
     compareHardwarePlatformFilter === 'all'
@@ -857,14 +875,57 @@ function App() {
     const repo = parseHuggingFaceRepoReference(inputValue)
 
     if (!repo) {
+      const searchQuery = normalizeHuggingFaceSearchQuery(inputValue)
+
+      if (!searchQuery) {
+        setHuggingFaceSearchQuery('')
+        setHuggingFaceSearchResults([])
+        setHuggingFaceImportState({
+          status: 'error',
+          message: 'Enter a Hugging Face repo like Qwen/Qwen2.5-7B-Instruct, a huggingface.co model URL, or a search like qwen.',
+        })
+        return null
+      }
+
+      setHuggingFaceImportInput(searchQuery)
+      setHuggingFaceSearchQuery(searchQuery)
+      setHuggingFaceSearchResults([])
       setHuggingFaceImportState({
-        status: 'error',
-        message: 'Enter a Hugging Face repo like Qwen/Qwen2.5-7B-Instruct or a huggingface.co model URL.',
+        status: 'loading',
+        message: `Searching Hugging Face for "${searchQuery}"...`,
       })
-      return null
+
+      try {
+        const params = new URLSearchParams({ q: searchQuery })
+        const response = await fetch(`/api/huggingface-search?${params.toString()}`)
+        const payload = await response.json()
+
+        if (!response.ok) {
+          throw new Error(payload.error ?? 'Hugging Face search failed.')
+        }
+
+        const results = Array.isArray(payload.results) ? payload.results : []
+        setHuggingFaceSearchResults(results)
+        setHuggingFaceImportState({
+          status: results.length > 0 ? 'success' : 'error',
+          message:
+            results.length > 0
+              ? `Found ${results.length} public model${results.length === 1 ? '' : 's'} for "${searchQuery}".`
+              : `No public text-generation models matched "${searchQuery}".`,
+        })
+        return null
+      } catch (error) {
+        setHuggingFaceImportState({
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Hugging Face search failed.',
+        })
+        return null
+      }
     }
 
     setHuggingFaceImportInput(repo)
+    setHuggingFaceSearchQuery('')
+    setHuggingFaceSearchResults([])
     setHuggingFaceImportState({
       status: 'loading',
       message: `Importing ${repo}...`,
@@ -1137,6 +1198,8 @@ function App() {
         huggingFaceQuantOverride={huggingFaceQuantOverride}
         setHuggingFaceQuantOverride={setHuggingFaceQuantOverride}
         huggingFaceImportState={huggingFaceImportState}
+        huggingFaceSearchQuery={huggingFaceSearchQuery}
+        huggingFaceSearchResults={huggingFaceSearchResults}
         importHuggingFaceModel={importHuggingFaceModel}
         workload={workload}
         workloadId={workloadId}
