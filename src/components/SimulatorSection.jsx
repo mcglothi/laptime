@@ -211,7 +211,9 @@ function SimulatorSection({
   const playbackRef = useRef(null)
   const [isCompactMobile, setIsCompactMobile] = useState(false)
   const [mobileEditorOpen, setMobileEditorOpen] = useState(false)
+  const [isCustomHardwareToolsOpen, setIsCustomHardwareToolsOpen] = useState(false)
   const [isHuggingFaceImportOpen, setIsHuggingFaceImportOpen] = useState(false)
+  const isCustomHardwareToolsVisible = isCustomHardwareToolsOpen || hardware.id === 'custom'
   const isHuggingFaceImportVisible = isHuggingFaceImportOpen || Boolean(model.huggingFaceRepo)
   const totalTimelineMs = metrics.prefillSeconds * 1000 + metrics.ttftMs + metrics.streamingSeconds * 1000
   const prefillShare = ((metrics.prefillSeconds * 1000) / totalTimelineMs) * 100
@@ -305,64 +307,102 @@ function SimulatorSection({
         <p>{hardware.buyer}</p>
       </label>
 
-      {hardware.id === 'custom' ? (
-        <div className="custom-grid">
-          <label className="control-group">
-            <span>Prefill tok/s</span>
-            <input
-              id="custom-prefill"
-              name="customPrefillTps"
-              min="1"
-              step="1"
-              type="number"
-              value={customMetrics.prefillTps}
-              onChange={(event) => {
-                setCustomMetrics((current) => ({
-                  ...current,
-                  prefillTps: Number(event.target.value) || 1,
-                }))
-                handleRestart()
-              }}
-            />
-          </label>
-          <label className="control-group">
-            <span>Decode tok/s</span>
-            <input
-              id="custom-decode"
-              name="customDecodeTps"
-              min="0.1"
-              step="0.1"
-              type="number"
-              value={customMetrics.decodeTps}
-              onChange={(event) => {
-                setCustomMetrics((current) => ({
-                  ...current,
-                  decodeTps: Number(event.target.value) || 0.1,
-                }))
-                handleRestart()
-              }}
-            />
-          </label>
-          <label className="control-group">
-            <span>TTFT ms</span>
-            <input
-              id="custom-ttft"
-              name="customTtftMs"
-              min="1"
-              step="1"
-              type="number"
-              value={customMetrics.ttftMs}
-              onChange={(event) => {
-                setCustomMetrics((current) => ({
-                  ...current,
-                  ttftMs: Number(event.target.value) || 1,
-                }))
-                handleRestart()
-              }}
-            />
-          </label>
+      <div className={`control-group dense advanced-shell ${isCustomHardwareToolsVisible ? 'open' : ''}`}>
+        <div className="control-label">
+          <span>Manual performance controls</span>
+          <small>Advanced</small>
         </div>
-      ) : null}
+        {!isCustomHardwareToolsVisible ? (
+          <>
+            <button
+              className="ghost-button advanced-toggle"
+              type="button"
+              onClick={() => setIsCustomHardwareToolsOpen(true)}
+            >
+              Open manual controls
+            </button>
+            <small>
+              Keep manual speed overrides tucked away unless you are modeling a custom or benchmarked rig.
+            </small>
+          </>
+        ) : (
+          <>
+            <div className="advanced-header-row">
+              <strong className="advanced-heading">Manual prefill, decode, and TTFT overrides</strong>
+              {hardware.id !== 'custom' ? (
+                <button
+                  className="ghost-button advanced-toggle"
+                  type="button"
+                  onClick={() => setIsCustomHardwareToolsOpen(false)}
+                >
+                  Collapse
+                </button>
+              ) : null}
+            </div>
+            {hardware.id !== 'custom' ? (
+              <div className="source-note">
+                Select `Custom speeds` in Hardware to make these values drive the lap directly.
+              </div>
+            ) : null}
+            <div className="custom-grid">
+              <label className="control-group">
+                <span>Prefill tok/s</span>
+                <input
+                  id="custom-prefill"
+                  name="customPrefillTps"
+                  min="1"
+                  step="1"
+                  type="number"
+                  value={customMetrics.prefillTps}
+                  onChange={(event) => {
+                    setCustomMetrics((current) => ({
+                      ...current,
+                      prefillTps: Number(event.target.value) || 1,
+                    }))
+                    handleRestart()
+                  }}
+                />
+              </label>
+              <label className="control-group">
+                <span>Decode tok/s</span>
+                <input
+                  id="custom-decode"
+                  name="customDecodeTps"
+                  min="0.1"
+                  step="0.1"
+                  type="number"
+                  value={customMetrics.decodeTps}
+                  onChange={(event) => {
+                    setCustomMetrics((current) => ({
+                      ...current,
+                      decodeTps: Number(event.target.value) || 0.1,
+                    }))
+                    handleRestart()
+                  }}
+                />
+              </label>
+              <label className="control-group">
+                <span>TTFT ms</span>
+                <input
+                  id="custom-ttft"
+                  name="customTtftMs"
+                  min="1"
+                  step="1"
+                  type="number"
+                  value={customMetrics.ttftMs}
+                  onChange={(event) => {
+                    setCustomMetrics((current) => ({
+                      ...current,
+                      ttftMs: Number(event.target.value) || 1,
+                    }))
+                    handleRestart()
+                  }}
+                />
+              </label>
+            </div>
+          </>
+        )}
+      </div>
 
       <label className="control-group">
         <div className="control-label">
