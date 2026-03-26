@@ -160,6 +160,42 @@ function getInitialShareState() {
   }
 }
 
+function buildShareParams({
+  hardwareId,
+  compareHardwareId,
+  modelId,
+  workloadId,
+  contextTokens,
+  isPromptExpanded,
+  customHardwareProfile,
+  customMetrics,
+}) {
+  const params = new URLSearchParams({
+    hw: hardwareId,
+    cmp: compareHardwareId,
+    m: modelId,
+    w: workloadId,
+    ctx: String(contextTokens),
+  })
+
+  if (isPromptExpanded) {
+    params.set('prompt', 'expanded')
+  }
+
+  if (hardwareId === 'custom' || compareHardwareId === 'custom') {
+    params.set('cname', customHardwareProfile.name)
+    params.set('cspec', customHardwareProfile.spec)
+    if (customHardwareProfile.memoryGb != null) {
+      params.set('cmem', String(customHardwareProfile.memoryGb))
+    }
+    params.set('cp', String(customMetrics.prefillTps))
+    params.set('cd', String(customMetrics.decodeTps))
+    params.set('ct', String(customMetrics.ttftMs))
+  }
+
+  return params
+}
+
 function uniqueFamilies(items) {
   return ['all', ...new Set(items.map((item) => item.family).filter(Boolean))]
 }
@@ -335,27 +371,53 @@ function estimateModelMemoryGb(model) {
   return baseWeightGb * overheadMultiplier
 }
 
-function assessModelFit(hardware, model) {
+function estimateKvCacheGb(model, workload) {
+  const totalTokens = Math.max((workload?.promptTokens ?? 0) + (workload?.responseTokens ?? 0), 0)
+  if (!totalTokens) return 0
+
+  const paramsB = Math.max(model.paramsB ?? 8, 0.5)
+  const kvCachePer64kGb = paramsB * 0.8
+  return (totalTokens / 65536) * kvCachePer64kGb
+}
+
+function estimateRuntimeOverheadGb(model) {
+  const weightGb = estimateModelMemoryGb(model)
+  return Math.max(0.6, weightGb * 0.08)
+}
+
+function assessModelFit(hardware, model, workload) {
+  const weightGb = estimateModelMemoryGb(model)
+  const kvCacheGb = estimateKvCacheGb(model, workload)
+  const runtimeOverheadGb = estimateRuntimeOverheadGb(model)
+  const requiredGb = weightGb + kvCacheGb + runtimeOverheadGb
+
   if (hardware.memoryGb == null) {
     return {
       fits: null,
       availableGb: null,
-      requiredGb: estimateModelMemoryGb(model),
-      message: 'Memory fit is unknown for custom hardware.',
+      requiredGb,
+      weightGb,
+      kvCacheGb,
+      runtimeOverheadGb,
+      message: `Memory fit is unknown for custom hardware. LapTime estimates about ${requiredGb.toFixed(1)} GB total at this context, including ${weightGb.toFixed(1)} GB of weights and ${kvCacheGb.toFixed(1)} GB of context cache.`,
       status: 'unknown',
     }
   }
 
-  const requiredGb = estimateModelMemoryGb(model)
   const availableGb = hardware.memoryGb
+  const headroomGb = availableGb - requiredGb
 
   if (requiredGb > availableGb) {
     return {
       fits: false,
       availableGb,
       requiredGb,
+      weightGb,
+      kvCacheGb,
+      runtimeOverheadGb,
+      headroomGb,
       status: 'unfit',
-      message: `This model likely will not fit in memory. Estimated requirement is about ${requiredGb.toFixed(1)} GB versus ${availableGb} GB available.`,
+      message: `At ${workload.promptTokens.toLocaleString()} prompt tokens, LapTime estimates about ${requiredGb.toFixed(1)} GB total (${weightGb.toFixed(1)} GB weights, ${kvCacheGb.toFixed(1)} GB context cache, ${runtimeOverheadGb.toFixed(1)} GB runtime overhead) versus ${availableGb} GB available.`,
     }
   }
 
@@ -364,8 +426,12 @@ function assessModelFit(hardware, model) {
       fits: true,
       availableGb,
       requiredGb,
+      weightGb,
+      kvCacheGb,
+      runtimeOverheadGb,
+      headroomGb,
       status: 'tight',
-      message: `This is a tight fit. Estimated requirement is about ${requiredGb.toFixed(1)} GB of the ${availableGb} GB available, so overhead and long contexts could still cause issues.`,
+      message: `This is a tight fit at the current context. LapTime estimates about ${requiredGb.toFixed(1)} GB total (${weightGb.toFixed(1)} GB weights, ${kvCacheGb.toFixed(1)} GB context cache, ${runtimeOverheadGb.toFixed(1)} GB runtime overhead), leaving roughly ${headroomGb.toFixed(1)} GB of headroom.`,
     }
   }
 
@@ -373,8 +439,12 @@ function assessModelFit(hardware, model) {
     fits: true,
     availableGb,
     requiredGb,
+    weightGb,
+    kvCacheGb,
+    runtimeOverheadGb,
+    headroomGb,
     status: 'fit',
-    message: `Estimated model memory is about ${requiredGb.toFixed(1)} GB on ${availableGb} GB available.`,
+    message: `Estimated total memory at this context is about ${requiredGb.toFixed(1)} GB (${weightGb.toFixed(1)} GB weights, ${kvCacheGb.toFixed(1)} GB context cache, ${runtimeOverheadGb.toFixed(1)} GB runtime overhead) on ${availableGb} GB available.`,
   }
 }
 
@@ -519,12 +589,12 @@ function App() {
   const workload = resolveWorkload(selectedWorkload, customPreset, contextTokens)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
   const runCoverage = getBenchmarkCoverage(getBenchmarkEntry(hardware.id, model.id))
-  const fitAssessment = assessModelFit(hardware, model)
+  const fitAssessment = assessModelFit(hardware, model, workload)
   const compareHardware =
     hardwareEntries.find((item) => item.id === compareHardwareId) ?? hardwareEntries[2]
   const compareModel = model
   const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
-  const compareFitAssessment = assessModelFit(compareHardware, compareModel)
+  const compareFitAssessment = assessModelFit(compareHardware, compareModel, workload)
   const platformFilteredHardware =
     hardwarePlatformFilter === 'all'
       ? hardwareEntries
@@ -550,7 +620,7 @@ function App() {
   )
   const visibleModelEntries = visibleModelOptions.map((option) => ({
     ...option,
-    fitAssessment: assessModelFit(hardware, option),
+    fitAssessment: assessModelFit(hardware, option, workload),
   }))
   const comparePlatformFilteredHardware =
     compareHardwarePlatformFilter === 'all'
@@ -572,7 +642,7 @@ function App() {
       : modelOptions.filter((option) => option.family === catalogFamilyFilter)
   const catalogEntries = catalogModels.map((entry) => ({
     ...entry,
-    fitAssessment: assessModelFit(hardware, entry),
+    fitAssessment: assessModelFit(hardware, entry, workload),
     benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardwareId, entry.id)),
   }))
 
@@ -665,6 +735,38 @@ function App() {
   }, [theme])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const params = buildShareParams({
+      hardwareId,
+      compareHardwareId,
+      modelId,
+      workloadId,
+      contextTokens,
+      isPromptExpanded,
+      customHardwareProfile,
+      customMetrics,
+    })
+    const nextSearch = `?${params.toString()}`
+    const currentHash = window.location.hash
+    const currentUrl = `${window.location.pathname}${window.location.search}${currentHash}`
+    const nextUrl = `${window.location.pathname}${nextSearch}${currentHash}`
+
+    if (currentUrl !== nextUrl) {
+      window.history.replaceState({}, '', nextUrl)
+    }
+  }, [
+    compareHardwareId,
+    contextTokens,
+    customHardwareProfile,
+    customMetrics,
+    hardwareId,
+    isPromptExpanded,
+    modelId,
+    workloadId,
+  ])
+
+  useEffect(() => {
     if (!isPlaying) {
       return undefined
     }
@@ -750,29 +852,16 @@ function App() {
 
   function buildShareUrl(sectionId) {
     if (typeof window === 'undefined') return ''
-
-    const params = new URLSearchParams({
-      hw: hardwareId,
-      cmp: compareHardwareId,
-      m: modelId,
-      w: workloadId,
-      ctx: String(contextTokens),
+    const params = buildShareParams({
+      hardwareId,
+      compareHardwareId,
+      modelId,
+      workloadId,
+      contextTokens,
+      isPromptExpanded,
+      customHardwareProfile,
+      customMetrics,
     })
-
-    if (isPromptExpanded) {
-      params.set('prompt', 'expanded')
-    }
-
-    if (hardwareId === 'custom' || compareHardwareId === 'custom') {
-      params.set('cname', customHardwareProfile.name)
-      params.set('cspec', customHardwareProfile.spec)
-      if (customHardwareProfile.memoryGb != null) {
-        params.set('cmem', String(customHardwareProfile.memoryGb))
-      }
-      params.set('cp', String(customMetrics.prefillTps))
-      params.set('cd', String(customMetrics.decodeTps))
-      params.set('ct', String(customMetrics.ttftMs))
-    }
 
     return `${window.location.origin}${window.location.pathname}?${params.toString()}#${sectionId}`
   }
@@ -893,6 +982,7 @@ function App() {
         catalogFamilyFilter={catalogFamilyFilter}
         setCatalogFamilyFilter={setCatalogFamilyFilter}
         catalogEntries={catalogEntries}
+        contextTokens={workload.promptTokens}
       />
 
       <MethodologySection

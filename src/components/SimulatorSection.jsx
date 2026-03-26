@@ -556,8 +556,10 @@ function SimulatorSection({
       </div>
       {fitAssessment.availableGb ? (
         <div className="source-note">
-          Estimated model memory: {fitAssessment.requiredGb.toFixed(1)} GB · available memory:{' '}
-          {fitAssessment.availableGb} GB
+          Estimated memory split: {fitAssessment.weightGb.toFixed(1)} GB weights ·{' '}
+          {fitAssessment.kvCacheGb.toFixed(1)} GB context cache ·{' '}
+          {fitAssessment.runtimeOverheadGb.toFixed(1)} GB runtime overhead ·{' '}
+          {fitAssessment.requiredGb.toFixed(1)} GB total on {fitAssessment.availableGb} GB available
         </div>
       ) : null}
       <div className="source-note">
@@ -628,8 +630,11 @@ function SimulatorSection({
                 but this setup is projected to miss memory requirements in a real local run.
               </p>
               <p>
-                Needs about {fitAssessment.requiredGb.toFixed(1)} GB for this model versus{' '}
-                {fitAssessment.availableGb} GB available on this hardware.
+                LapTime estimates {fitAssessment.weightGb.toFixed(1)} GB for weights,{' '}
+                {fitAssessment.kvCacheGb.toFixed(1)} GB for context cache, and{' '}
+                {fitAssessment.runtimeOverheadGb.toFixed(1)} GB for runtime overhead. That lands at{' '}
+                {fitAssessment.requiredGb.toFixed(1)} GB total versus {fitAssessment.availableGb} GB
+                available on this hardware.
               </p>
             </div>
           ) : null}

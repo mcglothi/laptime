@@ -6,6 +6,7 @@ function CatalogSection({
   catalogFamilyFilter,
   setCatalogFamilyFilter,
   catalogEntries,
+  contextTokens,
 }) {
   function getCoverageLabel(coverage) {
     if (coverage === 'exact') return 'Benchmark-backed'
@@ -36,6 +37,7 @@ function CatalogSection({
         </div>
         <div className="source-note">
           {catalogEntries.length} models visible · fit badges reflect the currently selected hardware
+          and the current {contextTokens.toLocaleString()}-token context
         </div>
       </div>
 
