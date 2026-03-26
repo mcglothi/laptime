@@ -350,63 +350,71 @@ function SimulatorSection({
           <span>Model</span>
           <small>Track</small>
         </div>
-        <div className="chip-row">
-          {modelFamilyOptions.map((family) => (
-            <button
-              key={family}
-              className={`filter-chip ${modelFamilyFilter === family ? 'active' : ''}`}
-              type="button"
-              onClick={() => setModelFamilyFilter(family)}
-            >
-              {family === 'all' ? 'All' : family}
-            </button>
-          ))}
+        <div className="filter-cluster">
+          <div className="filter-cluster-label">Family</div>
+          <div className="chip-row">
+            {modelFamilyOptions.map((family) => (
+              <button
+                key={family}
+                className={`filter-chip ${modelFamilyFilter === family ? 'active' : ''}`}
+                type="button"
+                onClick={() => setModelFamilyFilter(family)}
+              >
+                {family === 'all' ? 'All families' : family}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="select-dot-legend" aria-label="Model benchmark coverage filters">
-          <div className="coverage-filter-label">Coverage on {hardware.name}</div>
-          <button
-            className={`filter-chip coverage-chip ${modelCoverageFilter === 'all' ? 'active' : ''}`}
-            type="button"
-            onClick={() => setModelCoverageFilter('all')}
-          >
-            All coverage ({modelCoverageCounts.all})
-          </button>
-          <button
-            className={`filter-chip coverage-chip ${modelCoverageFilter === 'exact' ? 'active' : ''}`}
-            type="button"
-            disabled={modelCoverageCounts.exact === 0}
-            onClick={() => setModelCoverageFilter('exact')}
-          >
-            <span className="select-dot-symbol" aria-hidden="true">🟢</span>
-            Benchmark-backed ({modelCoverageCounts.exact})
-          </button>
-          <button
-            className={`filter-chip coverage-chip ${modelCoverageFilter === 'source-backed' ? 'active' : ''}`}
-            type="button"
-            disabled={modelCoverageCounts['source-backed'] === 0}
-            onClick={() => setModelCoverageFilter('source-backed')}
-          >
-            <span className="select-dot-symbol" aria-hidden="true">🔵</span>
-            Source-backed ({modelCoverageCounts['source-backed']})
-          </button>
-          <button
-            className={`filter-chip coverage-chip ${modelCoverageFilter === 'community-runtime' ? 'active' : ''}`}
-            type="button"
-            disabled={modelCoverageCounts['community-runtime'] === 0}
-            onClick={() => setModelCoverageFilter('community-runtime')}
-          >
-            <span className="select-dot-symbol" aria-hidden="true">🟡</span>
-            Community runtime ({modelCoverageCounts['community-runtime']})
-          </button>
-          <button
-            className={`filter-chip coverage-chip ${modelCoverageFilter === 'none' ? 'active' : ''}`}
-            type="button"
-            disabled={modelCoverageCounts.none === 0}
-            onClick={() => setModelCoverageFilter('none')}
-          >
-            <span className="select-dot-symbol" aria-hidden="true">⚪</span>
-            Estimate ({modelCoverageCounts.none})
-          </button>
+        <div className="filter-cluster filter-cluster-coverage" aria-label="Model benchmark coverage filters">
+          <div className="filter-cluster-heading">
+            <div className="filter-cluster-label">Source quality on {hardware.name}</div>
+            <div className="filter-cluster-note">Counts reflect the currently selected hardware.</div>
+          </div>
+          <div className="select-dot-legend">
+            <button
+              className={`filter-chip coverage-chip ${modelCoverageFilter === 'all' ? 'active' : ''}`}
+              type="button"
+              onClick={() => setModelCoverageFilter('all')}
+            >
+              Any source ({modelCoverageCounts.all})
+            </button>
+            <button
+              className={`filter-chip coverage-chip ${modelCoverageFilter === 'exact' ? 'active' : ''}`}
+              type="button"
+              disabled={modelCoverageCounts.exact === 0}
+              onClick={() => setModelCoverageFilter('exact')}
+            >
+              <span className="select-dot-symbol" aria-hidden="true">🟢</span>
+              Benchmark-backed ({modelCoverageCounts.exact})
+            </button>
+            <button
+              className={`filter-chip coverage-chip ${modelCoverageFilter === 'source-backed' ? 'active' : ''}`}
+              type="button"
+              disabled={modelCoverageCounts['source-backed'] === 0}
+              onClick={() => setModelCoverageFilter('source-backed')}
+            >
+              <span className="select-dot-symbol" aria-hidden="true">🔵</span>
+              Source-backed ({modelCoverageCounts['source-backed']})
+            </button>
+            <button
+              className={`filter-chip coverage-chip ${modelCoverageFilter === 'community-runtime' ? 'active' : ''}`}
+              type="button"
+              disabled={modelCoverageCounts['community-runtime'] === 0}
+              onClick={() => setModelCoverageFilter('community-runtime')}
+            >
+              <span className="select-dot-symbol" aria-hidden="true">🟡</span>
+              Community runtime ({modelCoverageCounts['community-runtime']})
+            </button>
+            <button
+              className={`filter-chip coverage-chip ${modelCoverageFilter === 'none' ? 'active' : ''}`}
+              type="button"
+              disabled={modelCoverageCounts.none === 0}
+              onClick={() => setModelCoverageFilter('none')}
+            >
+              <span className="select-dot-symbol" aria-hidden="true">⚪</span>
+              Estimate ({modelCoverageCounts.none})
+            </button>
+          </div>
         </div>
         <input
           id="model-search"

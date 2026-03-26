@@ -515,16 +515,39 @@
   color: var(--fit-warn-text);
 }
 
+.filter-cluster {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.72rem 0.78rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.95rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+    var(--panel-soft);
+}
+
+.filter-cluster-heading {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.filter-cluster-label {
+  color: var(--heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.filter-cluster-note {
+  color: var(--text-soft);
+  font-size: 0.77rem;
+}
+
 .select-dot-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem 0.8rem;
-}
-
-.coverage-filter-label {
-  width: 100%;
-  color: var(--text-soft);
-  font-size: 0.77rem;
 }
 
 .coverage-chip {
