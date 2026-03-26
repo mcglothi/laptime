@@ -696,6 +696,33 @@
   color: #e2ebff;
 }
 
+:root[data-theme='dark'] .catalog-card-current {
+  border-color: rgba(126, 210, 255, 0.52);
+  background:
+    radial-gradient(circle at top right, rgba(114, 195, 255, 0.2), transparent 42%),
+    var(--panel);
+  box-shadow:
+    var(--panel-shadow),
+    0 0 0 1px rgba(114, 195, 255, 0.2),
+    0 0 32px rgba(62, 152, 230, 0.22);
+}
+
+:root[data-theme='dark'] .catalog-current-pill {
+  background: rgba(114, 195, 255, 0.2);
+  border-color: rgba(142, 208, 255, 0.44);
+  color: #d9f2ff;
+}
+
+:root[data-theme='dark'] .source-list article:target {
+  border-color: rgba(126, 210, 255, 0.54);
+  background:
+    radial-gradient(circle at top right, rgba(114, 195, 255, 0.22), transparent 46%),
+    var(--panel-soft);
+  box-shadow:
+    0 0 0 1px rgba(114, 195, 255, 0.18),
+    0 0 36px rgba(72, 167, 245, 0.24);
+}
+
 .source-note-link {
   color: var(--accent);
 }
@@ -1380,6 +1407,33 @@
   font-size: 0.9rem;
 }
 
+.catalog-card-current {
+  border-color: rgba(112, 198, 255, 0.48);
+  background:
+    radial-gradient(circle at top right, rgba(114, 195, 255, 0.18), transparent 44%),
+    var(--panel);
+  box-shadow:
+    var(--panel-shadow),
+    0 0 0 1px rgba(114, 195, 255, 0.18),
+    0 0 28px rgba(52, 140, 214, 0.16);
+}
+
+.catalog-current-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.65rem;
+  border-radius: 999px;
+  padding: 0.28rem 0.56rem;
+  border: 1px solid rgba(114, 195, 255, 0.38);
+  background: rgba(114, 195, 255, 0.14);
+  color: #0f4c72;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .catalog-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1674,6 +1728,20 @@
   margin-top: 0.3rem;
   font-size: 0.9rem;
   overflow-wrap: anywhere;
+}
+
+.source-list article {
+  scroll-margin-top: 6rem;
+}
+
+.source-list article:target {
+  border-color: rgba(112, 198, 255, 0.5);
+  background:
+    radial-gradient(circle at top right, rgba(114, 195, 255, 0.18), transparent 48%),
+    var(--panel-soft);
+  box-shadow:
+    0 0 0 1px rgba(114, 195, 255, 0.16),
+    0 0 34px rgba(63, 152, 229, 0.2);
 }
 
 .source-link {

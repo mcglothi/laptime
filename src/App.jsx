@@ -882,6 +882,7 @@ function App() {
       />
 
       <CatalogSection
+        selectedModelId={modelId}
         modelFamilyOptions={modelFamilyOptions}
         catalogFamilyFilter={catalogFamilyFilter}
         setCatalogFamilyFilter={setCatalogFamilyFilter}

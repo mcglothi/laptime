@@ -1,6 +1,7 @@
 import SectionHeading from './SectionHeading'
 
 function CatalogSection({
+  selectedModelId,
   modelFamilyOptions,
   catalogFamilyFilter,
   setCatalogFamilyFilter,
@@ -40,11 +41,15 @@ function CatalogSection({
 
       <div className="catalog-grid">
         {catalogEntries.map((entry) => (
-          <article key={entry.id} className="catalog-card">
+          <article
+            key={entry.id}
+            className={`catalog-card${entry.id === selectedModelId ? ' catalog-card-current' : ''}`}
+          >
             <div className="catalog-header">
               <strong>{entry.name}</strong>
               <span>{entry.family}</span>
             </div>
+            {entry.id === selectedModelId ? <div className="catalog-current-pill">Current selection</div> : null}
             <p>{entry.fit}</p>
             <div className="catalog-meta">
               <span>{entry.quant}</span>
