@@ -1279,6 +1279,13 @@
   font-size: 0.92rem;
 }
 
+.hf-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: start;
+  gap: 0.45rem;
+}
+
 .hf-search-results {
   display: grid;
   gap: 0.55rem;

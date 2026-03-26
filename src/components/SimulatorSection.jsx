@@ -440,7 +440,7 @@ function SimulatorSection({
                 }
               }}
             />
-            <div className="submission-actions">
+            <div className="hf-import-actions">
               <button
                 className="ghost-button"
                 type="button"
@@ -455,8 +455,10 @@ function SimulatorSection({
                 {huggingFaceImportState.status === 'loading'
                   ? hasExactRepoInput
                     ? 'Importing...'
-                    : 'Searching...'
-                  : 'Import exact repo'}
+                    : 'Searching Hugging Face...'
+                  : hasExactRepoInput
+                    ? 'Import from Hugging Face'
+                    : 'Search Hugging Face'}
               </button>
             </div>
             <small>
