@@ -2,9 +2,66 @@ import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
 import ShareSheet from './ShareSheet'
 
+const SOURCE_EXPLORER_TARGETS = [
+  {
+    pattern: 'LocalScore',
+    target: '#source-localscore',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-0.8B-MLX-9bit',
+    target: '#source-inferencerlabs-qwen3-5-0-8b-mlx-9bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-2B-MLX-9bit',
+    target: '#source-inferencerlabs-qwen3-5-2b-mlx-9bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-4B-MLX-4.5bit',
+    target: '#source-inferencerlabs-qwen3-5-4b-mlx-4-5bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-9B-MLX-4.5bit',
+    target: '#source-inferencerlabs-qwen3-5-9b-mlx-4-5bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-9B-MLX-9bit',
+    target: '#source-inferencerlabs-qwen3-5-9b-mlx-9bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-27B-MLX-4.5bit',
+    target: '#source-inferencerlabs-qwen3-5-27b-mlx-4-5bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-27B-MLX-7bit',
+    target: '#source-inferencerlabs-qwen3-5-27b-mlx-7bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-35B-A3B-MLX-5.5bit',
+    target: '#source-inferencerlabs-qwen3-5-35b-a3b-mlx-5-5bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-122B-A10B-MLX-6.5bit',
+    target: '#source-inferencerlabs-qwen3-5-122b-a10b-mlx-6-5bit',
+  },
+  {
+    pattern: 'inferencerlabs Qwen3.5-122B-A10B-MLX-9bit',
+    target: '#source-inferencerlabs-qwen3-5-122b-a10b-mlx-9bit',
+  },
+  {
+    pattern: 'inferencerlabs NVIDIA-Nemotron-3-Super-120B-A12B-MLX-4.5bit',
+    target: '#source-inferencerlabs-nvidia-nemotron-3-super-120b-a12b-mlx-4-5bit',
+  },
+  {
+    pattern: 'NVIDIA Developer Forums DGX Spark vLLM MXFP4 post',
+    target: '#source-nvidia-developer-forums-dgx-spark-gpt-oss-post',
+  },
+]
+
 function getSourceExplorerTarget(coverage, metricsSource) {
-  if (coverage !== 'exact') return null
-  if (metricsSource?.includes('LocalScore')) return '#source-localscore'
+  if (!['exact', 'source-backed', 'community-runtime'].includes(coverage)) return null
+
+  const matchedTarget = SOURCE_EXPLORER_TARGETS.find((entry) => metricsSource?.includes(entry.pattern))
+  if (matchedTarget) return matchedTarget.target
   return '#sources'
 }
 
