@@ -16,7 +16,7 @@ function getCoverageTone(coverage) {
   return 'estimate'
 }
 
-function getCoverageExplanation(coverage, hardware, model, metrics) {
+function getCoverageExplanation(coverage, hardware, model) {
   if (coverage === 'exact') {
     return `This lap is using a direct benchmark row for ${hardware.name} and ${model.name}, so prefill, decode, and first-token timing all come from a published measurement instead of extrapolation.`
   }
@@ -122,7 +122,7 @@ function SimulatorSection({
   const useCaseLabel = getUseCaseLabel(metrics, fitAssessment)
   const coverageLabel = getCoverageLabel(runCoverage)
   const coverageTone = getCoverageTone(runCoverage)
-  const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, metrics)
+  const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
