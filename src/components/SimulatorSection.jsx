@@ -202,6 +202,7 @@ function SimulatorSection({
   modelFamilyOptions,
   modelFamilyFilter,
   setModelFamilyFilter,
+  modelCoverageCounts,
   modelCoverageFilter,
   setModelCoverageFilter,
   huggingFaceImportInput,
@@ -362,44 +363,49 @@ function SimulatorSection({
           ))}
         </div>
         <div className="select-dot-legend" aria-label="Model benchmark coverage filters">
+          <div className="coverage-filter-label">Coverage on {hardware.name}</div>
           <button
             className={`filter-chip coverage-chip ${modelCoverageFilter === 'all' ? 'active' : ''}`}
             type="button"
             onClick={() => setModelCoverageFilter('all')}
           >
-            All coverage
+            All coverage ({modelCoverageCounts.all})
           </button>
           <button
             className={`filter-chip coverage-chip ${modelCoverageFilter === 'exact' ? 'active' : ''}`}
             type="button"
+            disabled={modelCoverageCounts.exact === 0}
             onClick={() => setModelCoverageFilter('exact')}
           >
             <span className="select-dot-symbol" aria-hidden="true">🟢</span>
-            Benchmark-backed
+            Benchmark-backed ({modelCoverageCounts.exact})
           </button>
           <button
             className={`filter-chip coverage-chip ${modelCoverageFilter === 'source-backed' ? 'active' : ''}`}
             type="button"
+            disabled={modelCoverageCounts['source-backed'] === 0}
             onClick={() => setModelCoverageFilter('source-backed')}
           >
             <span className="select-dot-symbol" aria-hidden="true">🔵</span>
-            Source-backed
+            Source-backed ({modelCoverageCounts['source-backed']})
           </button>
           <button
             className={`filter-chip coverage-chip ${modelCoverageFilter === 'community-runtime' ? 'active' : ''}`}
             type="button"
+            disabled={modelCoverageCounts['community-runtime'] === 0}
             onClick={() => setModelCoverageFilter('community-runtime')}
           >
             <span className="select-dot-symbol" aria-hidden="true">🟡</span>
-            Community runtime
+            Community runtime ({modelCoverageCounts['community-runtime']})
           </button>
           <button
             className={`filter-chip coverage-chip ${modelCoverageFilter === 'none' ? 'active' : ''}`}
             type="button"
+            disabled={modelCoverageCounts.none === 0}
             onClick={() => setModelCoverageFilter('none')}
           >
             <span className="select-dot-symbol" aria-hidden="true">⚪</span>
-            Estimate
+            Estimate ({modelCoverageCounts.none})
           </button>
         </div>
         <input

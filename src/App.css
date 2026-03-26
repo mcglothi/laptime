@@ -521,6 +521,12 @@
   gap: 0.45rem 0.8rem;
 }
 
+.coverage-filter-label {
+  width: 100%;
+  color: var(--text-soft);
+  font-size: 0.77rem;
+}
+
 .coverage-chip {
   display: inline-flex;
   align-items: center;

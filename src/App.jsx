@@ -784,6 +784,15 @@ function App() {
     modelFamilyFilter === 'all'
       ? activeModelOptions
       : activeModelOptions.filter((option) => option.family === modelFamilyFilter)
+  const modelCoverageCounts = familyFilteredModels.reduce(
+    (counts, option) => {
+      const coverage = getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id))
+      counts.all += 1
+      counts[coverage] = (counts[coverage] ?? 0) + 1
+      return counts
+    },
+    { all: 0, exact: 0, 'source-backed': 0, 'community-runtime': 0, none: 0 },
+  )
   const coverageFilteredModels =
     modelCoverageFilter === 'all'
       ? familyFilteredModels
@@ -1301,6 +1310,7 @@ function App() {
         modelFamilyOptions={modelFamilyOptions}
         modelFamilyFilter={modelFamilyFilter}
         setModelFamilyFilter={setModelFamilyFilter}
+        modelCoverageCounts={modelCoverageCounts}
         modelCoverageFilter={modelCoverageFilter}
         setModelCoverageFilter={handleModelCoverageFilterChange}
         huggingFaceImportInput={huggingFaceImportInput}
