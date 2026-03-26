@@ -259,6 +259,34 @@
   color: #9a1f1f;
 }
 
+:root[data-theme='dark'] .playback-feel-pill-instant,
+:root[data-theme='dark'] .compare-experience-instant {
+  border-color: rgba(116, 219, 145, 0.46);
+  background: rgba(82, 196, 117, 0.24);
+  color: #dcffe7;
+}
+
+:root[data-theme='dark'] .playback-feel-pill-smooth,
+:root[data-theme='dark'] .compare-experience-smooth {
+  border-color: rgba(240, 211, 107, 0.48);
+  background: rgba(232, 196, 71, 0.24);
+  color: #fff3bf;
+}
+
+:root[data-theme='dark'] .playback-feel-pill-waiting,
+:root[data-theme='dark'] .compare-experience-waiting {
+  border-color: rgba(255, 177, 101, 0.5);
+  background: rgba(255, 154, 64, 0.24);
+  color: #ffe1c0;
+}
+
+:root[data-theme='dark'] .playback-feel-pill-batch,
+:root[data-theme='dark'] .compare-experience-batch {
+  border-color: rgba(255, 132, 132, 0.5);
+  background: rgba(255, 102, 102, 0.24);
+  color: #ffdcdc;
+}
+
 .playback-insight-card p {
   margin: 0;
   color: var(--heading);
