@@ -167,6 +167,17 @@ function hasExactHuggingFaceRepoInput(value) {
   }
 }
 
+function getContextPressureTone(fitAssessment) {
+  if (fitAssessment.availableGb == null) return 'unknown'
+
+  const usageRatio = fitAssessment.requiredGb / fitAssessment.availableGb
+
+  if (usageRatio >= 1) return 'critical'
+  if (usageRatio >= 0.94) return 'warning'
+  if (usageRatio >= 0.8) return 'caution'
+  return 'healthy'
+}
+
 function SimulatorSection({
   hardware,
   hardwareId,
@@ -245,6 +256,8 @@ function SimulatorSection({
   const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, benchmarkMatrix)
   const sourceExplorerTarget = getSourceExplorerTarget(runCoverage, metrics.source)
   const hasExactRepoInput = hasExactHuggingFaceRepoInput(huggingFaceImportInput)
+  const contextPressureTone = getContextPressureTone(fitAssessment)
+  const contextSliderProgress = `${(contextTokens / 128000) * 100}%`
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -564,6 +577,8 @@ function SimulatorSection({
         <input
           id="context-size"
           name="contextSize"
+          className={`context-slider context-slider-${contextPressureTone}`}
+          style={{ '--context-slider-progress': contextSliderProgress }}
           min="0"
           max="128000"
           step="256"
