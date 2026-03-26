@@ -15,6 +15,13 @@ function getCoverageLabel(coverage) {
   return 'Estimated / catalog only'
 }
 
+function getExperienceTone(experience) {
+  if (experience === 'Feels instant') return 'instant'
+  if (experience === 'Feels smooth') return 'smooth'
+  if (experience === 'Feels like waiting') return 'waiting'
+  return 'batch'
+}
+
 function ComparisonSection({
   hardware,
   model,
@@ -52,6 +59,8 @@ function ComparisonSection({
   const winnerThresholdMs = 40
   const hasWinner = !comparisonProjected && Math.abs(laneATotalMs - laneBTotalMs) > winnerThresholdMs
   const winnerLane = !hasWinner ? null : laneATotalMs < laneBTotalMs ? 'a' : 'b'
+  const laneAExperienceTone = getExperienceTone(metrics.experience)
+  const laneBExperienceTone = getExperienceTone(compareMetrics.experience)
 
   return (
     <section className="compare-section" id="comparison">
@@ -238,7 +247,7 @@ function ComparisonSection({
               <p>{fitAssessment.message}</p>
             </div>
           ) : null}
-          <div className="compare-experience">{metrics.experience}</div>
+          <div className={`compare-experience compare-experience-${laneAExperienceTone}`}>{metrics.experience}</div>
         </article>
 
         <article className={`compare-card ${winnerLane === 'b' ? 'compare-card-winner' : ''}`}>
@@ -321,7 +330,7 @@ function ComparisonSection({
               <p>{compareFitAssessment.message}</p>
             </div>
           ) : null}
-          <div className="compare-experience">{compareMetrics.experience}</div>
+          <div className={`compare-experience compare-experience-${laneBExperienceTone}`}>{compareMetrics.experience}</div>
         </article>
       </div>
 

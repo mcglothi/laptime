@@ -79,6 +79,13 @@ function getCoverageTone(coverage) {
   return 'estimate'
 }
 
+function getExperienceTone(experience) {
+  if (experience === 'Feels instant') return 'instant'
+  if (experience === 'Feels smooth') return 'smooth'
+  if (experience === 'Feels like waiting') return 'waiting'
+  return 'batch'
+}
+
 function describeModelEstimate(model) {
   if (model.scalingParamsB && model.scalingParamsB !== model.paramsB) {
     return `${model.name} is scaled using about ${model.scalingParamsB}B active parameters and ${model.quant} behavior instead of treating it like a plain ${model.paramsB}B dense model.`
@@ -205,6 +212,7 @@ function SimulatorSection({
   const useCaseLabel = getUseCaseLabel(metrics, fitAssessment)
   const coverageLabel = getCoverageLabel(runCoverage)
   const coverageTone = getCoverageTone(runCoverage)
+  const experienceTone = getExperienceTone(metrics.experience)
   const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, benchmarkMatrix)
   const sourceExplorerTarget = getSourceExplorerTarget(runCoverage, metrics.source)
 
@@ -665,7 +673,7 @@ function SimulatorSection({
       <div className="playback-insight-grid">
         <div className="playback-insight-card playback-insight-card-story">
           <div className="block-label">What This Lap Tells You</div>
-          <div className="playback-feel-pill">{metrics.experience}</div>
+          <div className={`playback-feel-pill playback-feel-pill-${experienceTone}`}>{metrics.experience}</div>
           <p>{bottleneckLabel}</p>
           <small>{useCaseLabel}</small>
         </div>
