@@ -133,7 +133,6 @@ function ComparisonSection({
             than a clean runnable matchup.
           </div>
         ) : null}
-        {runtimeRaceWarning ? <div className="compare-caveat compare-caveat-runtime">{runtimeRaceWarning}</div> : null}
         <div className="race-lanes">
           <div className="race-lane">
             <div className="race-lane-head">
@@ -206,6 +205,7 @@ function ComparisonSection({
               Top speed / generation
             </span>
           </div>
+          {runtimeRaceWarning ? <div className="race-footnote">{runtimeRaceWarning}</div> : null}
         </div>
       </div>
 

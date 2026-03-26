@@ -2098,16 +2098,11 @@
   color: var(--fit-bad-text);
 }
 
-.compare-caveat-runtime {
-  background: color-mix(in srgb, #ffb14a 12%, var(--panel-soft));
-  border-color: color-mix(in srgb, #ffb14a 40%, var(--border));
-  color: color-mix(in srgb, #8c4e00 72%, var(--text));
-}
-
-:root[data-theme='dark'] .compare-caveat-runtime {
-  background: color-mix(in srgb, #ffb14a 16%, var(--panel-soft));
-  border-color: rgba(255, 191, 101, 0.42);
-  color: #ffe0b3;
+.race-footnote {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  padding-top: 0.1rem;
 }
 
 .delta-grid {
