@@ -2,6 +2,36 @@ import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
 import ShareSheet from './ShareSheet'
 
+function getCoverageLabel(coverage) {
+  if (coverage === 'exact') return 'Exact benchmark'
+  if (coverage === 'source-backed') return 'Source-backed runtime'
+  if (coverage === 'community-runtime') return 'Community runtime'
+  return 'Estimated run'
+}
+
+function getCoverageTone(coverage) {
+  if (coverage === 'exact') return 'exact'
+  if (coverage === 'source-backed') return 'source'
+  if (coverage === 'community-runtime') return 'community'
+  return 'estimate'
+}
+
+function getCoverageExplanation(coverage, hardware, model, metrics) {
+  if (coverage === 'exact') {
+    return `This lap is using a direct benchmark row for ${hardware.name} and ${model.name}, so prefill, decode, and first-token timing all come from a published measurement instead of extrapolation.`
+  }
+
+  if (coverage === 'source-backed') {
+    return `This lap is anchored by a hardware-specific runtime source for ${model.name}. LapTime is using the published runtime data it has, then filling any missing pieces with benchmark-backed baseline modeling rather than pretending the full lap was measured.`
+  }
+
+  if (coverage === 'community-runtime') {
+    return `This lap is anchored by a concrete community runtime report for ${hardware.name} and ${model.name}. LapTime is using the published throughput from that report and keeping the row explicitly labeled as community runtime so it is easier to audit than a generic estimate.`
+  }
+
+  return `This lap is estimated from ${hardware.name}'s benchmark-backed baseline plus model-size and quant assumptions for ${model.name}. It is useful for rough buyer feel, but it should be treated as a hypothetical until a direct benchmark or runtime row replaces it.`
+}
+
 function getFitLabel(status) {
   if (status === 'unfit') return "Won't fit"
   if (status === 'tight') return 'Tight fit'
@@ -64,6 +94,7 @@ function SimulatorSection({
   customPreset,
   setCustomPreset,
   metrics,
+  runCoverage,
   benchmarkMatrix,
   communityBenchmarks,
   dataSources,
@@ -89,6 +120,9 @@ function SimulatorSection({
   const streamShare = ((metrics.streamingSeconds * 1000) / totalTimelineMs) * 100
   const bottleneckLabel = getBottleneckLabel(metrics)
   const useCaseLabel = getUseCaseLabel(metrics, fitAssessment)
+  const coverageLabel = getCoverageLabel(runCoverage)
+  const coverageTone = getCoverageTone(runCoverage)
+  const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, metrics)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -408,6 +442,19 @@ function SimulatorSection({
         Source: {metrics.source}
         {metrics.source === 'Benchmark-backed via LocalScore' ? ` · ${model.name}` : ''}
       </div>
+      <div className={`run-provenance run-provenance-${coverageTone}`}>
+        <div className="run-provenance-header">
+          <span className={`run-provenance-badge run-provenance-badge-${coverageTone}`}>
+            {coverageLabel}
+          </span>
+          <strong>
+            {coverageTone === 'estimate'
+              ? 'This lap is modeled, not measured.'
+              : 'This lap includes explicit source provenance.'}
+          </strong>
+        </div>
+        <p>{coverageExplanation}</p>
+      </div>
       {fitAssessment.availableGb ? (
         <div className="source-note">
           Estimated model memory: {fitAssessment.requiredGb.toFixed(1)} GB · available memory:{' '}
@@ -530,6 +577,14 @@ function SimulatorSection({
           <div className="playback-feel-pill">{metrics.experience}</div>
           <p>{bottleneckLabel}</p>
           <small>{useCaseLabel}</small>
+        </div>
+        <div className={`playback-insight-card playback-insight-card-audit playback-insight-card-audit-${coverageTone}`}>
+          <div className="block-label">How This Was Derived</div>
+          <div className={`run-provenance-badge run-provenance-badge-${coverageTone}`}>
+            {coverageLabel}
+          </div>
+          <p>{coverageExplanation}</p>
+          <small>{metrics.source}</small>
         </div>
       </div>
     </div>

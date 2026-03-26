@@ -195,6 +195,29 @@
     var(--panel);
 }
 
+.playback-insight-card-audit {
+  border-style: dashed;
+}
+
+.playback-insight-card-audit-estimate {
+  background:
+    radial-gradient(circle at top right, rgba(255, 196, 92, 0.12), transparent 52%),
+    var(--panel);
+}
+
+.playback-insight-card-audit-community {
+  background:
+    radial-gradient(circle at top right, rgba(124, 198, 255, 0.12), transparent 52%),
+    var(--panel);
+}
+
+.playback-insight-card-audit-source,
+.playback-insight-card-audit-exact {
+  background:
+    radial-gradient(circle at top right, rgba(91, 140, 255, 0.1), transparent 48%),
+    var(--panel);
+}
+
 .playback-feel-pill {
   display: inline-flex;
   width: fit-content;
@@ -561,6 +584,81 @@
 .source-note {
   color: var(--text-soft);
   font-size: 0.8rem;
+}
+
+.run-provenance {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.95rem;
+  padding: 0.85rem 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.run-provenance-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.run-provenance-header strong {
+  color: var(--heading);
+  font-size: 0.92rem;
+}
+
+.run-provenance p {
+  margin: 0;
+  color: var(--heading);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.run-provenance-estimate {
+  background: color-mix(in srgb, #ffc252 14%, var(--panel-soft));
+  border-color: color-mix(in srgb, #ffc252 48%, var(--border));
+}
+
+.run-provenance-community {
+  background: color-mix(in srgb, #72c3ff 14%, var(--panel-soft));
+  border-color: color-mix(in srgb, #72c3ff 46%, var(--border));
+}
+
+.run-provenance-source,
+.run-provenance-exact {
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel-soft));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+}
+
+.run-provenance-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.34rem 0.68rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.run-provenance-badge-estimate {
+  background: rgba(255, 194, 82, 0.18);
+  border-color: rgba(255, 194, 82, 0.34);
+  color: #6b4900;
+}
+
+.run-provenance-badge-community {
+  background: rgba(114, 195, 255, 0.16);
+  border-color: rgba(114, 195, 255, 0.34);
+  color: #0f4c72;
+}
+
+.run-provenance-badge-source,
+.run-provenance-badge-exact {
+  background: rgba(91, 140, 255, 0.16);
+  border-color: rgba(91, 140, 255, 0.34);
+  color: color-mix(in srgb, var(--accent) 72%, white 28%);
 }
 
 .source-note-link {

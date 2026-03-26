@@ -512,6 +512,7 @@ function App() {
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
   const workload = resolveWorkload(selectedWorkload, customPreset, contextTokens)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
+  const runCoverage = getBenchmarkCoverage(getBenchmarkEntry(hardware.id, model.id))
   const fitAssessment = assessModelFit(hardware, model)
   const compareHardware =
     hardwareEntries.find((item) => item.id === compareHardwareId) ?? hardwareEntries[2]
@@ -833,6 +834,7 @@ function App() {
         customPreset={customPreset}
         setCustomPreset={setCustomPreset}
         metrics={metrics}
+        runCoverage={runCoverage}
         benchmarkMatrix={benchmarkMatrix}
         communityBenchmarks={communityBenchmarks}
         dataSources={dataSources}
