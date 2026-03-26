@@ -201,7 +201,7 @@
 
 .playback-insight-card-audit-estimate {
   background:
-    radial-gradient(circle at top right, rgba(255, 196, 92, 0.12), transparent 52%),
+    radial-gradient(circle at top right, rgba(255, 107, 129, 0.14), transparent 52%),
     var(--panel);
 }
 
@@ -614,8 +614,8 @@
 }
 
 .run-provenance-estimate {
-  background: color-mix(in srgb, #ffc252 14%, var(--panel-soft));
-  border-color: color-mix(in srgb, #ffc252 48%, var(--border));
+  background: color-mix(in srgb, #ff6b81 14%, var(--panel-soft));
+  border-color: color-mix(in srgb, #ff6b81 48%, var(--border));
 }
 
 .run-provenance-community {
@@ -643,9 +643,9 @@
 }
 
 .run-provenance-badge-estimate {
-  background: rgba(255, 194, 82, 0.18);
-  border-color: rgba(255, 194, 82, 0.34);
-  color: #6b4900;
+  background: rgba(255, 107, 129, 0.16);
+  border-color: rgba(255, 107, 129, 0.34);
+  color: #7a1026;
 }
 
 .run-provenance-badge-community {
