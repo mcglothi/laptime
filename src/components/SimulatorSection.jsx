@@ -151,6 +151,22 @@ function getUseCaseLabel(metrics, fitAssessment) {
   return 'Better suited to batchy or long-context workflows than snappy back-and-forth chat.'
 }
 
+function hasExactHuggingFaceRepoInput(value) {
+  const normalized = String(value ?? '').trim()
+  if (!normalized) return false
+
+  try {
+    const parsedUrl = new URL(normalized)
+    if (!parsedUrl.hostname.includes('huggingface.co')) {
+      return false
+    }
+
+    return parsedUrl.pathname.split('/').filter(Boolean).length >= 2
+  } catch {
+    return /^([A-Za-z0-9._-]+\/[A-Za-z0-9._-]+)$/.test(normalized)
+  }
+}
+
 function SimulatorSection({
   hardware,
   hardwareId,
@@ -228,6 +244,7 @@ function SimulatorSection({
   const experienceTone = getExperienceTone(metrics.experience)
   const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, benchmarkMatrix)
   const sourceExplorerTarget = getSourceExplorerTarget(runCoverage, metrics.source)
+  const hasExactRepoInput = hasExactHuggingFaceRepoInput(huggingFaceImportInput)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -417,23 +434,33 @@ function SimulatorSection({
               value={huggingFaceImportInput}
               placeholder="Qwen, Qwen/Qwen2.5-7B-Instruct, or huggingface.co URL"
               onChange={(event) => setHuggingFaceImportInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                }
+              }}
             />
             <div className="submission-actions">
               <button
                 className="ghost-button"
                 type="button"
                 disabled={huggingFaceImportState.status === 'loading'}
-                onClick={() => {
-                  importHuggingFaceModel()
-                  handleRestart({ collapseMobile: true })
+                onClick={async () => {
+                  const importedModel = await importHuggingFaceModel()
+                  if (importedModel) {
+                    handleRestart({ collapseMobile: true })
+                  }
                 }}
               >
-                {huggingFaceImportState.status === 'loading' ? 'Importing...' : 'Import from Hugging Face'}
+                {huggingFaceImportState.status === 'loading'
+                  ? hasExactRepoInput
+                    ? 'Importing...'
+                    : 'Searching...'
+                  : 'Import exact repo'}
               </button>
             </div>
             <small>
-              Pull a public model repo into the selector using Hugging Face metadata. Speeds remain
-              modeled until a real lap replaces the estimate.
+              Type to search public models in real time, or paste an exact repo id to import it directly.
             </small>
             {huggingFaceImportState.message ? (
               <div className={`source-note hf-import-status hf-import-status-${huggingFaceImportState.status}`}>

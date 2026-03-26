@@ -870,57 +870,64 @@ function App() {
     }
   }
 
+  const searchHuggingFaceModels = useCallback(async (inputValue) => {
+    const searchQuery = normalizeHuggingFaceSearchQuery(inputValue)
+
+    if (!searchQuery || searchQuery.length < 2) {
+      setHuggingFaceSearchQuery('')
+      setHuggingFaceSearchResults([])
+      setHuggingFaceImportState((current) =>
+        current.status === 'idle' && !current.message
+          ? current
+          : {
+              status: 'idle',
+              message: '',
+            },
+      )
+      return null
+    }
+
+    setHuggingFaceSearchQuery(searchQuery)
+    setHuggingFaceSearchResults([])
+    setHuggingFaceImportState({
+      status: 'loading',
+      message: `Searching Hugging Face for "${searchQuery}"...`,
+    })
+
+    try {
+      const params = new URLSearchParams({ q: searchQuery })
+      const response = await fetch(`/api/huggingface-search?${params.toString()}`)
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? 'Hugging Face search failed.')
+      }
+
+      const results = Array.isArray(payload.results) ? payload.results : []
+      setHuggingFaceSearchResults(results)
+      setHuggingFaceImportState({
+        status: results.length > 0 ? 'success' : 'error',
+        message:
+          results.length > 0
+            ? `Found ${results.length} public model${results.length === 1 ? '' : 's'} for "${searchQuery}".`
+            : `No public text-generation models matched "${searchQuery}".`,
+      })
+      return results
+    } catch (error) {
+      setHuggingFaceImportState({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Hugging Face search failed.',
+      })
+      return null
+    }
+  }, [])
+
   const importHuggingFaceModel = useCallback(async (inputValue = huggingFaceImportInput, options = {}) => {
     const { selectImportedModel = true } = options
     const repo = parseHuggingFaceRepoReference(inputValue)
 
     if (!repo) {
-      const searchQuery = normalizeHuggingFaceSearchQuery(inputValue)
-
-      if (!searchQuery) {
-        setHuggingFaceSearchQuery('')
-        setHuggingFaceSearchResults([])
-        setHuggingFaceImportState({
-          status: 'error',
-          message: 'Enter a Hugging Face repo like Qwen/Qwen2.5-7B-Instruct, a huggingface.co model URL, or a search like qwen.',
-        })
-        return null
-      }
-
-      setHuggingFaceImportInput(searchQuery)
-      setHuggingFaceSearchQuery(searchQuery)
-      setHuggingFaceSearchResults([])
-      setHuggingFaceImportState({
-        status: 'loading',
-        message: `Searching Hugging Face for "${searchQuery}"...`,
-      })
-
-      try {
-        const params = new URLSearchParams({ q: searchQuery })
-        const response = await fetch(`/api/huggingface-search?${params.toString()}`)
-        const payload = await response.json()
-
-        if (!response.ok) {
-          throw new Error(payload.error ?? 'Hugging Face search failed.')
-        }
-
-        const results = Array.isArray(payload.results) ? payload.results : []
-        setHuggingFaceSearchResults(results)
-        setHuggingFaceImportState({
-          status: results.length > 0 ? 'success' : 'error',
-          message:
-            results.length > 0
-              ? `Found ${results.length} public model${results.length === 1 ? '' : 's'} for "${searchQuery}".`
-              : `No public text-generation models matched "${searchQuery}".`,
-        })
-        return null
-      } catch (error) {
-        setHuggingFaceImportState({
-          status: 'error',
-          message: error instanceof Error ? error.message : 'Hugging Face search failed.',
-        })
-        return null
-      }
+      return searchHuggingFaceModels(inputValue)
     }
 
     setHuggingFaceImportInput(repo)
@@ -961,13 +968,68 @@ function App() {
       })
       return null
     }
-  }, [huggingFaceImportInput, huggingFaceQuantOverride])
+  }, [huggingFaceImportInput, huggingFaceQuantOverride, searchHuggingFaceModels])
 
   useEffect(() => {
     if (!importedModelPayload) return
 
     setImportedModel(buildImportedModelOption(importedModelPayload, huggingFaceQuantOverride))
   }, [huggingFaceQuantOverride, importedModelPayload])
+
+  useEffect(() => {
+    const trimmedInput = huggingFaceImportInput.trim()
+    const exactRepo = parseHuggingFaceRepoReference(trimmedInput)
+
+    if (!trimmedInput) {
+      setHuggingFaceSearchQuery('')
+      setHuggingFaceSearchResults([])
+      setHuggingFaceImportState((current) =>
+        current.status === 'idle' && !current.message
+          ? current
+          : {
+              status: 'idle',
+              message: '',
+            },
+      )
+      return undefined
+    }
+
+    if (exactRepo) {
+      setHuggingFaceSearchQuery('')
+      setHuggingFaceSearchResults([])
+      setHuggingFaceImportState((current) => {
+        const nextMessage = `Exact repo detected: ${exactRepo}. Click import to load it.`
+        if (current.status === 'success' && current.message === nextMessage) {
+          return current
+        }
+        return {
+          status: 'success',
+          message: nextMessage,
+        }
+      })
+      return undefined
+    }
+
+    if (normalizeHuggingFaceSearchQuery(trimmedInput).length < 2) {
+      setHuggingFaceSearchQuery('')
+      setHuggingFaceSearchResults([])
+      setHuggingFaceImportState((current) =>
+        current.status === 'idle' && !current.message
+          ? current
+          : {
+              status: 'idle',
+              message: '',
+            },
+      )
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      searchHuggingFaceModels(trimmedInput)
+    }, 320)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [huggingFaceImportInput, searchHuggingFaceModels])
 
   function applyParsedSubmission(parsedLap) {
     syncParsedLap(parsedLap)
