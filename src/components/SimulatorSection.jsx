@@ -82,6 +82,14 @@ function getCoverageTone(coverage) {
   return 'estimate'
 }
 
+function getRuntimeTone(runtimeInfo) {
+  if (!runtimeInfo) return 'unknown'
+  if (runtimeInfo.supportStatus === 'supported') return 'supported'
+  if (runtimeInfo.supportStatus === 'mismatch') return 'warning'
+  if (runtimeInfo.status === 'modeled') return 'modeled'
+  return 'unknown'
+}
+
 function getExperienceTone(experience) {
   if (experience === 'Feels instant') return 'instant'
   if (experience === 'Feels smooth') return 'smooth'
@@ -264,6 +272,7 @@ function SimulatorSection({
   const hasExactRepoInput = hasExactHuggingFaceRepoInput(huggingFaceImportInput)
   const contextPressureTone = getContextPressureTone(fitAssessment)
   const contextSliderProgress = `${((contextTokens - CONTEXT_TOKENS_MIN) / (CONTEXT_TOKENS_MAX - CONTEXT_TOKENS_MIN)) * 100}%`
+  const runtimeTone = getRuntimeTone(metrics.runtimeInfo)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -822,6 +831,10 @@ function SimulatorSection({
           </>
         ) : null}
       </div>
+      <div className={`runtime-note runtime-note-${runtimeTone}`}>
+        <strong>Runtime lens:</strong> {metrics.runtimeInfo.label}
+        <span> · {metrics.runtimeInfo.detail}</span>
+      </div>
       <div className={`run-provenance run-provenance-${coverageTone}`}>
         <div className="run-provenance-header">
           <span className={`run-provenance-badge run-provenance-badge-${coverageTone}`}>
@@ -972,6 +985,9 @@ function SimulatorSection({
           </div>
           <p>{coverageExplanation}</p>
           <small>{metrics.source}</small>
+          <small className={`playback-runtime playback-runtime-${runtimeTone}`}>
+            Runtime lens: {metrics.runtimeInfo.label}
+          </small>
         </div>
       </div>
     </div>

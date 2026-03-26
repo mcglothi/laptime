@@ -22,6 +22,42 @@ function getExperienceTone(experience) {
   return 'batch'
 }
 
+function getRuntimeTone(runtimeInfo) {
+  if (!runtimeInfo) return 'unknown'
+  if (runtimeInfo.supportStatus === 'supported') return 'supported'
+  if (runtimeInfo.supportStatus === 'mismatch') return 'warning'
+  if (runtimeInfo.status === 'modeled') return 'modeled'
+  return 'unknown'
+}
+
+function getRuntimeRaceWarning(metrics, compareMetrics, hardware, compareHardware) {
+  const laneARuntime = metrics.runtimeInfo
+  const laneBRuntime = compareMetrics.runtimeInfo
+
+  if (!laneARuntime || !laneBRuntime) return null
+
+  if (laneARuntime.status === 'modeled' || laneBRuntime.status === 'modeled') {
+    return 'At least one lane is still modeled from a hardware baseline, so runtime-specific frontend deltas are not normalized yet.'
+  }
+
+  if (laneARuntime.label !== laneBRuntime.label) {
+    if (
+      (hardware.platform === 'Apple Silicon' && laneBRuntime.label === 'vLLM') ||
+      (compareHardware.platform === 'Apple Silicon' && laneARuntime.label === 'vLLM')
+    ) {
+      return `These lanes are using different runtime stacks (${laneARuntime.label} vs ${laneBRuntime.label}). Apple Silicon does not have a native vLLM lane in LapTime, so treat this as a hardware-plus-runtime comparison, not a clean frontend shootout.`
+    }
+
+    return `These lanes are using different runtime stacks (${laneARuntime.label} vs ${laneBRuntime.label}), so the race is useful for end-user feel but not a pure frontend-vs-frontend benchmark.`
+  }
+
+  if (laneARuntime.status.startsWith('unspecified') || laneBRuntime.status.startsWith('unspecified')) {
+    return 'At least one lane comes from a source that did not name the frontend explicitly, so runtime apples-to-apples conclusions would be too strong here.'
+  }
+
+  return null
+}
+
 function ComparisonSection({
   hardware,
   model,
@@ -61,6 +97,9 @@ function ComparisonSection({
   const winnerLane = !hasWinner ? null : laneATotalMs < laneBTotalMs ? 'a' : 'b'
   const laneAExperienceTone = getExperienceTone(metrics.experience)
   const laneBExperienceTone = getExperienceTone(compareMetrics.experience)
+  const runtimeRaceWarning = getRuntimeRaceWarning(metrics, compareMetrics, hardware, compareHardware)
+  const laneARuntimeTone = getRuntimeTone(metrics.runtimeInfo)
+  const laneBRuntimeTone = getRuntimeTone(compareMetrics.runtimeInfo)
 
   return (
     <section className="compare-section" id="comparison">
@@ -94,6 +133,7 @@ function ComparisonSection({
             than a clean runnable matchup.
           </div>
         ) : null}
+        {runtimeRaceWarning ? <div className="compare-caveat compare-caveat-runtime">{runtimeRaceWarning}</div> : null}
         <div className="race-lanes">
           <div className="race-lane">
             <div className="race-lane-head">
@@ -119,6 +159,9 @@ function ComparisonSection({
             <div className={`race-lane-meta ${winnerLane === 'a' ? 'race-lane-meta-winner' : ''}`}>
               <span>{formatSeconds(metrics.totalSeconds)}</span>
               <span>{metrics.experience}</span>
+            </div>
+            <div className={`compare-runtime-chip compare-runtime-chip-${laneARuntimeTone}`}>
+              Runtime: {metrics.runtimeInfo.label}
             </div>
           </div>
 
@@ -146,6 +189,9 @@ function ComparisonSection({
             <div className={`race-lane-meta ${winnerLane === 'b' ? 'race-lane-meta-winner' : ''}`}>
               <span>{formatSeconds(compareMetrics.totalSeconds)}</span>
               <span>{compareMetrics.experience}</span>
+            </div>
+            <div className={`compare-runtime-chip compare-runtime-chip-${laneBRuntimeTone}`}>
+              Runtime: {compareMetrics.runtimeInfo.label}
             </div>
           </div>
 
@@ -248,6 +294,10 @@ function ComparisonSection({
             </div>
           ) : null}
           <div className={`compare-experience compare-experience-${laneAExperienceTone}`}>{metrics.experience}</div>
+          <div className={`compare-runtime-note compare-runtime-note-${laneARuntimeTone}`}>
+            <strong>Runtime lens:</strong> {metrics.runtimeInfo.label}
+            <span> · {metrics.runtimeInfo.detail}</span>
+          </div>
         </article>
 
         <article className={`compare-card ${winnerLane === 'b' ? 'compare-card-winner' : ''}`}>
@@ -331,6 +381,10 @@ function ComparisonSection({
             </div>
           ) : null}
           <div className={`compare-experience compare-experience-${laneBExperienceTone}`}>{compareMetrics.experience}</div>
+          <div className={`compare-runtime-note compare-runtime-note-${laneBRuntimeTone}`}>
+            <strong>Runtime lens:</strong> {compareMetrics.runtimeInfo.label}
+            <span> · {compareMetrics.runtimeInfo.detail}</span>
+          </div>
         </article>
       </div>
 

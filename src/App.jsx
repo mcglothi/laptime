@@ -623,37 +623,121 @@ function matchesCoverageFilter(coverage, filter) {
   return coverage === filter
 }
 
+function formatRuntimeList(items) {
+  if (!items.length) return 'No runtime guidance yet'
+  if (items.length === 1) return items[0]
+  if (items.length === 2) return `${items[0]} and ${items[1]}`
+  return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`
+}
+
+function getSupportedRuntimeLabels(hardware) {
+  if (hardware.id === 'custom') return ['Manual override']
+  if (hardware.platform === 'Apple Silicon') return ['MLX', 'llama.cpp', 'Ollama']
+  if (hardware.platform === 'AMD GPU') return ['ROCm backend', 'Vulkan backend', 'llama.cpp', 'Ollama']
+  if (hardware.platform === 'AMD Strix Halo') return ['llama.cpp', 'Ollama']
+  if (hardware.platform === 'NVIDIA GPU' || hardware.platform === 'GB10 Systems') {
+    return ['vLLM', 'llama.cpp', 'Ollama']
+  }
+  return ['llama.cpp', 'Ollama']
+}
+
+function inferRuntimeLabel(source) {
+  const normalized = String(source ?? '').toLowerCase()
+
+  if (!normalized) return null
+  if (normalized.includes('manual')) return 'Manual override'
+  if (normalized.includes('vllm')) return 'vLLM'
+  if (normalized.includes('mlx')) return 'MLX'
+  if (normalized.includes('ollama')) return 'Ollama'
+  if (normalized.includes('llama.cpp')) return 'llama.cpp'
+  if (normalized.includes('rocm')) return 'ROCm backend'
+  if (normalized.includes('vulkan')) return 'Vulkan backend'
+  return null
+}
+
+function resolveRuntimeInfo(hardware, benchmark, source) {
+  const supportedRuntimes = getSupportedRuntimeLabels(hardware)
+  const coverage = getBenchmarkCoverage(benchmark)
+  const observedRuntime = inferRuntimeLabel(source)
+
+  if (hardware.id === 'custom') {
+    return {
+      label: 'Manual override',
+      status: 'manual',
+      supportStatus: 'supported',
+      supportedRuntimes,
+      detail: 'You are supplying the lap data directly, so LapTime is not assuming a frontend or backend.',
+    }
+  }
+
+  if (!benchmark) {
+    return {
+      label: 'Modeled from hardware baseline',
+      status: 'modeled',
+      supportStatus: 'unknown',
+      supportedRuntimes,
+      detail: `No direct row exists yet, so LapTime is modeling this run. Plausible local stacks for ${hardware.name} include ${formatRuntimeList(
+        supportedRuntimes,
+      )}.`,
+    }
+  }
+
+  if (!observedRuntime) {
+    return {
+      label: 'Runtime not specified by source',
+      status: coverage === 'exact' ? 'unspecified-measured' : 'unspecified-source',
+      supportStatus: 'unknown',
+      supportedRuntimes,
+      detail: `The source for this row does not name the frontend or backend explicitly. Treat it as a real lap, but not as a clean runtime-vs-runtime result. Common stacks on ${hardware.name} include ${formatRuntimeList(
+        supportedRuntimes,
+      )}.`,
+    }
+  }
+
+  return {
+    label: observedRuntime,
+    status: 'observed',
+    supportStatus: supportedRuntimes.includes(observedRuntime) ? 'supported' : 'mismatch',
+    supportedRuntimes,
+    detail: `This row is anchored to ${observedRuntime}. Common local stacks on ${hardware.name} include ${formatRuntimeList(
+      supportedRuntimes,
+    )}.`,
+  }
+}
+
 function calculateMetrics(hardware, model, workload, customMetrics) {
   let prefillTps
   let decodeTps
   let ttftMs
   let source
+  let benchmark = null
 
   if (hardware.id === 'custom') {
     prefillTps = customMetrics.prefillTps
     decodeTps = customMetrics.decodeTps
     ttftMs = customMetrics.ttftMs
     source = hardware.source ?? 'Manual'
-    } else {
-      const benchmark = getBenchmarkEntry(hardware.id, model.id)
-      if (benchmark) {
-        prefillTps = benchmark.prefillTps
-        decodeTps = benchmark.decodeTps
+  } else {
+    benchmark = getBenchmarkEntry(hardware.id, model.id)
+    if (benchmark) {
+      prefillTps = benchmark.prefillTps
+      decodeTps = benchmark.decodeTps
       ttftMs = benchmark.ttftMs
       source = benchmark.source
-      } else {
-        const scaling = getModelScaling(model)
-        prefillTps = hardware.prefillBase / scaling.prefillFactor
-        decodeTps = hardware.decodeBase / scaling.decodeFactor
-        ttftMs = hardware.ttftBase * scaling.ttftFactor
-        source = `${hardware.source} · ${model.name} modeled from the hardware reference baseline`
-      }
+    } else {
+      const scaling = getModelScaling(model)
+      prefillTps = hardware.prefillBase / scaling.prefillFactor
+      decodeTps = hardware.decodeBase / scaling.decodeFactor
+      ttftMs = hardware.ttftBase * scaling.ttftFactor
+      source = `${hardware.source} · ${model.name} modeled from the hardware reference baseline`
     }
+  }
 
   ttftMs += workload.promptTokens * 0.16
   const prefillSeconds = workload.promptTokens / prefillTps
   const streamingSeconds = workload.responseTokens / decodeTps
   const totalSeconds = prefillSeconds + ttftMs / 1000 + streamingSeconds
+  const runtimeInfo = resolveRuntimeInfo(hardware, benchmark, source)
 
   return {
     prefillTps,
@@ -664,6 +748,7 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
     totalSeconds,
     experience: getExperience(totalSeconds),
     source,
+    runtimeInfo,
   }
 }
 
