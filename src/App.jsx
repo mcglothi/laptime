@@ -490,22 +490,28 @@ function App() {
   const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!window.location.hash) return
+    if (typeof window === 'undefined') return undefined
 
-    const targetId = window.location.hash.replace('#', '')
-    if (!targetId) return
+    function scrollToCurrentHash() {
+      if (!window.location.hash) return
 
-    const scrollToHash = () => {
+      const targetId = window.location.hash.replace('#', '')
+      if (!targetId) return
+
       const target = document.getElementById(targetId)
       if (target) {
         target.scrollIntoView({ behavior: 'auto', block: 'start' })
       }
     }
 
-    const timeoutId = window.setTimeout(scrollToHash, 60)
-    return () => window.clearTimeout(timeoutId)
-  }, [hardwareId, compareHardwareId, modelId, workloadId, contextTokens])
+    const timeoutId = window.setTimeout(scrollToCurrentHash, 60)
+    window.addEventListener('hashchange', scrollToCurrentHash)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      window.removeEventListener('hashchange', scrollToCurrentHash)
+    }
+  }, [])
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
   const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
