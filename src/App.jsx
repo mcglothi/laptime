@@ -369,6 +369,14 @@ function getHardwarePlatform(hardware) {
     return 'AMD Strix Halo'
   }
   if (
+    hardware.id.includes('amd-r9700') ||
+    hardware.id.includes('amd-w7900') ||
+    hardware.id.includes('amd-w6800') ||
+    hardware.name.includes('Radeon')
+  ) {
+    return 'AMD GPU'
+  }
+  if (
     hardware.name.includes('RTX') ||
     hardware.name.includes('A100') ||
     hardware.name.includes('H100')
