@@ -648,6 +648,17 @@
   color: #7a1026;
 }
 
+:root[data-theme='dark'] .run-provenance-estimate {
+  background: color-mix(in srgb, #ff6b81 18%, var(--panel-soft));
+  border-color: rgba(255, 132, 150, 0.46);
+}
+
+:root[data-theme='dark'] .run-provenance-badge-estimate {
+  background: rgba(255, 122, 142, 0.22);
+  border-color: rgba(255, 146, 162, 0.46);
+  color: #ffd8de;
+}
+
 .run-provenance-badge-community {
   background: rgba(114, 195, 255, 0.16);
   border-color: rgba(114, 195, 255, 0.34);
