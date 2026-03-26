@@ -398,21 +398,21 @@ function calculateMetrics(hardware, model, workload, customMetrics) {
     decodeTps = customMetrics.decodeTps
     ttftMs = customMetrics.ttftMs
     source = hardware.source ?? 'Manual'
-  } else {
-    const benchmark = getBenchmarkEntry(hardware.id, model.id)
-    if (benchmark) {
-      prefillTps = benchmark.prefillTps
-      decodeTps = benchmark.decodeTps
+    } else {
+      const benchmark = getBenchmarkEntry(hardware.id, model.id)
+      if (benchmark) {
+        prefillTps = benchmark.prefillTps
+        decodeTps = benchmark.decodeTps
       ttftMs = benchmark.ttftMs
       source = benchmark.source
-    } else {
-      const scaling = getModelScaling(model)
-      prefillTps = hardware.prefillBase / scaling.prefillFactor
-      decodeTps = hardware.decodeBase / scaling.decodeFactor
-      ttftMs = hardware.ttftBase * scaling.ttftFactor
-      source = 'Estimated from benchmark-backed LocalScore baselines + model size'
+      } else {
+        const scaling = getModelScaling(model)
+        prefillTps = hardware.prefillBase / scaling.prefillFactor
+        decodeTps = hardware.decodeBase / scaling.decodeFactor
+        ttftMs = hardware.ttftBase * scaling.ttftFactor
+        source = `${hardware.source} · ${model.name} modeled from the hardware reference baseline`
+      }
     }
-  }
 
   ttftMs += workload.promptTokens * 0.16
   const prefillSeconds = workload.promptTokens / prefillTps

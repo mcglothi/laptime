@@ -16,7 +16,15 @@ function getCoverageTone(coverage) {
   return 'estimate'
 }
 
-function getCoverageExplanation(coverage, hardware, model) {
+function describeModelEstimate(model) {
+  if (model.scalingParamsB && model.scalingParamsB !== model.paramsB) {
+    return `${model.name} is scaled using about ${model.scalingParamsB}B active parameters and ${model.quant} behavior instead of treating it like a plain ${model.paramsB}B dense model.`
+  }
+
+  return `${model.name} is projected from the baseline with LapTime's ${model.quant.toLowerCase()} size curve for a ${model.paramsB}B-class model.`
+}
+
+function getCoverageExplanation(coverage, hardware, model, benchmarkMatrix) {
   if (coverage === 'exact') {
     return `This lap is using a direct benchmark row for ${hardware.name} and ${model.name}, so prefill, decode, and first-token timing all come from a published measurement instead of extrapolation.`
   }
@@ -29,7 +37,19 @@ function getCoverageExplanation(coverage, hardware, model) {
     return `This lap is anchored by a concrete community runtime report for ${hardware.name} and ${model.name}. LapTime is using the published throughput from that report and keeping the row explicitly labeled as community runtime so it is easier to audit than a generic estimate.`
   }
 
-  return `This lap is estimated from ${hardware.name}'s benchmark-backed baseline plus model-size and quant assumptions for ${model.name}. It is useful for rough buyer feel, but it should be treated as a hypothetical until a direct benchmark or runtime row replaces it.`
+  const anchorBenchmark = hardware.estimateAnchorId
+    ? benchmarkMatrix[hardware.estimateAnchorId]?.[model.id] ?? benchmarkMatrix[hardware.estimateAnchorId]?.['llama-3.1-8b']
+    : null
+
+  const hardwareExplanation = hardware.estimateAnchorName
+    ? anchorBenchmark?.coverage === 'community-runtime'
+      ? `For ${hardware.name}, LapTime anchors this estimate to the ${hardware.estimateAnchorName} community runtime row for ${model.name} because ${hardware.estimateReason}.`
+      : `For ${hardware.name}, LapTime starts from the ${hardware.estimateAnchorName} reference row because ${hardware.estimateReason}.`
+    : hardware.estimateSourceLabel
+      ? `For ${hardware.name}, the hardware lane itself is estimated from ${hardware.estimateSourceLabel} because ${hardware.estimateReason}.`
+      : `For ${hardware.name}, LapTime falls back to the closest available hardware baseline because no direct row exists yet.`
+
+  return `${hardwareExplanation} ${describeModelEstimate(model)} That makes this useful for rough planning, but it should still be treated as modeled rather than measured until a direct row replaces it.`
 }
 
 function getFitLabel(status) {
@@ -122,7 +142,7 @@ function SimulatorSection({
   const useCaseLabel = getUseCaseLabel(metrics, fitAssessment)
   const coverageLabel = getCoverageLabel(runCoverage)
   const coverageTone = getCoverageTone(runCoverage)
-  const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model)
+  const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, benchmarkMatrix)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -440,7 +460,6 @@ function SimulatorSection({
 
       <div className="source-note">
         Source: {metrics.source}
-        {metrics.source === 'Benchmark-backed via LocalScore' ? ` · ${model.name}` : ''}
       </div>
       <div className={`run-provenance run-provenance-${coverageTone}`}>
         <div className="run-provenance-header">

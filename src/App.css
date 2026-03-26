@@ -665,11 +665,35 @@
   color: #0f4c72;
 }
 
+:root[data-theme='dark'] .run-provenance-community {
+  background: color-mix(in srgb, #72c3ff 18%, var(--panel-soft));
+  border-color: rgba(122, 206, 255, 0.46);
+}
+
+:root[data-theme='dark'] .run-provenance-badge-community {
+  background: rgba(114, 195, 255, 0.22);
+  border-color: rgba(142, 208, 255, 0.46);
+  color: #d9f2ff;
+}
+
 .run-provenance-badge-source,
 .run-provenance-badge-exact {
   background: rgba(91, 140, 255, 0.16);
   border-color: rgba(91, 140, 255, 0.34);
   color: color-mix(in srgb, var(--accent) 72%, white 28%);
+}
+
+:root[data-theme='dark'] .run-provenance-source,
+:root[data-theme='dark'] .run-provenance-exact {
+  background: color-mix(in srgb, var(--accent) 16%, var(--panel-soft));
+  border-color: rgba(116, 157, 255, 0.44);
+}
+
+:root[data-theme='dark'] .run-provenance-badge-source,
+:root[data-theme='dark'] .run-provenance-badge-exact {
+  background: rgba(91, 140, 255, 0.22);
+  border-color: rgba(126, 164, 255, 0.44);
+  color: #e2ebff;
 }
 
 .source-note-link {

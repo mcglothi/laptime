@@ -286,6 +286,8 @@ export const hardwareOptions = [
     decodeBase: 18.5,
     ttftBase: 3600,
     source: 'Estimated from Apple M4 specs',
+    estimateSourceLabel: 'published Apple M4 specs',
+    estimateReason: 'this exact memory tier does not have a direct benchmark row yet',
   },
   {
     id: 'mac-mini-m4-pro-64',
@@ -298,6 +300,8 @@ export const hardwareOptions = [
     decodeBase: 31.5,
     ttftBase: 2300,
     source: 'Estimated from Apple M4 Pro specs',
+    estimateSourceLabel: 'published Apple M4 Pro specs',
+    estimateReason: 'this exact configuration does not have a direct benchmark row yet',
   },
   {
     id: 'mac-studio-m4-max-128',
@@ -310,6 +314,8 @@ export const hardwareOptions = [
     decodeBase: 58,
     ttftBase: 1600,
     source: 'Estimated from Apple M4 Max specs',
+    estimateSourceLabel: 'published Apple M4 Max specs',
+    estimateReason: 'this specific machine does not have a benchmark-backed playback row yet',
   },
   {
     id: 'macbook-air-m4-32',
@@ -322,6 +328,8 @@ export const hardwareOptions = [
     decodeBase: 16,
     ttftBase: 4300,
     source: 'Estimated from Apple M4 specs',
+    estimateSourceLabel: 'published Apple M4 specs',
+    estimateReason: 'this lightweight laptop tier does not have a direct benchmark row yet',
   },
   {
     id: 'macbook-air-m5-32',
@@ -334,6 +342,8 @@ export const hardwareOptions = [
     decodeBase: 20,
     ttftBase: 3000,
     source: 'Estimated from Apple M5 specs',
+    estimateSourceLabel: 'published Apple M5 specs',
+    estimateReason: 'this upcoming Apple tier is modeled from specs instead of a measured row',
   },
   {
     id: 'macbook-pro-m5-pro-64',
@@ -346,6 +356,8 @@ export const hardwareOptions = [
     decodeBase: 46,
     ttftBase: 1400,
     source: 'Estimated from Apple M5 Pro specs',
+    estimateSourceLabel: 'published Apple M5 Pro specs',
+    estimateReason: 'this specific M5 Pro configuration is still modeled from specs',
   },
   {
     id: 'macbook-pro-m5-max-128',
@@ -358,6 +370,8 @@ export const hardwareOptions = [
     decodeBase: 62,
     ttftBase: 980,
     source: 'Estimated from Apple M5 Max specs',
+    estimateSourceLabel: 'published Apple M5 Max specs',
+    estimateReason: 'this exact M5 Max laptop row is still derived from specs rather than a benchmark',
   },
   {
     id: 'dgx-spark-gb10',
@@ -382,6 +396,9 @@ export const hardwareOptions = [
     decodeBase: 34.9,
     ttftBase: 681,
     source: 'Estimated from LocalScore GB10 reference row',
+    estimateAnchorId: 'dgx-spark-gb10',
+    estimateAnchorName: 'NVIDIA DGX Spark',
+    estimateReason: 'both systems are GB10-class boxes with the same 128 GB unified-memory footprint',
   },
   {
     id: 'lenovo-thinkstation-pgx',
@@ -394,6 +411,9 @@ export const hardwareOptions = [
     decodeBase: 34.9,
     ttftBase: 681,
     source: 'Estimated from LocalScore GB10 reference row',
+    estimateAnchorId: 'dgx-spark-gb10',
+    estimateAnchorName: 'NVIDIA DGX Spark',
+    estimateReason: 'both systems target the same GB10-class 128 GB unified-memory platform',
   },
   {
     id: 'msi-edgexpert-ms-c931',
@@ -406,6 +426,9 @@ export const hardwareOptions = [
     decodeBase: 34.9,
     ttftBase: 681,
     source: 'Estimated from LocalScore GB10 reference row',
+    estimateAnchorId: 'dgx-spark-gb10',
+    estimateAnchorName: 'NVIDIA DGX Spark',
+    estimateReason: 'it is another GB10 128 GB unified-memory system expected to land near DGX Spark behavior',
   },
   {
     id: 'framework-desktop-ai-max-395',
@@ -418,6 +441,8 @@ export const hardwareOptions = [
     decodeBase: 33.4,
     ttftBase: 820,
     source: 'Estimated from AMD Strix Halo specs',
+    estimateSourceLabel: 'AMD Ryzen AI Max / Strix Halo specs',
+    estimateReason: 'this desktop class Strix Halo system does not have a benchmark-backed playback row yet',
   },
   {
     id: 'hp-z2-mini-g1a-ai-max-395',
@@ -430,6 +455,8 @@ export const hardwareOptions = [
     decodeBase: 30.6,
     ttftBase: 880,
     source: 'Estimated from AMD Strix Halo specs',
+    estimateSourceLabel: 'AMD Ryzen AI Max / Strix Halo specs',
+    estimateReason: 'this workstation configuration is still represented by a spec-derived baseline',
   },
   {
     id: 'rog-flow-z13-ai-max-395',
@@ -442,6 +469,8 @@ export const hardwareOptions = [
     decodeBase: 27.8,
     ttftBase: 980,
     source: 'Estimated from AMD Strix Halo specs',
+    estimateSourceLabel: 'AMD Ryzen AI Max / Strix Halo specs',
+    estimateReason: 'this portable Strix Halo device is still modeled from class-level specs',
   },
   {
     id: 'beelink-gtr9-pro',
@@ -454,6 +483,8 @@ export const hardwareOptions = [
     decodeBase: 29.4,
     ttftBase: 940,
     source: 'Estimated from Strix Halo class specs',
+    estimateSourceLabel: 'Strix Halo class specs',
+    estimateReason: 'this system is community-tracked, but the playback row is still a class-level estimate',
   },
   {
     id: 'm1-pro-32',
