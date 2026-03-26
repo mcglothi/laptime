@@ -1,5 +1,9 @@
 import SectionHeading from './SectionHeading'
 
+function getSourceAnchorId(name) {
+  return `source-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+}
+
 function SourceExplorerSection({
   sourceQuery,
   setSourceQuery,
@@ -47,7 +51,7 @@ function SourceExplorerSection({
           <div className="metrics-heading">Structured sources · {filteredStructuredSources.length}</div>
           <div className="source-list">
             {filteredStructuredSources.map((source) => (
-              <article key={source.name}>
+              <article key={source.name} id={getSourceAnchorId(source.name)}>
                 <div className="source-name-row">
                   <strong>{source.name}</strong>
                   <span className="source-type-pill">{source.type}</span>

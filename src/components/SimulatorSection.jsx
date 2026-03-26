@@ -2,8 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
 import ShareSheet from './ShareSheet'
 
+function getSourceExplorerTarget(coverage, metricsSource) {
+  if (coverage !== 'exact') return null
+  if (metricsSource?.includes('LocalScore')) return '#source-localscore'
+  return '#sources'
+}
+
 function getCoverageLabel(coverage) {
-  if (coverage === 'exact') return 'Exact benchmark'
+  if (coverage === 'exact') return 'Benchmark-backed'
   if (coverage === 'source-backed') return 'Source-backed runtime'
   if (coverage === 'community-runtime') return 'Community runtime'
   return 'Estimated run'
@@ -143,6 +149,7 @@ function SimulatorSection({
   const coverageLabel = getCoverageLabel(runCoverage)
   const coverageTone = getCoverageTone(runCoverage)
   const coverageExplanation = getCoverageExplanation(runCoverage, hardware, model, benchmarkMatrix)
+  const sourceExplorerTarget = getSourceExplorerTarget(runCoverage, metrics.source)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -460,6 +467,14 @@ function SimulatorSection({
 
       <div className="source-note">
         Source: {metrics.source}
+        {sourceExplorerTarget ? (
+          <>
+            {' '}·{' '}
+            <a className="source-note-link" href={sourceExplorerTarget}>
+              Inspect benchmark source
+            </a>
+          </>
+        ) : null}
       </div>
       <div className={`run-provenance run-provenance-${coverageTone}`}>
         <div className="run-provenance-header">

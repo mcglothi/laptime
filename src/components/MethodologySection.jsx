@@ -23,7 +23,7 @@ function MethodologySection({
       <div className="method-grid">
         <article className="method-card">
           <div className="method-kicker">Tier 1</div>
-          <h3>Exact benchmark rows drive the closest laps.</h3>
+          <h3>Benchmark-backed rows drive the closest laps.</h3>
           <p>
             When LapTime has a direct benchmark entry for a hardware and model pairing, it uses
             those published prompt, generation, and first-token values first and points back to
@@ -31,7 +31,7 @@ function MethodologySection({
           </p>
           <div className="method-metrics">
             <div>
-              <span>Exact benchmark pairs</span>
+              <span>Benchmark-backed pairs</span>
               <strong>{exactBenchmarkCount}</strong>
             </div>
             <div>
