@@ -389,19 +389,19 @@ function SimulatorSection({
         </small>
         <div className="select-dot-legend" aria-label="Model benchmark coverage legend">
           <span className="select-dot-legend-item">
-            <span className="select-dot select-dot-exact" aria-hidden="true" />
+            <span className="select-dot-symbol" aria-hidden="true">🟢</span>
             Benchmark-backed
           </span>
           <span className="select-dot-legend-item">
-            <span className="select-dot select-dot-source" aria-hidden="true" />
+            <span className="select-dot-symbol" aria-hidden="true">🔵</span>
             Source-backed
           </span>
           <span className="select-dot-legend-item">
-            <span className="select-dot select-dot-community" aria-hidden="true" />
+            <span className="select-dot-symbol" aria-hidden="true">🟡</span>
             Community runtime
           </span>
           <span className="select-dot-legend-item">
-            <span className="select-dot select-dot-estimate" aria-hidden="true" />
+            <span className="select-dot-symbol" aria-hidden="true">⚪</span>
             Estimate
           </span>
         </div>

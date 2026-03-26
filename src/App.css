@@ -529,32 +529,9 @@
   gap: 0.38rem;
 }
 
-.select-dot {
-  width: 0.56rem;
-  height: 0.56rem;
-  border-radius: 999px;
-  display: inline-block;
-  border: 1px solid transparent;
-}
-
-.select-dot-exact {
-  background: #61c089;
-  border-color: rgba(97, 192, 137, 0.45);
-}
-
-.select-dot-source {
-  background: #6ea7ff;
-  border-color: rgba(110, 167, 255, 0.45);
-}
-
-.select-dot-community {
-  background: #e7b65d;
-  border-color: rgba(231, 182, 93, 0.45);
-}
-
-.select-dot-estimate {
-  background: var(--text-soft);
-  border-color: rgba(255, 255, 255, 0.12);
+.select-dot-symbol {
+  font-size: 0.82rem;
+  line-height: 1;
 }
 
 .metric-grid {
