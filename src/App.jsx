@@ -147,7 +147,19 @@ function extractParamsFromName(value) {
   }
 }
 
-function buildImportedModelOption(payload) {
+const importedQuantOptions = [
+  'Source precision',
+  'Q4_K_M',
+  'Q6_K',
+  'Q8_0',
+  'IQ4_XS',
+  'BF16',
+  'FP16',
+  'FP8',
+  'MXFP4',
+]
+
+function buildImportedModelOption(payload, quantOverride = '') {
   const repo = payload.id ?? payload.modelId
   if (!repo) {
     throw new Error('Model repo not found in Hugging Face response.')
@@ -160,7 +172,8 @@ function buildImportedModelOption(payload) {
   const safetensorsTotal = Number(payload.safetensors?.total ?? 0)
   const nameDerivedParams = extractParamsFromName(repoName)
   const paramsB = safetensorsTotal > 0 ? safetensorsTotal / 1_000_000_000 : nameDerivedParams.paramsB
-  const quant = extractQuantLabel(repoName, safetensorsPrecision)
+  const sourceQuant = extractQuantLabel(repoName, safetensorsPrecision)
+  const quant = quantOverride || sourceQuant
   const family =
     payload.config?.model_type != null
       ? toTitleCase(payload.config.model_type)
@@ -172,6 +185,8 @@ function buildImportedModelOption(payload) {
     family,
     paramsB: paramsB != null ? Number(paramsB.toFixed(paramsB >= 20 ? 0 : 1)) : 8,
     quant,
+    importedSourceQuant: sourceQuant,
+    importedQuantOverride: quantOverride || '',
     fit: `Imported from Hugging Face (${repo}). Runtime speeds are still modeled from LapTime's baseline until a direct benchmark row exists.`,
     huggingFaceRepo: repo,
     source: 'Imported from Hugging Face metadata',
@@ -204,6 +219,7 @@ function getInitialShareState() {
     customMetrics: defaultCustomMetrics,
     hardwareId: hardwareOptions[1].id,
     huggingFaceRepo: '',
+    huggingFaceQuantOverride: '',
     modelId: modelOptions[1].id,
     workloadId: workloadOptions[0].id,
     compareHardwareId: hardwareOptions[3].id,
@@ -255,6 +271,8 @@ function getInitialShareState() {
     customMetrics,
     hardwareId: hardwareIds.has(params.get('hw')) ? params.get('hw') : defaults.hardwareId,
     huggingFaceRepo: parseHuggingFaceRepoReference(params.get('hf')) ?? defaults.huggingFaceRepo,
+    huggingFaceQuantOverride:
+      importedQuantOptions.includes(params.get('hfq')) ? params.get('hfq') : defaults.huggingFaceQuantOverride,
     compareHardwareId: hardwareIds.has(params.get('cmp'))
       ? params.get('cmp')
       : defaults.compareHardwareId,
@@ -269,6 +287,7 @@ function buildShareParams({
   hardwareId,
   compareHardwareId,
   huggingFaceRepo,
+  huggingFaceQuantOverride,
   modelId,
   workloadId,
   contextTokens,
@@ -290,6 +309,9 @@ function buildShareParams({
 
   if (huggingFaceRepo) {
     params.set('hf', huggingFaceRepo)
+    if (huggingFaceQuantOverride) {
+      params.set('hfq', huggingFaceQuantOverride)
+    }
   }
 
   if (hardwareId === 'custom' || compareHardwareId === 'custom') {
@@ -633,11 +655,13 @@ function App() {
   const [initialShareState] = useState(() => getInitialShareState())
   const [customHardwareProfile, setCustomHardwareProfile] = useState(initialShareState.customHardwareProfile)
   const [huggingFaceImportInput, setHuggingFaceImportInput] = useState(initialShareState.huggingFaceRepo)
+  const [huggingFaceQuantOverride, setHuggingFaceQuantOverride] = useState(initialShareState.huggingFaceQuantOverride)
   const [huggingFaceImportState, setHuggingFaceImportState] = useState({
     status: 'idle',
     message: '',
   })
   const [importedModel, setImportedModel] = useState(null)
+  const [importedModelPayload, setImportedModelPayload] = useState(null)
   const hardwareEntries = hardwareOptions
     .map((item) => {
       const mergedItem =
@@ -855,7 +879,8 @@ function App() {
         throw new Error(payload.error ?? 'Hugging Face import failed.')
       }
 
-      const nextImportedModel = buildImportedModelOption(payload)
+      const nextImportedModel = buildImportedModelOption(payload, huggingFaceQuantOverride)
+      setImportedModelPayload(payload)
       setImportedModel(nextImportedModel)
       setModelFamilyFilter('all')
       setCatalogFamilyFilter('all')
@@ -875,7 +900,13 @@ function App() {
       })
       return null
     }
-  }, [huggingFaceImportInput])
+  }, [huggingFaceImportInput, huggingFaceQuantOverride])
+
+  useEffect(() => {
+    if (!importedModelPayload) return
+
+    setImportedModel(buildImportedModelOption(importedModelPayload, huggingFaceQuantOverride))
+  }, [huggingFaceQuantOverride, importedModelPayload])
 
   function applyParsedSubmission(parsedLap) {
     syncParsedLap(parsedLap)
@@ -918,6 +949,7 @@ function App() {
       hardwareId,
       compareHardwareId,
       huggingFaceRepo: model.huggingFaceRepo ?? '',
+      huggingFaceQuantOverride: model.importedQuantOverride ?? '',
       modelId,
       workloadId,
       contextTokens,
@@ -938,11 +970,12 @@ function App() {
     contextTokens,
     customHardwareProfile,
     customMetrics,
-      hardwareId,
-      model.huggingFaceRepo,
-      isPromptExpanded,
-      modelId,
-      workloadId,
+    hardwareId,
+    model.huggingFaceRepo,
+    model.importedQuantOverride,
+    isPromptExpanded,
+    modelId,
+    workloadId,
   ])
 
   useEffect(() => {
@@ -1035,6 +1068,7 @@ function App() {
       hardwareId,
       compareHardwareId,
       huggingFaceRepo: model.huggingFaceRepo ?? '',
+      huggingFaceQuantOverride: model.importedQuantOverride ?? '',
       modelId,
       workloadId,
       contextTokens,
@@ -1099,6 +1133,9 @@ function App() {
         setModelFamilyFilter={setModelFamilyFilter}
         huggingFaceImportInput={huggingFaceImportInput}
         setHuggingFaceImportInput={setHuggingFaceImportInput}
+        huggingFaceQuantOptions={importedQuantOptions}
+        huggingFaceQuantOverride={huggingFaceQuantOverride}
+        setHuggingFaceQuantOverride={setHuggingFaceQuantOverride}
         huggingFaceImportState={huggingFaceImportState}
         importHuggingFaceModel={importHuggingFaceModel}
         workload={workload}

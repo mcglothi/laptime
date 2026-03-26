@@ -174,6 +174,9 @@ function SimulatorSection({
   setModelFamilyFilter,
   huggingFaceImportInput,
   setHuggingFaceImportInput,
+  huggingFaceQuantOptions,
+  huggingFaceQuantOverride,
+  setHuggingFaceQuantOverride,
   huggingFaceImportState,
   importHuggingFaceModel,
   workload,
@@ -444,6 +447,37 @@ function SimulatorSection({
           <div className={`source-note hf-import-status hf-import-status-${huggingFaceImportState.status}`}>
             {huggingFaceImportState.message}
           </div>
+        ) : null}
+        {model.huggingFaceRepo ? (
+          <>
+            <label className="control-group dense">
+              <span>Imported quant / precision</span>
+              <select
+                id="hf-quant-override"
+                name="huggingFaceQuantOverride"
+                value={huggingFaceQuantOverride}
+                onChange={(event) => {
+                  setHuggingFaceQuantOverride(event.target.value)
+                  handleRestart({ collapseMobile: true })
+                }}
+              >
+                {huggingFaceQuantOptions.map((option) => (
+                  <option key={option} value={option === 'Source precision' ? '' : option}>
+                    {option === 'Source precision'
+                      ? `Source precision (${model.importedSourceQuant ?? model.quant})`
+                      : option}
+                  </option>
+                ))}
+              </select>
+              <small>
+                Override the imported precision to see how memory fit changes for the same model.
+              </small>
+            </label>
+            <div className="source-note">
+              Imported repo: {model.huggingFaceRepo} · source precision:{' '}
+              {model.importedSourceQuant ?? model.quant}
+            </div>
+          </>
         ) : null}
       </div>
 
