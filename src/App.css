@@ -2215,6 +2215,7 @@
 }
 
 .timeline-rail {
+  --timeline-thumb-size: 1.12rem;
   position: relative;
   height: 1rem;
 }
@@ -2271,7 +2272,9 @@
   position: absolute;
   top: 50%;
   left: 0;
+  z-index: 2;
   height: 0.38rem;
+  min-width: 0.16rem;
   transform: translateY(-50%);
   pointer-events: none;
   border-radius: 999px;
@@ -2283,8 +2286,8 @@
   position: absolute;
   top: 50%;
   right: -1px;
-  width: var(--slider-thumb-size);
-  height: var(--slider-thumb-size);
+  width: var(--timeline-thumb-size);
+  height: var(--timeline-thumb-size);
   transform: translateY(-50%);
   border-radius: 999px;
   border: 2px solid color-mix(in srgb, var(--accent) 78%, white 22%);
