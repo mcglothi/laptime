@@ -212,6 +212,7 @@ function SimulatorSection({
   const [isCompactMobile, setIsCompactMobile] = useState(false)
   const [mobileEditorOpen, setMobileEditorOpen] = useState(false)
   const [isHuggingFaceImportOpen, setIsHuggingFaceImportOpen] = useState(false)
+  const isHuggingFaceImportVisible = isHuggingFaceImportOpen || Boolean(model.huggingFaceRepo)
   const totalTimelineMs = metrics.prefillSeconds * 1000 + metrics.ttftMs + metrics.streamingSeconds * 1000
   const prefillShare = ((metrics.prefillSeconds * 1000) / totalTimelineMs) * 100
   const ttftShare = (metrics.ttftMs / totalTimelineMs) * 100
@@ -239,12 +240,6 @@ function SimulatorSection({
 
     return () => mediaQuery.removeEventListener('change', syncViewport)
   }, [])
-
-  useEffect(() => {
-    if (model.huggingFaceRepo) {
-      setIsHuggingFaceImportOpen(true)
-    }
-  }, [model.huggingFaceRepo])
 
   function scrollPlaybackIntoView() {
     if (!isCompactMobile) return
@@ -420,12 +415,12 @@ function SimulatorSection({
         <p>{model.fit}</p>
       </label>
 
-      <div className={`control-group dense hf-import-shell ${isHuggingFaceImportOpen ? 'open' : ''}`}>
+      <div className={`control-group dense hf-import-shell ${isHuggingFaceImportVisible ? 'open' : ''}`}>
         <div className="control-label">
           <span>Bring your own model</span>
           <small>Hugging Face</small>
         </div>
-        {!isHuggingFaceImportOpen ? (
+        {!isHuggingFaceImportVisible ? (
           <>
             <button
               className="ghost-button hf-import-toggle"
@@ -442,13 +437,15 @@ function SimulatorSection({
           <>
             <div className="hf-import-header-row">
               <strong className="hf-import-heading">Import a public Hugging Face model</strong>
-              <button
-                className="ghost-button hf-import-toggle"
-                type="button"
-                onClick={() => setIsHuggingFaceImportOpen(false)}
-              >
-                {model.huggingFaceRepo ? 'Hide import tools' : 'Collapse'}
-              </button>
+              {!model.huggingFaceRepo ? (
+                <button
+                  className="ghost-button hf-import-toggle"
+                  type="button"
+                  onClick={() => setIsHuggingFaceImportOpen(false)}
+                >
+                  Collapse
+                </button>
+              ) : null}
             </div>
             <input
               id="hf-model-import"
