@@ -32,6 +32,14 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Build Pages Functions
+        run: >-
+          npx wrangler pages functions build functions
+          --outfile dist/_worker.js
+          --output-routes-path dist/_routes.json
+          --project-directory .
+          --build-output-directory dist
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:

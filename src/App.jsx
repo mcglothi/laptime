@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   benchmarkMatrix,
   communityBenchmarks,
@@ -81,6 +81,109 @@ function parsePositiveNumber(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null
 }
 
+function parseHuggingFaceRepoReference(value) {
+  const normalized = String(value ?? '').trim()
+  if (!normalized) return null
+
+  try {
+    const parsedUrl = new URL(normalized)
+    if (!parsedUrl.hostname.includes('huggingface.co')) {
+      return null
+    }
+
+    const parts = parsedUrl.pathname.split('/').filter(Boolean)
+    if (parts.length >= 2) {
+      return `${parts[0]}/${parts[1]}`
+    }
+    return null
+  } catch {
+    const match = normalized.match(/^([A-Za-z0-9._-]+\/[A-Za-z0-9._-]+)$/)
+    return match ? match[1] : null
+  }
+}
+
+function toTitleCase(value) {
+  return String(value ?? '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .trim()
+}
+
+function extractQuantLabel(value, fallbackPrecision) {
+  const normalized = String(value ?? '')
+  const patterns = [
+    /MXFP4(?:[_-]MOE)?/i,
+    /IQ\d+(?:[_-][A-Z0-9]+)?/i,
+    /Q\d+(?:\.\d+)?(?:[_-][A-Z0-9]+)*/i,
+    /BF16/i,
+    /FP16/i,
+    /\bF16\b/i,
+    /FP8/i,
+    /INT8/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern)
+    if (match) {
+      return match[0].replace(/-/g, '_').toUpperCase()
+    }
+  }
+
+  if (fallbackPrecision) {
+    return String(fallbackPrecision).toUpperCase()
+  }
+
+  return 'Source precision'
+}
+
+function extractParamsFromName(value) {
+  const normalized = String(value ?? '')
+  const activeMatch = normalized.match(/A(\d+(?:\.\d+)?)B/i)
+  const totalMatch = normalized.match(/(\d+(?:\.\d+)?)B(?![A-Za-z])/i)
+
+  return {
+    paramsB: totalMatch ? Number(totalMatch[1]) : null,
+    scalingParamsB: activeMatch ? Number(activeMatch[1]) : null,
+  }
+}
+
+function buildImportedModelOption(payload) {
+  const repo = payload.id ?? payload.modelId
+  if (!repo) {
+    throw new Error('Model repo not found in Hugging Face response.')
+  }
+
+  const repoName = repo.split('/').pop() ?? repo
+  const safetensorsParams = payload.safetensors?.parameters ?? {}
+  const safetensorsKeys = Object.keys(safetensorsParams)
+  const safetensorsPrecision = safetensorsKeys[0] ?? null
+  const safetensorsTotal = Number(payload.safetensors?.total ?? 0)
+  const nameDerivedParams = extractParamsFromName(repoName)
+  const paramsB = safetensorsTotal > 0 ? safetensorsTotal / 1_000_000_000 : nameDerivedParams.paramsB
+  const quant = extractQuantLabel(repoName, safetensorsPrecision)
+  const family =
+    payload.config?.model_type != null
+      ? toTitleCase(payload.config.model_type)
+      : toTitleCase(repoName.split(/[-_]/)[0] ?? 'Imported')
+
+  const option = {
+    id: `hf:${repo.toLowerCase()}`,
+    name: repoName.replace(/[-_]+/g, ' ').trim(),
+    family,
+    paramsB: paramsB != null ? Number(paramsB.toFixed(paramsB >= 20 ? 0 : 1)) : 8,
+    quant,
+    fit: `Imported from Hugging Face (${repo}). Runtime speeds are still modeled from LapTime's baseline until a direct benchmark row exists.`,
+    huggingFaceRepo: repo,
+    source: 'Imported from Hugging Face metadata',
+  }
+
+  if (nameDerivedParams.scalingParamsB != null) {
+    option.scalingParamsB = nameDerivedParams.scalingParamsB
+  }
+
+  return option
+}
+
 const defaultCustomHardwareProfile = {
   name: 'Custom speeds',
   spec: 'Manual override',
@@ -100,6 +203,7 @@ function getInitialShareState() {
     customHardwareProfile: defaultCustomHardwareProfile,
     customMetrics: defaultCustomMetrics,
     hardwareId: hardwareOptions[1].id,
+    huggingFaceRepo: '',
     modelId: modelOptions[1].id,
     workloadId: workloadOptions[0].id,
     compareHardwareId: hardwareOptions[3].id,
@@ -150,6 +254,7 @@ function getInitialShareState() {
     customHardwareProfile,
     customMetrics,
     hardwareId: hardwareIds.has(params.get('hw')) ? params.get('hw') : defaults.hardwareId,
+    huggingFaceRepo: parseHuggingFaceRepoReference(params.get('hf')) ?? defaults.huggingFaceRepo,
     compareHardwareId: hardwareIds.has(params.get('cmp'))
       ? params.get('cmp')
       : defaults.compareHardwareId,
@@ -163,6 +268,7 @@ function getInitialShareState() {
 function buildShareParams({
   hardwareId,
   compareHardwareId,
+  huggingFaceRepo,
   modelId,
   workloadId,
   contextTokens,
@@ -180,6 +286,10 @@ function buildShareParams({
 
   if (isPromptExpanded) {
     params.set('prompt', 'expanded')
+  }
+
+  if (huggingFaceRepo) {
+    params.set('hf', huggingFaceRepo)
   }
 
   if (hardwareId === 'custom' || compareHardwareId === 'custom') {
@@ -356,7 +466,11 @@ function getModelScaling(model) {
 
 function getQuantBits(model) {
   const match = model.quant?.match(/q(\d+(?:\.\d+)?)/i)
-  return match ? Number(match[1]) : 4
+  if (match) return Number(match[1])
+  if (/mxfp4/i.test(model.quant ?? '')) return 4
+  if (/\bbf16\b|\bfp16\b|\bf16\b/i.test(model.quant ?? '')) return 16
+  if (/fp8|int8|q8/i.test(model.quant ?? '')) return 8
+  return 4
 }
 
 function estimateModelMemoryGb(model) {
@@ -518,6 +632,12 @@ function resolveWorkload(selectedWorkload, customPreset, contextTokens) {
 function App() {
   const [initialShareState] = useState(() => getInitialShareState())
   const [customHardwareProfile, setCustomHardwareProfile] = useState(initialShareState.customHardwareProfile)
+  const [huggingFaceImportInput, setHuggingFaceImportInput] = useState(initialShareState.huggingFaceRepo)
+  const [huggingFaceImportState, setHuggingFaceImportState] = useState({
+    status: 'idle',
+    message: '',
+  })
+  const [importedModel, setImportedModel] = useState(null)
   const hardwareEntries = hardwareOptions
     .map((item) => {
       const mergedItem =
@@ -558,6 +678,7 @@ function App() {
   })
   const [contextTokens, setContextTokens] = useState(initialShareState.contextTokens)
   const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
+  const activeModelOptions = importedModel ? [importedModel, ...modelOptions] : modelOptions
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -584,7 +705,7 @@ function App() {
   }, [])
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
-  const model = modelOptions.find((item) => item.id === modelId) ?? modelOptions[0]
+  const model = activeModelOptions.find((item) => item.id === modelId) ?? activeModelOptions[0]
   const selectedWorkload = workloadOptions.find((item) => item.id === workloadId) ?? workloadOptions[0]
   const workload = resolveWorkload(selectedWorkload, customPreset, contextTokens)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
@@ -607,11 +728,11 @@ function App() {
     hardwareId,
     ['name', 'spec', 'buyer', 'platform'],
   )
-  const modelFamilyOptions = uniqueFamilies(modelOptions)
+  const modelFamilyOptions = uniqueFamilies(activeModelOptions)
   const familyFilteredModels =
     modelFamilyFilter === 'all'
-      ? modelOptions
-      : modelOptions.filter((option) => option.family === modelFamilyFilter)
+      ? activeModelOptions
+      : activeModelOptions.filter((option) => option.family === modelFamilyFilter)
   const visibleModelOptions = buildFilteredOptions(
     familyFilteredModels,
     modelQuery,
@@ -638,8 +759,8 @@ function App() {
   )
   const catalogModels =
     catalogFamilyFilter === 'all'
-      ? modelOptions
-      : modelOptions.filter((option) => option.family === catalogFamilyFilter)
+      ? activeModelOptions
+      : activeModelOptions.filter((option) => option.family === catalogFamilyFilter)
   const catalogEntries = catalogModels.map((entry) => ({
     ...entry,
     fitAssessment: assessModelFit(hardware, entry, workload),
@@ -701,11 +822,60 @@ function App() {
       memoryGb: parsedLap.memoryGb ?? null,
     })
 
-    const matchedModel = findBestModelMatch(parsedLap.model, modelOptions)
+    const matchedModel = findBestModelMatch(parsedLap.model, activeModelOptions)
     if (matchedModel) {
       setModelId(matchedModel.id)
     }
   }
+
+  const importHuggingFaceModel = useCallback(async (inputValue = huggingFaceImportInput, options = {}) => {
+    const { selectImportedModel = true } = options
+    const repo = parseHuggingFaceRepoReference(inputValue)
+
+    if (!repo) {
+      setHuggingFaceImportState({
+        status: 'error',
+        message: 'Enter a Hugging Face repo like Qwen/Qwen2.5-7B-Instruct or a huggingface.co model URL.',
+      })
+      return null
+    }
+
+    setHuggingFaceImportInput(repo)
+    setHuggingFaceImportState({
+      status: 'loading',
+      message: `Importing ${repo}...`,
+    })
+
+    try {
+      const params = new URLSearchParams({ repo })
+      const response = await fetch(`/api/huggingface-model?${params.toString()}`)
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? 'Hugging Face import failed.')
+      }
+
+      const nextImportedModel = buildImportedModelOption(payload)
+      setImportedModel(nextImportedModel)
+      setModelFamilyFilter('all')
+      setCatalogFamilyFilter('all')
+      setModelQuery('')
+      if (selectImportedModel) {
+        setModelId(nextImportedModel.id)
+      }
+      setHuggingFaceImportState({
+        status: 'success',
+        message: `Imported ${payload.id} from Hugging Face metadata.`,
+      })
+      return nextImportedModel
+    } catch (error) {
+      setHuggingFaceImportState({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Hugging Face import failed.',
+      })
+      return null
+    }
+  }, [huggingFaceImportInput])
 
   function applyParsedSubmission(parsedLap) {
     syncParsedLap(parsedLap)
@@ -735,11 +905,19 @@ function App() {
   }, [theme])
 
   useEffect(() => {
+    if (!initialShareState.huggingFaceRepo) return
+    if (importedModel?.huggingFaceRepo === initialShareState.huggingFaceRepo) return
+
+    importHuggingFaceModel(initialShareState.huggingFaceRepo)
+  }, [importHuggingFaceModel, importedModel?.huggingFaceRepo, initialShareState.huggingFaceRepo])
+
+  useEffect(() => {
     if (typeof window === 'undefined') return
 
     const params = buildShareParams({
       hardwareId,
       compareHardwareId,
+      huggingFaceRepo: model.huggingFaceRepo ?? '',
       modelId,
       workloadId,
       contextTokens,
@@ -760,10 +938,11 @@ function App() {
     contextTokens,
     customHardwareProfile,
     customMetrics,
-    hardwareId,
-    isPromptExpanded,
-    modelId,
-    workloadId,
+      hardwareId,
+      model.huggingFaceRepo,
+      isPromptExpanded,
+      modelId,
+      workloadId,
   ])
 
   useEffect(() => {
@@ -855,6 +1034,7 @@ function App() {
     const params = buildShareParams({
       hardwareId,
       compareHardwareId,
+      huggingFaceRepo: model.huggingFaceRepo ?? '',
       modelId,
       workloadId,
       contextTokens,
@@ -917,6 +1097,10 @@ function App() {
         modelFamilyOptions={modelFamilyOptions}
         modelFamilyFilter={modelFamilyFilter}
         setModelFamilyFilter={setModelFamilyFilter}
+        huggingFaceImportInput={huggingFaceImportInput}
+        setHuggingFaceImportInput={setHuggingFaceImportInput}
+        huggingFaceImportState={huggingFaceImportState}
+        importHuggingFaceModel={importHuggingFaceModel}
         workload={workload}
         workloadId={workloadId}
         workloadOptions={workloadOptions}
@@ -933,7 +1117,7 @@ function App() {
         benchmarkMatrix={benchmarkMatrix}
         communityBenchmarks={communityBenchmarks}
         dataSources={dataSources}
-        modelOptions={modelOptions}
+        modelOptions={activeModelOptions}
         fitAssessment={fitAssessment}
         isPlaying={isPlaying}
         currentPhase={displayPhase}

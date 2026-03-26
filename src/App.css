@@ -642,6 +642,22 @@
   font-size: 0.8rem;
 }
 
+.hf-import-status {
+  margin-top: 0.1rem;
+}
+
+.hf-import-status-success {
+  color: #1f7a42;
+}
+
+.hf-import-status-error {
+  color: #b33a3a;
+}
+
+.hf-import-status-loading {
+  color: var(--heading);
+}
+
 .run-provenance {
   border: 1px solid var(--border-soft);
   border-radius: 0.95rem;

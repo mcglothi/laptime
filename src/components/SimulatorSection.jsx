@@ -172,6 +172,10 @@ function SimulatorSection({
   modelFamilyOptions,
   modelFamilyFilter,
   setModelFamilyFilter,
+  huggingFaceImportInput,
+  setHuggingFaceImportInput,
+  huggingFaceImportState,
+  importHuggingFaceModel,
   workload,
   workloadId,
   workloadOptions,
@@ -405,6 +409,43 @@ function SimulatorSection({
         </div>
         <p>{model.fit}</p>
       </label>
+
+      <div className="control-group dense">
+        <div className="control-label">
+          <span>Bring your own model</span>
+          <small>Hugging Face</small>
+        </div>
+        <input
+          id="hf-model-import"
+          name="huggingFaceModelImport"
+          type="text"
+          value={huggingFaceImportInput}
+          placeholder="Qwen/Qwen2.5-7B-Instruct or huggingface.co URL"
+          onChange={(event) => setHuggingFaceImportInput(event.target.value)}
+        />
+        <div className="submission-actions">
+          <button
+            className="ghost-button"
+            type="button"
+            disabled={huggingFaceImportState.status === 'loading'}
+            onClick={() => {
+              importHuggingFaceModel()
+              handleRestart({ collapseMobile: true })
+            }}
+          >
+            {huggingFaceImportState.status === 'loading' ? 'Importing...' : 'Import from Hugging Face'}
+          </button>
+        </div>
+        <small>
+          Pull a public model repo into the selector using Hugging Face metadata. Speeds remain modeled
+          until a real lap replaces the estimate.
+        </small>
+        {huggingFaceImportState.message ? (
+          <div className={`source-note hf-import-status hf-import-status-${huggingFaceImportState.status}`}>
+            {huggingFaceImportState.message}
+          </div>
+        ) : null}
+      </div>
 
       <label className="control-group">
         <div className="control-label">
