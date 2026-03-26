@@ -32,6 +32,9 @@ function formatTokenCount(value) {
   return `${value}`
 }
 
+const CONTEXT_TOKENS_MIN = 128
+const CONTEXT_TOKENS_MAX = 128000
+
 function normalizeComparableModelName(value) {
   return String(value ?? '')
     .toLowerCase()
@@ -716,7 +719,9 @@ function App() {
   const [customPreset, setCustomPreset] = useState({
     responseTokens: 220,
   })
-  const [contextTokens, setContextTokens] = useState(initialShareState.contextTokens)
+  const [contextTokens, setContextTokens] = useState(
+    clamp(initialShareState.contextTokens, CONTEXT_TOKENS_MIN, CONTEXT_TOKENS_MAX),
+  )
   const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
   const activeModelOptions = importedModel ? [importedModel, ...modelOptions] : modelOptions
 

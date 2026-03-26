@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './SectionHeading'
 import ShareSheet from './ShareSheet'
 
+const CONTEXT_TOKENS_MIN = 128
+const CONTEXT_TOKENS_MAX = 128000
+
 const SOURCE_EXPLORER_TARGETS = [
   {
     pattern: 'LocalScore',
@@ -257,7 +260,7 @@ function SimulatorSection({
   const sourceExplorerTarget = getSourceExplorerTarget(runCoverage, metrics.source)
   const hasExactRepoInput = hasExactHuggingFaceRepoInput(huggingFaceImportInput)
   const contextPressureTone = getContextPressureTone(fitAssessment)
-  const contextSliderProgress = `${(contextTokens / 128000) * 100}%`
+  const contextSliderProgress = `${((contextTokens - CONTEXT_TOKENS_MIN) / (CONTEXT_TOKENS_MAX - CONTEXT_TOKENS_MIN)) * 100}%`
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 760px)')
@@ -556,7 +559,9 @@ function SimulatorSection({
             const nextWorkload = workloadOptions.find((option) => option.id === nextId)
             setWorkloadId(nextId)
             if (nextWorkload) {
-              setContextTokens(nextWorkload.promptTokens)
+              setContextTokens(
+                Math.min(Math.max(nextWorkload.promptTokens, CONTEXT_TOKENS_MIN), CONTEXT_TOKENS_MAX),
+              )
             }
             setIsPromptExpanded(false)
             handleRestart({ collapseMobile: true })
@@ -579,13 +584,15 @@ function SimulatorSection({
           name="contextSize"
           className={`context-slider context-slider-${contextPressureTone}`}
           style={{ '--context-slider-progress': contextSliderProgress }}
-          min="0"
-          max="128000"
-          step="256"
+          min={CONTEXT_TOKENS_MIN}
+          max={CONTEXT_TOKENS_MAX}
+          step="4"
           type="range"
           value={contextTokens}
           onChange={(event) => {
-            setContextTokens(Number(event.target.value))
+            setContextTokens(
+              Math.min(Math.max(Number(event.target.value), CONTEXT_TOKENS_MIN), CONTEXT_TOKENS_MAX),
+            )
             setIsPromptExpanded(false)
             handleRestart()
           }}
@@ -595,7 +602,7 @@ function SimulatorSection({
           <span>{workload.contextDescriptor}</span>
         </div>
         <div className="slider-scale" aria-hidden="true">
-          <span>0</span>
+          <span>128</span>
           <span>8k</span>
           <span>32k</span>
           <span>128k</span>
