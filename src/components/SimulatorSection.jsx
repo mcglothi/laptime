@@ -211,6 +211,7 @@ function SimulatorSection({
   const playbackRef = useRef(null)
   const [isCompactMobile, setIsCompactMobile] = useState(false)
   const [mobileEditorOpen, setMobileEditorOpen] = useState(false)
+  const [isHuggingFaceImportOpen, setIsHuggingFaceImportOpen] = useState(false)
   const totalTimelineMs = metrics.prefillSeconds * 1000 + metrics.ttftMs + metrics.streamingSeconds * 1000
   const prefillShare = ((metrics.prefillSeconds * 1000) / totalTimelineMs) * 100
   const ttftShare = (metrics.ttftMs / totalTimelineMs) * 100
@@ -238,6 +239,12 @@ function SimulatorSection({
 
     return () => mediaQuery.removeEventListener('change', syncViewport)
   }, [])
+
+  useEffect(() => {
+    if (model.huggingFaceRepo) {
+      setIsHuggingFaceImportOpen(true)
+    }
+  }, [model.huggingFaceRepo])
 
   function scrollPlaybackIntoView() {
     if (!isCompactMobile) return
@@ -413,72 +420,99 @@ function SimulatorSection({
         <p>{model.fit}</p>
       </label>
 
-      <div className="control-group dense">
+      <div className={`control-group dense hf-import-shell ${isHuggingFaceImportOpen ? 'open' : ''}`}>
         <div className="control-label">
           <span>Bring your own model</span>
           <small>Hugging Face</small>
         </div>
-        <input
-          id="hf-model-import"
-          name="huggingFaceModelImport"
-          type="text"
-          value={huggingFaceImportInput}
-          placeholder="Qwen/Qwen2.5-7B-Instruct or huggingface.co URL"
-          onChange={(event) => setHuggingFaceImportInput(event.target.value)}
-        />
-        <div className="submission-actions">
-          <button
-            className="ghost-button"
-            type="button"
-            disabled={huggingFaceImportState.status === 'loading'}
-            onClick={() => {
-              importHuggingFaceModel()
-              handleRestart({ collapseMobile: true })
-            }}
-          >
-            {huggingFaceImportState.status === 'loading' ? 'Importing...' : 'Import from Hugging Face'}
-          </button>
-        </div>
-        <small>
-          Pull a public model repo into the selector using Hugging Face metadata. Speeds remain modeled
-          until a real lap replaces the estimate.
-        </small>
-        {huggingFaceImportState.message ? (
-          <div className={`source-note hf-import-status hf-import-status-${huggingFaceImportState.status}`}>
-            {huggingFaceImportState.message}
-          </div>
-        ) : null}
-        {model.huggingFaceRepo ? (
+        {!isHuggingFaceImportOpen ? (
           <>
-            <label className="control-group dense">
-              <span>Imported quant / precision</span>
-              <select
-                id="hf-quant-override"
-                name="huggingFaceQuantOverride"
-                value={huggingFaceQuantOverride}
-                onChange={(event) => {
-                  setHuggingFaceQuantOverride(event.target.value)
+            <button
+              className="ghost-button hf-import-toggle"
+              type="button"
+              onClick={() => setIsHuggingFaceImportOpen(true)}
+            >
+              Import from Hugging Face
+            </button>
+            <small>
+              Import a public model only when you need it, so the main simulator stays focused.
+            </small>
+          </>
+        ) : (
+          <>
+            <div className="hf-import-header-row">
+              <strong className="hf-import-heading">Import a public Hugging Face model</strong>
+              <button
+                className="ghost-button hf-import-toggle"
+                type="button"
+                onClick={() => setIsHuggingFaceImportOpen(false)}
+              >
+                {model.huggingFaceRepo ? 'Hide import tools' : 'Collapse'}
+              </button>
+            </div>
+            <input
+              id="hf-model-import"
+              name="huggingFaceModelImport"
+              type="text"
+              value={huggingFaceImportInput}
+              placeholder="Qwen/Qwen2.5-7B-Instruct or huggingface.co URL"
+              onChange={(event) => setHuggingFaceImportInput(event.target.value)}
+            />
+            <div className="submission-actions">
+              <button
+                className="ghost-button"
+                type="button"
+                disabled={huggingFaceImportState.status === 'loading'}
+                onClick={() => {
+                  importHuggingFaceModel()
                   handleRestart({ collapseMobile: true })
                 }}
               >
-                {huggingFaceQuantOptions.map((option) => (
-                  <option key={option} value={option === 'Source precision' ? '' : option}>
-                    {option === 'Source precision'
-                      ? `Source precision (${model.importedSourceQuant ?? model.quant})`
-                      : option}
-                  </option>
-                ))}
-              </select>
-              <small>
-                Override the imported precision to see how memory fit changes for the same model.
-              </small>
-            </label>
-            <div className="source-note">
-              Imported repo: {model.huggingFaceRepo} · source precision:{' '}
-              {model.importedSourceQuant ?? model.quant}
+                {huggingFaceImportState.status === 'loading' ? 'Importing...' : 'Import from Hugging Face'}
+              </button>
             </div>
+            <small>
+              Pull a public model repo into the selector using Hugging Face metadata. Speeds remain
+              modeled until a real lap replaces the estimate.
+            </small>
+            {huggingFaceImportState.message ? (
+              <div className={`source-note hf-import-status hf-import-status-${huggingFaceImportState.status}`}>
+                {huggingFaceImportState.message}
+              </div>
+            ) : null}
+            {model.huggingFaceRepo ? (
+              <>
+                <label className="control-group dense">
+                  <span>Imported quant / precision</span>
+                  <select
+                    id="hf-quant-override"
+                    name="huggingFaceQuantOverride"
+                    value={huggingFaceQuantOverride}
+                    onChange={(event) => {
+                      setHuggingFaceQuantOverride(event.target.value)
+                      handleRestart({ collapseMobile: true })
+                    }}
+                  >
+                    {huggingFaceQuantOptions.map((option) => (
+                      <option key={option} value={option === 'Source precision' ? '' : option}>
+                        {option === 'Source precision'
+                          ? `Source precision (${model.importedSourceQuant ?? model.quant})`
+                          : option}
+                      </option>
+                    ))}
+                  </select>
+                  <small>
+                    Override the imported precision to see how memory fit changes for the same model.
+                  </small>
+                </label>
+                <div className="source-note">
+                  Imported repo: {model.huggingFaceRepo} · source precision:{' '}
+                  {model.importedSourceQuant ?? model.quant}
+                </div>
+              </>
+            ) : null}
           </>
-        ) : null}
+        )}
       </div>
 
       <label className="control-group">
