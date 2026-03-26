@@ -927,10 +927,12 @@ function SimulatorSection({
       </div>
 
       <div className="timeline-card">
-        <div className="timeline-segments" aria-hidden="true">
-          <div className="timeline-segment phase-prefill" style={{ width: `${prefillShare}%` }} />
-          <div className="timeline-segment phase-ttft" style={{ width: `${ttftShare}%` }} />
-          <div className="timeline-segment phase-stream" style={{ width: `${streamShare}%` }} />
+        <div className="timeline-rail" aria-hidden="true">
+          <div className="timeline-segments">
+            <div className="timeline-segment phase-prefill" style={{ width: `${prefillShare}%` }} />
+            <div className="timeline-segment phase-ttft" style={{ width: `${ttftShare}%` }} />
+            <div className="timeline-segment phase-stream" style={{ width: `${streamShare}%` }} />
+          </div>
           <div className="timeline-progress-overlay" style={{ width: `${progress * 100}%` }} />
         </div>
         <div className="timeline-legend">
