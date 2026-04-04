@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { buildTelemetrySnapshot } from './src/lib/runtimeTelemetry.js'
 
 function json(res, statusCode, body) {
   res.statusCode = statusCode
@@ -12,6 +13,12 @@ function normalizeRepo(repo) {
     return null
   }
   return repo
+}
+
+function parseOptionalNumber(value) {
+  if (value == null || value === '') return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
 }
 
 function compactSearchResult(payload) {
@@ -130,6 +137,24 @@ export default defineConfig({
           } catch {
             json(res, 502, { error: 'Unable to search Hugging Face right now.' })
           }
+        })
+
+        server.middlewares.use('/api/runtime-telemetry', async (req, res) => {
+          const requestUrl = new URL(req.url ?? '/', 'http://localhost')
+          const payload = buildTelemetrySnapshot({
+            hardwareId: requestUrl.searchParams.get('hardwareId') ?? undefined,
+            hardwareName: requestUrl.searchParams.get('hardwareName') ?? undefined,
+            modelId: requestUrl.searchParams.get('modelId') ?? undefined,
+            modelName: requestUrl.searchParams.get('modelName') ?? undefined,
+            runtime: requestUrl.searchParams.get('runtime') ?? undefined,
+            promptTokens: parseOptionalNumber(requestUrl.searchParams.get('promptTokens')) ?? 1200,
+            responseTokens: parseOptionalNumber(requestUrl.searchParams.get('responseTokens')) ?? 220,
+            observedPrefillTps: parseOptionalNumber(requestUrl.searchParams.get('observedPrefillTps')),
+            observedDecodeTps: parseOptionalNumber(requestUrl.searchParams.get('observedDecodeTps')),
+            observedTtftMs: parseOptionalNumber(requestUrl.searchParams.get('observedTtftMs')),
+          })
+
+          json(res, payload.ok ? 200 : 404, payload)
         })
       },
     },
