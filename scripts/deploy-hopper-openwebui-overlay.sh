@@ -4,12 +4,14 @@ set -euo pipefail
 TARGET_HOST="${TARGET_HOST:-mcglothi@hopper.home.timmcg.net}"
 REMOTE_BASE="${REMOTE_BASE:-/home/mcglothi/code/.venvs/open-webui/lib/python3.12/site-packages/open_webui}"
 LOCAL_OVERLAY="$(cd "$(dirname "$0")/.." && pwd)/integrations/open-webui/laptime-telemetry-overlay.js"
-REMOTE_OVERLAY="${REMOTE_BASE}/static/laptime-telemetry-overlay.js"
+REMOTE_FRONTEND_OVERLAY="${REMOTE_BASE}/frontend/static/laptime-telemetry-overlay.js"
+REMOTE_STATIC_OVERLAY="${REMOTE_BASE}/static/laptime-telemetry-overlay.js"
 REMOTE_INDEX="${REMOTE_BASE}/frontend/index.html"
 SCRIPT_TAG='<script src="/static/laptime-telemetry-overlay.js" defer crossorigin="use-credentials"></script>'
 
-echo "Copying overlay script to ${TARGET_HOST}:${REMOTE_OVERLAY}"
-scp "${LOCAL_OVERLAY}" "${TARGET_HOST}:${REMOTE_OVERLAY}"
+echo "Copying overlay script to ${TARGET_HOST}:${REMOTE_FRONTEND_OVERLAY}"
+scp "${LOCAL_OVERLAY}" "${TARGET_HOST}:${REMOTE_FRONTEND_OVERLAY}"
+ssh "${TARGET_HOST}" "cp '${REMOTE_FRONTEND_OVERLAY}' '${REMOTE_STATIC_OVERLAY}'"
 
 echo "Injecting overlay script tag into Hopper Open WebUI index"
 ssh "${TARGET_HOST}" "python3 - <<'PY'

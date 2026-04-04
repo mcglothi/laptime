@@ -187,6 +187,12 @@
     });
   }
 
+  function clearOverlay() {
+    if (root) {
+      root.innerHTML = '';
+    }
+  }
+
   function renderTelemetry(payload) {
     if (dismissed) return;
     const el = ensureRoot();
@@ -316,7 +322,7 @@
     state.modelName = modelName;
 
     if (!modelName) {
-      renderError('No active model detected yet.');
+      clearOverlay();
       return;
     }
 
