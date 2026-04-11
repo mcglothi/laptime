@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/hero-graphic.png" alt="LapTime" width="1000" />
+</p>
+
 # LapTime
 
 **Test-drive local LLM hardware before you buy.**
