@@ -766,8 +766,20 @@ function resolveWorkload(selectedWorkload, customPreset, contextTokens) {
   }
 }
 
+function getInitialPage() {
+  if (typeof window === 'undefined') return 'simulate'
+  const path = window.location.pathname.replace(/\/$/, '')
+  if (path === '/race') return 'race'
+  if (path === '/reference') return 'reference'
+  // Legacy hash fallback for old share links
+  const hash = window.location.hash.replace('#', '')
+  if (hash === 'comparison') return 'race'
+  return 'simulate'
+}
+
 function App() {
   const [initialShareState] = useState(() => getInitialShareState())
+  const [page, setPage] = useState(() => getInitialPage())
   const [customHardwareProfile, setCustomHardwareProfile] = useState(initialShareState.customHardwareProfile)
   const [huggingFaceImportInput, setHuggingFaceImportInput] = useState(initialShareState.huggingFaceRepo)
   const [huggingFaceQuantOverride, setHuggingFaceQuantOverride] = useState(initialShareState.huggingFaceQuantOverride)
@@ -812,6 +824,21 @@ function App() {
   const [sourceQuery, setSourceQuery] = useState('')
   const [communityFilter, setCommunityFilter] = useState('all')
   const [theme, setTheme] = useState('dark')
+
+  function navigate(newPage) {
+    const path = newPage === 'simulate' ? '/' : `/${newPage}`
+    window.history.pushState({ page: newPage }, '', path)
+    setPage(newPage)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
+
+  useEffect(() => {
+    function handlePopState() {
+      setPage(getInitialPage())
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
   const [isPlaying, setIsPlaying] = useState(true)
   const [elapsedMs, setElapsedMs] = useState(0)
   const [customMetrics, setCustomMetrics] = useState(initialShareState.customMetrics)
@@ -824,29 +851,6 @@ function App() {
   const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
   const activeModelOptions = importedModel ? [importedModel, ...modelOptions] : modelOptions
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-
-    function scrollToCurrentHash() {
-      if (!window.location.hash) return
-
-      const targetId = window.location.hash.replace('#', '')
-      if (!targetId) return
-
-      const target = document.getElementById(targetId)
-      if (target) {
-        target.scrollIntoView({ behavior: 'auto', block: 'start' })
-      }
-    }
-
-    const timeoutId = window.setTimeout(scrollToCurrentHash, 60)
-    window.addEventListener('hashchange', scrollToCurrentHash)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-      window.removeEventListener('hashchange', scrollToCurrentHash)
-    }
-  }, [])
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
   const model = activeModelOptions.find((item) => item.id === modelId) ?? activeModelOptions[0]
@@ -1191,7 +1195,7 @@ function App() {
     setHardwareQuery('')
     setIsPromptExpanded(false)
     restartSimulation()
-    window.location.hash = 'simulator'
+    navigate('simulate')
   }
 
   function raceParsedSubmission(parsedLap) {
@@ -1200,7 +1204,7 @@ function App() {
     setCompareHardwarePlatformFilter('all')
     setCompareHardwareQuery('')
     restartSimulation()
-    window.location.hash = 'comparison'
+    navigate('race')
   }
 
   useEffect(() => {
@@ -1230,9 +1234,8 @@ function App() {
       customMetrics,
     })
     const nextSearch = `?${params.toString()}`
-    const currentHash = window.location.hash
-    const currentUrl = `${window.location.pathname}${window.location.search}${currentHash}`
-    const nextUrl = `${window.location.pathname}${nextSearch}${currentHash}`
+    const currentUrl = `${window.location.pathname}${window.location.search}`
+    const nextUrl = `${window.location.pathname}${nextSearch}`
 
     if (currentUrl !== nextUrl) {
       window.history.replaceState({}, '', nextUrl)
@@ -1334,7 +1337,7 @@ function App() {
   const forumCount = communityBenchmarks.filter((entry) => entry.quality === 'forum').length
   const approximateCount = communityBenchmarks.filter((entry) => entry.quality === 'approximate').length
 
-  function buildShareUrl(sectionId) {
+  function buildShareUrl(targetPage) {
     if (typeof window === 'undefined') return ''
     const params = buildShareParams({
       hardwareId,
@@ -1348,12 +1351,12 @@ function App() {
       customHardwareProfile,
       customMetrics,
     })
-
-    return `${window.location.origin}${window.location.pathname}?${params.toString()}#${sectionId}`
+    const path = targetPage === 'simulate' ? '/' : `/${targetPage}`
+    return `${window.location.origin}${path}?${params.toString()}`
   }
 
-  const simulatorShareUrl = buildShareUrl('simulator')
-  const comparisonShareUrl = buildShareUrl('comparison')
+  const simulatorShareUrl = buildShareUrl('simulate')
+  const comparisonShareUrl = buildShareUrl('race')
   const simulatorShareTitle = `${hardware.name} vs ${model.name} on LapTime`
   const comparisonShareTitle = `${hardware.name} vs ${compareHardware.name} on LapTime`
 
@@ -1382,7 +1385,34 @@ function App() {
         </button>
       </section>
 
-      <SimulatorSection
+      <nav className="site-nav" aria-label="Primary navigation">
+        <button
+          type="button"
+          className="site-nav-btn"
+          aria-current={page === 'simulate' ? 'page' : undefined}
+          onClick={() => navigate('simulate')}
+        >
+          Simulate
+        </button>
+        <button
+          type="button"
+          className="site-nav-btn"
+          aria-current={page === 'race' ? 'page' : undefined}
+          onClick={() => navigate('race')}
+        >
+          Race
+        </button>
+        <button
+          type="button"
+          className="site-nav-btn"
+          aria-current={page === 'reference' ? 'page' : undefined}
+          onClick={() => navigate('reference')}
+        >
+          Reference
+        </button>
+      </nav>
+
+      {page === 'simulate' && <SimulatorSection
         hardware={hardware}
         hardwareId={hardwareId}
         hardwareQuery={hardwareQuery}
@@ -1443,68 +1473,78 @@ function App() {
         formatSeconds={formatSeconds}
         shareUrl={simulatorShareUrl}
         shareTitle={simulatorShareTitle}
-      />
+      />}
 
-      <ComparisonSection
-        hardware={hardware}
-        model={model}
-        metrics={metrics}
-        fitAssessment={fitAssessment}
-        compareHardware={compareHardware}
-        compareHardwareId={compareHardwareId}
-        compareHardwareQuery={compareHardwareQuery}
-        setCompareHardwareQuery={setCompareHardwareQuery}
-        visibleCompareHardwareOptions={visibleCompareHardwareOptions}
-        hardwarePlatformOptions={hardwarePlatformOptions}
-        compareHardwarePlatformFilter={compareHardwarePlatformFilter}
-        setCompareHardwarePlatformFilter={handleCompareHardwarePlatformFilterChange}
-        setCompareHardwareId={setCompareHardwareId}
-        compareModel={compareModel}
-        compareMetrics={compareMetrics}
-        compareFitAssessment={compareFitAssessment}
-        elapsedMs={elapsedMs}
-        restartSimulation={restartSimulation}
-        formatSeconds={formatSeconds}
-        shareUrl={comparisonShareUrl}
-        shareTitle={comparisonShareTitle}
-      />
+      {page === 'race' && <>
+        <ComparisonSection
+          hardware={hardware}
+          model={model}
+          metrics={metrics}
+          fitAssessment={fitAssessment}
+          compareHardware={compareHardware}
+          compareHardwareId={compareHardwareId}
+          compareHardwareQuery={compareHardwareQuery}
+          setCompareHardwareQuery={setCompareHardwareQuery}
+          visibleCompareHardwareOptions={visibleCompareHardwareOptions}
+          hardwarePlatformOptions={hardwarePlatformOptions}
+          compareHardwarePlatformFilter={compareHardwarePlatformFilter}
+          setCompareHardwarePlatformFilter={handleCompareHardwarePlatformFilterChange}
+          setCompareHardwareId={setCompareHardwareId}
+          compareModel={compareModel}
+          compareMetrics={compareMetrics}
+          compareFitAssessment={compareFitAssessment}
+          elapsedMs={elapsedMs}
+          restartSimulation={restartSimulation}
+          formatSeconds={formatSeconds}
+          shareUrl={comparisonShareUrl}
+          shareTitle={comparisonShareTitle}
+          modelId={modelId}
+          modelQuery={modelQuery}
+          setModelQuery={setModelQuery}
+          visibleModelOptions={visibleModelEntries}
+          setModelId={setModelId}
+        />
 
-      <SubmissionSection
-        onLoadParsedSubmission={applyParsedSubmission}
-        onRaceParsedSubmission={raceParsedSubmission}
-      />
+        <SubmissionSection
+          onLoadParsedSubmission={applyParsedSubmission}
+          onRaceParsedSubmission={raceParsedSubmission}
+        />
+      </>}
 
-      <CatalogSection
-        selectedModelId={modelId}
-        modelFamilyOptions={modelFamilyOptions}
-        catalogFamilyFilter={catalogFamilyFilter}
-        setCatalogFamilyFilter={setCatalogFamilyFilter}
-        catalogEntries={catalogEntries}
-        contextTokens={workload.promptTokens}
-      />
+      {page === 'reference' && <>
+        <CatalogSection
+          selectedModelId={modelId}
+          modelFamilyOptions={modelFamilyOptions}
+          catalogFamilyFilter={catalogFamilyFilter}
+          setCatalogFamilyFilter={setCatalogFamilyFilter}
+          catalogEntries={catalogEntries}
+          contextTokens={workload.promptTokens}
+          onSelectModel={(id) => { setModelId(id); navigate('simulate') }}
+        />
 
-      <MethodologySection
-        exactBenchmarkCount={exactBenchmarkCount}
-        exactHardwareCount={exactHardwareCount}
-        sourceBackedCount={sourceBackedCount}
-        sourceBackedHardwareCount={sourceBackedHardwareCount}
-        communityRuntimeCount={communityRuntimeCount}
-        communityRuntimeHardwareCount={communityRuntimeHardwareCount}
-        officialSourceCount={officialSourceCount}
-        catalogSourceCount={catalogSourceCount}
-        communityCount={communityBenchmarks.length}
-        forumCount={forumCount}
-        approximateCount={approximateCount}
-      />
+        <MethodologySection
+          exactBenchmarkCount={exactBenchmarkCount}
+          exactHardwareCount={exactHardwareCount}
+          sourceBackedCount={sourceBackedCount}
+          sourceBackedHardwareCount={sourceBackedHardwareCount}
+          communityRuntimeCount={communityRuntimeCount}
+          communityRuntimeHardwareCount={communityRuntimeHardwareCount}
+          officialSourceCount={officialSourceCount}
+          catalogSourceCount={catalogSourceCount}
+          communityCount={communityBenchmarks.length}
+          forumCount={forumCount}
+          approximateCount={approximateCount}
+        />
 
-      <SourceExplorerSection
-        sourceQuery={sourceQuery}
-        setSourceQuery={setSourceQuery}
-        communityFilter={communityFilter}
-        setCommunityFilter={setCommunityFilter}
-        filteredStructuredSources={filteredStructuredSources}
-        filteredCommunityBenchmarks={filteredCommunityBenchmarks}
-      />
+        <SourceExplorerSection
+          sourceQuery={sourceQuery}
+          setSourceQuery={setSourceQuery}
+          communityFilter={communityFilter}
+          setCommunityFilter={setCommunityFilter}
+          filteredStructuredSources={filteredStructuredSources}
+          filteredCommunityBenchmarks={filteredCommunityBenchmarks}
+        />
+      </>}
     </div>
   )
 }

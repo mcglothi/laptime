@@ -7,6 +7,7 @@ function CatalogSection({
   setCatalogFamilyFilter,
   catalogEntries,
   contextTokens,
+  onSelectModel,
 }) {
   function getCoverageLabel(coverage) {
     if (coverage === 'exact') return 'Benchmark-backed'
@@ -66,6 +67,15 @@ function CatalogSection({
                 {entry.fitAssessment.status === 'unknown' ? 'Unknown fit' : null}
               </span>
             </div>
+            {entry.id !== selectedModelId && onSelectModel ? (
+              <button
+                type="button"
+                className="catalog-simulate-btn ghost-button"
+                onClick={() => onSelectModel(entry.id)}
+              >
+                Simulate →
+              </button>
+            ) : null}
           </article>
         ))}
       </div>

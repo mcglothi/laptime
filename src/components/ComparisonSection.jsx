@@ -80,6 +80,11 @@ function ComparisonSection({
   formatSeconds,
   shareUrl,
   shareTitle,
+  modelId,
+  modelQuery,
+  setModelQuery,
+  visibleModelOptions,
+  setModelId,
 }) {
   const comparisonProjected =
     fitAssessment.status === 'unfit' || compareFitAssessment.status === 'unfit'
@@ -390,9 +395,28 @@ function ComparisonSection({
 
       <article className="compare-model-card compare-model-track-card">
         <div className="compare-model-card-header">
-          <span>Selected track</span>
+          <span>Model / Track</span>
           <strong>{model.family}</strong>
         </div>
+        <label className="control-group dense">
+          <span>Search</span>
+          <input
+            type="text"
+            value={modelQuery}
+            placeholder="Search models…"
+            onChange={(e) => setModelQuery(e.target.value)}
+          />
+          <select
+            value={modelId}
+            onChange={(e) => setModelId(e.target.value)}
+          >
+            {visibleModelOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.family} · {option.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="compare-model-card-title">{model.name}</div>
         <div className="compare-model-card-meta">
           <span>{model.quant}</span>
