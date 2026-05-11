@@ -525,13 +525,20 @@ function estimateModelMemoryGb(model) {
   return baseWeightGb * overheadMultiplier
 }
 
-function estimateKvCacheGb(model, workload) {
+function getKvCompressionFactor(mode) {
+  if (mode === 'q8') return 0.5
+  if (mode === 'q4' || mode === 'turboquant') return 0.25
+  return 1
+}
+
+function estimateKvCacheGb(model, workload, compressionFactor = 1) {
   const totalTokens = Math.max((workload?.promptTokens ?? 0) + (workload?.responseTokens ?? 0), 0)
   if (!totalTokens) return 0
 
   const paramsB = Math.max(model.paramsB ?? 8, 0.5)
   const kvCachePer64kGb = paramsB * 0.8
-  return (totalTokens / 65536) * kvCachePer64kGb
+  const archFactor = model.kvCacheFactor ?? 1
+  return (totalTokens / 65536) * kvCachePer64kGb * archFactor * compressionFactor
 }
 
 function estimateRuntimeOverheadGb(model) {
@@ -539,9 +546,9 @@ function estimateRuntimeOverheadGb(model) {
   return Math.max(0.6, weightGb * 0.08)
 }
 
-function assessModelFit(hardware, model, workload) {
+function assessModelFit(hardware, model, workload, compressionFactor = 1) {
   const weightGb = estimateModelMemoryGb(model)
-  const kvCacheGb = estimateKvCacheGb(model, workload)
+  const kvCacheGb = estimateKvCacheGb(model, workload, compressionFactor)
   const runtimeOverheadGb = estimateRuntimeOverheadGb(model)
   const requiredGb = weightGb + kvCacheGb + runtimeOverheadGb
 
@@ -824,6 +831,7 @@ function App() {
   const [sourceQuery, setSourceQuery] = useState('')
   const [communityFilter, setCommunityFilter] = useState('all')
   const [theme, setTheme] = useState('dark')
+  const [kvCacheCompression, setKvCacheCompression] = useState('none')
 
   function navigate(newPage) {
     const path = newPage === 'simulate' ? '/' : `/${newPage}`
@@ -858,12 +866,13 @@ function App() {
   const workload = resolveWorkload(selectedWorkload, customPreset, contextTokens)
   const metrics = calculateMetrics(hardware, model, workload, customMetrics)
   const runCoverage = getBenchmarkCoverage(getBenchmarkEntry(hardware.id, model.id))
-  const fitAssessment = assessModelFit(hardware, model, workload)
+  const compressionFactor = getKvCompressionFactor(kvCacheCompression)
+  const fitAssessment = assessModelFit(hardware, model, workload, compressionFactor)
   const compareHardware =
     hardwareEntries.find((item) => item.id === compareHardwareId) ?? hardwareEntries[2]
   const compareModel = model
   const compareMetrics = calculateMetrics(compareHardware, compareModel, workload, customMetrics)
-  const compareFitAssessment = assessModelFit(compareHardware, compareModel, workload)
+  const compareFitAssessment = assessModelFit(compareHardware, compareModel, workload, compressionFactor)
   const platformFilteredHardware =
     hardwarePlatformFilter === 'all'
       ? hardwareEntries
@@ -904,7 +913,7 @@ function App() {
   )
   const visibleModelEntries = visibleModelOptions.map((option) => ({
     ...option,
-    fitAssessment: assessModelFit(hardware, option, workload),
+    fitAssessment: assessModelFit(hardware, option, workload, compressionFactor),
     benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)),
     coverageIndicator: getCoverageIndicator(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id))),
   }))
@@ -928,7 +937,7 @@ function App() {
       : activeModelOptions.filter((option) => option.family === catalogFamilyFilter)
   const catalogEntries = catalogModels.map((entry) => ({
     ...entry,
-    fitAssessment: assessModelFit(hardware, entry, workload),
+    fitAssessment: assessModelFit(hardware, entry, workload, compressionFactor),
     benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardwareId, entry.id)),
   }))
 
@@ -1473,6 +1482,8 @@ function App() {
         formatSeconds={formatSeconds}
         shareUrl={simulatorShareUrl}
         shareTitle={simulatorShareTitle}
+        kvCacheCompression={kvCacheCompression}
+        setKvCacheCompression={setKvCacheCompression}
       />}
 
       {page === 'race' && <>

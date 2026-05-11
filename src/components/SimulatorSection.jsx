@@ -233,6 +233,8 @@ function SimulatorSection({
   setIsPromptExpanded,
   customPreset,
   setCustomPreset,
+  kvCacheCompression,
+  setKvCacheCompression,
   metrics,
   runCoverage,
   benchmarkMatrix,
@@ -660,6 +662,36 @@ function SimulatorSection({
           see when long-context work starts to feel heavy.
         </p>
       </label>
+
+      <div className="control-group">
+        <span>KV cache</span>
+        <div className="kv-compression-chips">
+          {[
+            { value: 'none', label: 'Standard' },
+            { value: 'q8', label: 'llama.cpp q8 (2×)' },
+            { value: 'q4', label: 'llama.cpp q4 (4×)' },
+            { value: 'turboquant', label: 'TurboQuant 4-bit (4×)' },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`filter-chip${kvCacheCompression === opt.value ? ' active' : ''}`}
+              onClick={() => { setKvCacheCompression(opt.value); handleRestart() }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <p>
+          {kvCacheCompression === 'none'
+            ? 'Full-precision FP16 KV cache. Accurate baseline for memory planning.'
+            : kvCacheCompression === 'q8'
+            ? 'llama.cpp −ctk q8_0: 2× KV memory reduction with near-lossless quality. One flag, no extra library.'
+            : kvCacheCompression === 'q4'
+            ? 'llama.cpp −ctk q4_0: 4× KV memory reduction. Slight quality drop on very long contexts.'
+            : 'Google TurboQuant (ICLR 2026): 4× KV compression via random orthogonal rotation. Bit-identical prefill logits at 4-bit.'}
+        </p>
+      </div>
 
       {workload.id === 'custom' ? (
         <div className="custom-grid one-up">
