@@ -66,9 +66,9 @@ export const hardwareOptions = [
     price: '$749+',
     memoryGb: 16,
     buyer: 'Strong sweet-spot Blackwell option for 8B to 14B local work.',
-    prefillBase: 2473,
-    decodeBase: 36.8,
-    ttftBase: 552,
+    prefillBase: 3657,
+    decodeBase: 65.5,
+    ttftBase: 363,
     source: 'Benchmark-backed via LocalScore',
   },
   {
@@ -1077,7 +1077,7 @@ export const benchmarkMatrix = {
     'llama-3.1-8b': { prefillTps: 4428, decodeTps: 44.9, ttftMs: 289, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-5070-ti': {
-    'llama-3.1-8b': { prefillTps: 2473, decodeTps: 36.8, ttftMs: 552, source: 'Benchmark-backed via LocalScore' },
+    'llama-3.1-8b': { prefillTps: 3657, decodeTps: 65.5, ttftMs: 363, source: 'Benchmark-backed via LocalScore' },
   },
   'rtx-5070': {
     'llama-3.1-8b': { prefillTps: 2927, decodeTps: 55.9, ttftMs: 477, source: 'Benchmark-backed via LocalScore' },
