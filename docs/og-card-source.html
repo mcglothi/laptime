@@ -1,0 +1,170 @@
+<!doctype html>
+<!--
+  Source template for public/og-image.png (the 1200x630 social preview card).
+
+  Regenerate after editing:
+
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+      --headless --disable-gpu --hide-scrollbars \
+      --force-device-scale-factor=1 --window-size=1200,630 \
+      --screenshot=public/og-image.png docs/og-card-source.html
+
+  Keep it at exactly 1200x630 — that is the aspect ratio X, Discord, Slack,
+  LinkedIn, and YouTube description unfurls all expect.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: 'Faster One';
+    src: url('../public/fonts/faster-one-latin-400.woff2') format('woff2');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'Inter';
+    src: url('../public/fonts/inter-latin-variable.woff2') format('woff2');
+    font-weight: 400 700;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../public/fonts/ibm-plex-mono-latin-500.woff2') format('woff2');
+    font-weight: 500;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 82% 12%, rgba(91, 140, 255, 0.20), transparent 52%),
+      radial-gradient(circle at 8% 92%, rgba(125, 107, 255, 0.16), transparent 46%),
+      #090b10;
+    color: #f5f7fb;
+    font-family: 'Inter', sans-serif;
+    padding: 68px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  /* Faint checkered flag motif, matching the site's background treatment. */
+  .checkers {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(45deg, rgba(255,255,255,0.045) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.045) 75%),
+      linear-gradient(45deg, rgba(255,255,255,0.045) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.045) 75%);
+    background-size: 56px 56px;
+    background-position: 0 0, 28px 28px;
+    -webkit-mask-image: linear-gradient(115deg, transparent 55%, #000 100%);
+    mask-image: linear-gradient(115deg, transparent 55%, #000 100%);
+    opacity: 0.6;
+  }
+
+  .top, .bottom { position: relative; z-index: 1; }
+
+  .wordmark {
+    font-family: 'Faster One', sans-serif;
+    font-size: 92px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: #f5f7fb;
+    text-shadow: 0 6px 28px rgba(31, 59, 117, 0.55);
+  }
+
+  .kicker {
+    margin-top: 22px;
+    font-size: 33px;
+    font-weight: 600;
+    line-height: 1.32;
+    letter-spacing: -0.012em;
+    color: #dfe5f1;
+    max-width: 20ch;
+  }
+
+  .kicker em {
+    font-style: normal;
+    color: #7fa5ff;
+  }
+
+  .track {
+    display: flex;
+    height: 17px;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: 0 3px 22px rgba(0, 0, 0, 0.45);
+  }
+  .seg-prefill { background: #ff8a1f; width: 26%; }
+  .seg-ttft    { background: #ffd84d; width: 12%; }
+  .seg-stream  { background: #1fe08f; width: 62%; }
+
+  .legend {
+    display: flex;
+    gap: 40px;
+    margin-top: 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .legend span { display: flex; align-items: center; gap: 11px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 40px;
+  }
+
+  .domain {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 27px;
+    font-weight: 500;
+    color: #f5f7fb;
+    letter-spacing: 0.02em;
+  }
+
+  .sub {
+    text-align: right;
+    font-size: 19px;
+    line-height: 1.5;
+    color: #8b96ae;
+    max-width: 42ch;
+  }
+</style>
+</head>
+<body>
+  <div class="checkers"></div>
+
+  <div class="top">
+    <div class="wordmark">LAPTIME</div>
+    <div class="kicker">Test-drive local LLM hardware <em>before you buy.</em></div>
+  </div>
+
+  <div class="bottom">
+    <div class="track">
+      <div class="seg-prefill"></div>
+      <div class="seg-ttft"></div>
+      <div class="seg-stream"></div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#ff8a1f"></i>Prompt ingest</span>
+      <span><i class="dot" style="background:#ffd84d"></i>First token</span>
+      <span><i class="dot" style="background:#1fe08f"></i>Token stream</span>
+    </div>
+    <div class="footer">
+      <div class="domain">laptime.run</div>
+      <div class="sub">Apple Silicon · NVIDIA · DGX Spark · Strix Halo — measured where possible, labeled where modeled.</div>
+    </div>
+  </div>
+</body>
+</html>

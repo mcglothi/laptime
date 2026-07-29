@@ -611,7 +611,136 @@ export const hardwareOptions = [
   },
 ]
 
-export const modelOptions = [
+const rawModelOptions = [
+  {
+    id: 'bonsai-27b-q1-0',
+    name: 'Bonsai 27B Q1_0 (1-bit)',
+    family: 'Bonsai',
+    paramsB: 27,
+    scalingParamsB: 8,
+    memoryGb: 3.8,
+    kvCacheFactor: 0.19,
+    quant: 'Q1_0 (1-bit)',
+    fit: 'A 27B model in 3.8 GB of weights. PrismML quantizes Qwen3.6 27B down to 1-bit with hybrid attention, which is why this lands on phones, 8 GB laptops, and Raspberry-class boards that no other 27B can touch. Decode is modeled from the 3.8 GB weight footprint rather than the 27B parameter count, because ternary/1-bit decode is bound by how many bytes move per token — treat the speed as modeled, not measured.',
+  },
+  {
+    id: 'ternary-bonsai-27b-q2-0',
+    name: 'Ternary Bonsai 27B Q2_0',
+    family: 'Bonsai',
+    paramsB: 27,
+    scalingParamsB: 11,
+    memoryGb: 7.17,
+    kvCacheFactor: 0.19,
+    quant: 'Q2_0 (ternary)',
+    fit: 'Ternary build of Bonsai 27B at 7.17 GB — the quality-recovery step up from the 1-bit Q1_0 file while still fitting a 12 GB card or a 16 GB laptop. Same hybrid-attention Qwen3.6 27B base. Decode modeled from weight footprint, not parameter count.',
+  },
+  {
+    id: 'deepseek-v4-flash-ud-iq1-s',
+    name: 'DeepSeek V4 Flash UD-IQ1_S',
+    family: 'DeepSeek',
+    paramsB: 158,
+    scalingParamsB: 10,
+    memoryGb: 82.54,
+    kvCacheFactor: 0.023,
+    quant: 'UD-IQ1_S (MoE)',
+    fit: 'DeepSeek V4 Flash is 158B total with roughly 10B active per token and MLA-compressed KV cache, so the smallest Unsloth dynamic quant squeezes onto 96 GB and 128 GB unified-memory boxes. This is the row that shows why active parameters, not total parameters, decide how a big MoE feels.',
+  },
+  {
+    id: 'deepseek-v4-flash-ud-q2-k-xl',
+    name: 'DeepSeek V4 Flash UD-Q2_K_XL',
+    family: 'DeepSeek',
+    paramsB: 158,
+    scalingParamsB: 10,
+    memoryGb: 96.83,
+    kvCacheFactor: 0.023,
+    quant: 'UD-Q2_K_XL (MoE)',
+    fit: 'The practical DeepSeek V4 Flash target for a 128 GB Mac Studio or M4/M5 Max laptop. 158B total, ~10B active, 1M native context with MLA keeping the KV cache small enough that long prompts stay affordable.',
+  },
+  {
+    id: 'deepseek-v4-flash-ud-iq4-xs',
+    name: 'DeepSeek V4 Flash UD-IQ4_XS',
+    family: 'DeepSeek',
+    paramsB: 158,
+    scalingParamsB: 10,
+    memoryGb: 137.9,
+    kvCacheFactor: 0.023,
+    quant: 'UD-IQ4_XS (MoE)',
+    fit: 'Near-4-bit DeepSeek V4 Flash for 256 GB and larger rigs that want the quality without dropping to 2-bit. Still only ~10B active parameters, so decode stays far quicker than the 158B total suggests.',
+  },
+  {
+    id: 'glm-5.2-ud-iq1-s',
+    name: 'GLM-5.2 UD-IQ1_S',
+    family: 'GLM',
+    paramsB: 753,
+    scalingParamsB: 36,
+    memoryGb: 216.72,
+    kvCacheFactor: 0.0086,
+    quant: 'UD-IQ1_S (MoE)',
+    fit: 'Z.ai GLM-5.2 is 753B total / roughly 36B active with DeepSeek-style sparse attention and a 1M context window. At 1-bit dynamic quant it becomes a genuine — if extreme — target for a 256 GB or 512 GB unified-memory machine.',
+  },
+  {
+    id: 'glm-5.2-ud-q2-k-xl',
+    name: 'GLM-5.2 UD-Q2_K_XL',
+    family: 'GLM',
+    paramsB: 753,
+    scalingParamsB: 36,
+    memoryGb: 253.88,
+    kvCacheFactor: 0.0086,
+    quant: 'UD-Q2_K_XL (MoE)',
+    fit: 'The 2-bit GLM-5.2 build that a Mac Studio M3 Ultra 512 GB can actually hold. Sparse attention keeps the KV cache small for a model this size, so long-context work is bound by weights rather than context.',
+  },
+  {
+    id: 'ornith-1.0-35b-q4-k-m',
+    name: 'Ornith 1.0 35B Q4_K_M',
+    family: 'Ornith',
+    paramsB: 35,
+    memoryGb: 21.17,
+    kvCacheFactor: 0.19,
+    quant: 'Q4_K_M',
+    fit: 'Ships as GGUF first, which is why it moved millions of downloads in weeks. At 21.2 GB it is a 24 GB-card model with enough room left for a working context.',
+  },
+  {
+    id: 'ornith-1.0-35b-q8-0',
+    name: 'Ornith 1.0 35B Q8_0',
+    family: 'Ornith',
+    paramsB: 35,
+    memoryGb: 36.9,
+    kvCacheFactor: 0.19,
+    quant: 'Q8_0',
+    fit: 'Reference-quality 8-bit Ornith 35B for 48 GB cards and larger unified-memory systems.',
+  },
+  {
+    id: 'ornith-1.0-9b-q4-k-m',
+    name: 'Ornith 1.0 9B Q4_K_M',
+    family: 'Ornith',
+    paramsB: 9,
+    memoryGb: 5.63,
+    kvCacheFactor: 0.19,
+    quant: 'Q4_K_M',
+    fit: 'The small Ornith tier at 5.6 GB — comfortable on an 8 GB card and fast on anything newer. Good default when you want a current model rather than a 2024 baseline.',
+  },
+  {
+    id: 'laguna-s-2.1-ud-q2-k-xl',
+    name: 'Laguna-S 2.1 UD-Q2_K_XL',
+    family: 'Laguna',
+    paramsB: 117,
+    scalingParamsB: 9,
+    memoryGb: 39.68,
+    kvCacheFactor: 0.134,
+    quant: 'UD-Q2_K_XL (MoE)',
+    fit: 'Poolside Laguna-S 2.1 is a 117B coding MoE with roughly 9B active parameters. The 2-bit dynamic quant fits a 48 GB card or a 64 GB Mac, which makes a frontier-class coding model a local option rather than an API line item.',
+  },
+  {
+    id: 'laguna-s-2.1-ud-iq4-xs',
+    name: 'Laguna-S 2.1 UD-IQ4_XS',
+    family: 'Laguna',
+    paramsB: 117,
+    scalingParamsB: 9,
+    memoryGb: 57.57,
+    kvCacheFactor: 0.134,
+    quant: 'UD-IQ4_XS (MoE)',
+    fit: 'Near-4-bit Laguna-S 2.1 for 64 GB and larger builds. Standard GQA rather than MLA, so long contexts grow the KV cache faster than DeepSeek V4 Flash at a similar size.',
+  },
   {
     id: 'llama-3.2-1b',
     name: 'Llama 3.2 1B Instruct',
@@ -1053,6 +1182,63 @@ export const modelOptions = [
   },
 ]
 
+// Catalog recency tiers. `current` models are what people are actually downloading
+// and running today; `common` are older but still widely deployed; `baseline` rows are
+// kept because LapTime's estimation math is calibrated against their LocalScore
+// measurements, not because they are a recommendation.
+const baselineModelIds = new Set([
+  'llama-3.2-1b',
+  'llama-3.2-3b',
+  'llama-3.1-70b',
+  'qwen-2.5-14b',
+  'phi-4-mini',
+  'phi-4-14b',
+  'deepseek-r1-8b',
+  'deepseek-r1-14b',
+  'deepseek-r1-32b',
+  'llama-3.3-70b',
+  'kimi-k2-instruct',
+  'kimi-k2-thinking',
+])
+
+const commonModelIds = new Set([
+  'llama-3.1-8b',
+  'ministral-8b',
+  'ministral-3-14b',
+  'mistral-small-24b',
+  'nemotron-cascade-8b',
+  'nemotron-nano-9b-v2',
+  'gpt-oss-20b',
+  'gpt-oss-120b',
+  'nemotron-3-super-120b',
+])
+
+export const modelTierOrder = ['current', 'common', 'baseline']
+
+export const modelTierLabels = {
+  current: 'Current generation',
+  common: 'Still widely run',
+  baseline: 'Calibration baselines',
+}
+
+function resolveModelTier(id) {
+  if (baselineModelIds.has(id)) return 'baseline'
+  if (commonModelIds.has(id)) return 'common'
+  return 'current'
+}
+
+export const modelOptions = rawModelOptions.map((model) => ({
+  ...model,
+  tier: model.tier ?? resolveModelTier(model.id),
+}))
+
+export function compareModelsByTier(left, right) {
+  const tierDiff =
+    modelTierOrder.indexOf(left.tier ?? 'current') - modelTierOrder.indexOf(right.tier ?? 'current')
+  if (tierDiff !== 0) return tierDiff
+  return 0
+}
+
 export const benchmarkMatrix = {
   'rtx-pro-6000-bwe': {
     'llama-3.1-8b': { prefillTps: 8478.63, decodeTps: 138.18, ttftMs: 146.37, source: 'Benchmark-backed via LocalScore' },
@@ -1445,6 +1631,34 @@ export const workloadOptions = [
 ]
 
 export const dataSources = [
+  {
+    name: 'Unsloth dynamic GGUF quants',
+    type: 'published artifact sizes',
+    url: 'https://huggingface.co/unsloth',
+    notes:
+      'Weight footprints for GLM-5.2, DeepSeek V4 Flash, and Laguna-S 2.1 are summed from the actual sharded .gguf blob sizes published on Hugging Face, so the memory-fit numbers reflect files you can really download rather than a parameter-count estimate.',
+  },
+  {
+    name: 'PrismML Bonsai 27B',
+    type: 'published artifact sizes',
+    url: 'https://huggingface.co/prism-ml/Bonsai-27B-gguf',
+    notes:
+      'Bonsai and Ternary Bonsai footprints come from the published GGUF blob sizes. These are 1-bit and ternary quantizations of Qwen3.6 27B; decode speed in LapTime is modeled from the weight footprint rather than measured, because low-bit decode is bound by bytes moved per token.',
+  },
+  {
+    name: 'DeepReinforce Ornith 1.0',
+    type: 'published artifact sizes',
+    url: 'https://huggingface.co/deepreinforce-ai/Ornith-1.0-35B-GGUF',
+    notes:
+      'Ornith 35B and 9B weight footprints are taken from the published GGUF blob sizes. Runtime speeds remain modeled from LapTime hardware baselines.',
+  },
+  {
+    name: 'Hugging Face model configs',
+    type: 'official model metadata',
+    url: 'https://huggingface.co/docs/hub/api',
+    notes:
+      'Total and active parameter counts, expert routing, KV-cache architecture, and context limits for GLM-5.2, DeepSeek V4 Flash, Laguna-S 2.1, and Solar-Open2 are read from each repository config.json rather than from secondary reporting.',
+  },
   {
     name: 'LocalScore',
     type: 'structured benchmark',

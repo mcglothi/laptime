@@ -36,7 +36,9 @@ LapTime answers:
 - Color-coded fit warnings for likely broken or risky combinations
 - Segmented playback timeline for prompt ingest, TTFT, and token generation
 - Side-by-side comparison view
-- Broader model browser and source explorer
+- Model browser grouped by recency, with a source explorer
+- KV cache compression modes (llama.cpp q8/q4, TurboQuant) folded into the fit math
+- Bring-your-own-model import from Hugging Face
 - In-app methodology section that explains measured versus estimated versus community-backed laps
 - Cloudflare Pages deploys on every push to `main`
 
@@ -50,6 +52,22 @@ estimate-based entries across:
 - GB10-class systems such as DGX Spark and partner variants
 - AMD Strix Halo systems, including Framework, HP, ASUS, and community-tracked mini PCs
 
+## Model coverage
+
+The catalog is grouped into three recency tiers so the current generation is what
+you see first:
+
+- **Current generation** — GLM-5.2, DeepSeek V4 Flash, Qwen3.6, Gemma 4, Ornith 1.0,
+  Laguna-S 2.1, Bonsai 27B (1-bit and ternary), GPT OSS, Nemotron 3
+- **Still widely run** — Llama 3.1 8B, Mistral Small, Ministral, Nemotron Nano
+- **Calibration baselines** — collapsed by default. These older rows are kept because
+  LapTime's estimation curve is fitted against their measured LocalScore runs, not
+  because they are a recommendation.
+
+Where a model ships as GGUF, memory footprints are the **summed sizes of the actual
+published `.gguf` blobs** rather than a parameter-count estimate, so a "won't fit"
+badge reflects a file you can really download.
+
 ## Data philosophy
 
 LapTime tries to stay honest about source quality.
@@ -57,6 +75,10 @@ LapTime tries to stay honest about source quality.
 - Exact benchmark rows are labeled from structured sources like LocalScore
 - Community/forum observations stay separate from high-confidence benchmark data
 - Newer or harder-to-source systems are included as estimates only when labeled clearly
+- Architecture matters and is modeled explicitly: MoE rows scale on active parameters,
+  not total, and MLA/sparse-attention models get their own KV-cache factors
+- Low-bit rows (Bonsai 1-bit, ternary) model decode from the weight footprint rather
+  than the parameter count, and say so
 - Fit checks are guardrails, not guarantees; long context, KV cache growth, backend choice, and offload behavior still matter
 
 ## Stack

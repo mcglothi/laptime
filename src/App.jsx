@@ -2,9 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   benchmarkMatrix,
   communityBenchmarks,
+  compareModelsByTier,
   dataSources,
   hardwareOptions,
   modelOptions,
+  modelTierLabels,
+  modelTierOrder,
   workloadOptions,
 } from './data/benchmarkData'
 import CatalogSection from './components/CatalogSection'
@@ -223,16 +226,59 @@ const defaultCustomMetrics = {
   ttftMs: 350,
 }
 
+// Current-generation models sort ahead of older ones everywhere they are listed.
+// Ordering within a tier is left as authored. The catalog is static, so this is
+// computed once at module load rather than on every render.
+const tieredModelOptions = [...modelOptions].sort(compareModelsByTier)
+
+const SITE_ORIGIN = 'https://laptime.run'
+
+const PAGE_META = {
+  simulate: {
+    path: '/',
+    title: 'LapTime - Local LLM Simulator',
+    description:
+      'LapTime helps buyers feel local LLM performance before they buy hardware. Watch prompt ingest, time to first token, and streamed output for a given rig, model, and quantization.',
+  },
+  race: {
+    path: '/race',
+    title: 'Race two setups side by side | LapTime',
+    description:
+      'Put two local LLM setups in adjacent lanes and watch them clear prompt ingest, time to first token, and token generation on the same clock.',
+  },
+  reference: {
+    path: '/reference',
+    title: 'Model catalog, methodology, and sources | LapTime',
+    description:
+      'Browse the LapTime model catalog with memory-fit badges, and read exactly how measured benchmarks, source-backed rows, community runtimes, and estimates are separated.',
+  },
+}
+
+// Landing state is the product demo, so it is pinned to explicit ids rather than
+// array positions — reordering the catalog must not silently change what a visitor
+// sees. The pairing is deliberate: both machines fit the model, but the lap splits
+// ~2.1s vs ~6.3s with different verdicts, so the race makes its point without
+// needing a "won't fit" gotcha.
+const DEFAULT_HARDWARE_ID = 'dgx-spark-gb10'
+const DEFAULT_COMPARE_HARDWARE_ID = 'macbook-air-m4-32'
+const DEFAULT_MODEL_ID = 'qwen3.6-35b-a3b-q4-k-m'
+
+function resolveDefaultId(options, preferredId, fallbackIndex) {
+  return options.some((option) => option.id === preferredId)
+    ? preferredId
+    : options[fallbackIndex].id
+}
+
 function getInitialShareState() {
   const defaults = {
     customHardwareProfile: defaultCustomHardwareProfile,
     customMetrics: defaultCustomMetrics,
-    hardwareId: hardwareOptions[1].id,
+    hardwareId: resolveDefaultId(hardwareOptions, DEFAULT_HARDWARE_ID, 1),
     huggingFaceRepo: '',
     huggingFaceQuantOverride: '',
-    modelId: modelOptions[1].id,
+    modelId: resolveDefaultId(modelOptions, DEFAULT_MODEL_ID, 1),
     workloadId: workloadOptions[0].id,
-    compareHardwareId: hardwareOptions[3].id,
+    compareHardwareId: resolveDefaultId(hardwareOptions, DEFAULT_COMPARE_HARDWARE_ID, 3),
     contextTokens: workloadOptions[0].promptTokens,
     isPromptExpanded: false,
   }
@@ -847,6 +893,20 @@ function App() {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
+
+  // The static index.html ships one title and one canonical for every route, so
+  // /race and /reference would otherwise both declare themselves duplicates of the
+  // root. Keep them in sync with the active route as the user navigates.
+  useEffect(() => {
+    const meta = PAGE_META[page] ?? PAGE_META.simulate
+    document.title = meta.title
+
+    const description = document.querySelector('meta[name="description"]')
+    if (description) description.setAttribute('content', meta.description)
+
+    const canonical = document.querySelector('link[rel="canonical"]')
+    if (canonical) canonical.setAttribute('href', `${SITE_ORIGIN}${meta.path}`)
+  }, [page])
   const [isPlaying, setIsPlaying] = useState(true)
   const [elapsedMs, setElapsedMs] = useState(0)
   const [customMetrics, setCustomMetrics] = useState(initialShareState.customMetrics)
@@ -857,7 +917,9 @@ function App() {
     clamp(initialShareState.contextTokens, CONTEXT_TOKENS_MIN, CONTEXT_TOKENS_MAX),
   )
   const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
-  const activeModelOptions = importedModel ? [importedModel, ...modelOptions] : modelOptions
+  const activeModelOptions = importedModel
+    ? [importedModel, ...tieredModelOptions]
+    : tieredModelOptions
 
 
   const hardware = hardwareEntries.find((item) => item.id === hardwareId) ?? hardwareEntries[1]
@@ -1491,6 +1553,7 @@ function App() {
           hardware={hardware}
           model={model}
           metrics={metrics}
+          onNavigateToSimulate={() => navigate('simulate')}
           fitAssessment={fitAssessment}
           compareHardware={compareHardware}
           compareHardwareId={compareHardwareId}
@@ -1531,6 +1594,8 @@ function App() {
           catalogEntries={catalogEntries}
           contextTokens={workload.promptTokens}
           onSelectModel={(id) => { setModelId(id); navigate('simulate') }}
+          tierOrder={modelTierOrder}
+          tierLabels={modelTierLabels}
         />
 
         <MethodologySection

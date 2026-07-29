@@ -727,33 +727,8 @@ function SimulatorSection({
         </div>
       ) : null}
 
-      <div className="metrics-heading">Values used for this run</div>
-      <div className="metric-grid">
-        <div>
-          <span>Prefill</span>
-          <strong>{metrics.prefillTps.toFixed(0)} tok/s</strong>
-        </div>
-        <div>
-          <span>Decode</span>
-          <strong>{metrics.decodeTps.toFixed(1)} tok/s</strong>
-        </div>
-        <div>
-          <span>TTFT</span>
-          <strong>{Math.round(metrics.ttftMs)} ms</strong>
-        </div>
-        <div>
-          <span>Total</span>
-          <strong>{formatSeconds(metrics.totalSeconds)}</strong>
-        </div>
-        <div>
-          <span>Prompt tokens</span>
-          <strong>{workload.promptTokens.toLocaleString()}</strong>
-        </div>
-        <div>
-          <span>Response tokens</span>
-          <strong>{workload.responseTokens.toLocaleString()}</strong>
-        </div>
-      </div>
+      {/* "Values used for this run" lives in the playback panel — it is an output of
+          the run, not an input to it, and the left rail is the input column. */}
 
       <div className={`control-group dense advanced-shell ${isCustomHardwareToolsVisible ? 'open' : ''}`}>
         <div className="control-label">
@@ -852,34 +827,8 @@ function SimulatorSection({
         )}
       </div>
 
-      <div className="source-note">
-        Source: {metrics.source}
-        {sourceExplorerTarget ? (
-          <>
-            {' '}·{' '}
-            <a className="source-note-link" href={sourceExplorerTarget}>
-              Inspect benchmark source
-            </a>
-          </>
-        ) : null}
-      </div>
-      <div className={`runtime-note runtime-note-${runtimeTone}`}>
-        <strong>Runtime lens:</strong> {metrics.runtimeInfo.label}
-        <span> · {metrics.runtimeInfo.detail}</span>
-      </div>
-      <div className={`run-provenance run-provenance-${coverageTone}`}>
-        <div className="run-provenance-header">
-          <span className={`run-provenance-badge run-provenance-badge-${coverageTone}`}>
-            {coverageLabel}
-          </span>
-          <strong>
-            {coverageTone === 'estimate'
-              ? 'This lap is modeled, not measured.'
-              : 'This lap includes explicit source provenance.'}
-          </strong>
-        </div>
-        <p>{coverageExplanation}</p>
-      </div>
+      {/* Provenance (source, runtime lens, coverage explanation) is rendered once,
+          in the "How This Was Derived" card next to the results it explains. */}
       {fitAssessment.availableGb ? (
         <div className="source-note">
           Estimated memory split: {fitAssessment.weightGb.toFixed(1)} GB weights ·{' '}
@@ -1003,6 +952,36 @@ function SimulatorSection({
         </div>
       </div>
 
+      <div className="playback-values">
+        <div className="metrics-heading">Values used for this run</div>
+        <div className="metric-grid">
+          <div>
+            <span>Prefill</span>
+            <strong>{metrics.prefillTps.toFixed(0)} tok/s</strong>
+          </div>
+          <div>
+            <span>Decode</span>
+            <strong>{metrics.decodeTps.toFixed(1)} tok/s</strong>
+          </div>
+          <div>
+            <span>TTFT</span>
+            <strong>{Math.round(metrics.ttftMs)} ms</strong>
+          </div>
+          <div>
+            <span>Total</span>
+            <strong>{formatSeconds(metrics.totalSeconds)}</strong>
+          </div>
+          <div>
+            <span>Prompt tokens</span>
+            <strong>{workload.promptTokens.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span>Response tokens</span>
+            <strong>{workload.responseTokens.toLocaleString()}</strong>
+          </div>
+        </div>
+      </div>
+
       <div className="playback-insight-grid">
         <div className="playback-insight-card playback-insight-card-story">
           <div className="block-label">What This Lap Tells You</div>
@@ -1015,10 +994,25 @@ function SimulatorSection({
           <div className={`run-provenance-badge run-provenance-badge-${coverageTone}`}>
             {coverageLabel}
           </div>
+          <strong className="playback-provenance-claim">
+            {coverageTone === 'estimate'
+              ? 'This lap is modeled, not measured.'
+              : 'This lap includes explicit source provenance.'}
+          </strong>
           <p>{coverageExplanation}</p>
-          <small>{metrics.source}</small>
+          <small>
+            {metrics.source}
+            {sourceExplorerTarget ? (
+              <>
+                {' '}·{' '}
+                <a className="source-note-link" href={sourceExplorerTarget}>
+                  Inspect benchmark source
+                </a>
+              </>
+            ) : null}
+          </small>
           <small className={`playback-runtime playback-runtime-${runtimeTone}`}>
-            Runtime lens: {metrics.runtimeInfo.label}
+            Runtime lens: {metrics.runtimeInfo.label} · {metrics.runtimeInfo.detail}
           </small>
         </div>
       </div>

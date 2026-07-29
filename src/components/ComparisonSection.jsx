@@ -62,6 +62,7 @@ function ComparisonSection({
   hardware,
   model,
   metrics,
+  onNavigateToSimulate,
   fitAssessment,
   compareHardware,
   compareHardwareId,
@@ -223,47 +224,17 @@ function ComparisonSection({
               {winnerLane === 'a' ? <span className="winner-label">Fastest</span> : null}
             </strong>
           </div>
-          <div className="compare-setup-block compare-setup-block-disabled">
-            <div className="compare-controls compare-controls-disabled" aria-hidden="true">
-              <label className="control-group dense">
-                <span>Hardware</span>
-                <div className="chip-row">
-                  {hardwarePlatformOptions.map((platform) => (
-                    <button
-                      key={platform}
-                      className={`filter-chip ${platform === hardware.platform ? 'active' : ''}`}
-                      type="button"
-                      disabled
-                      tabIndex={-1}
-                    >
-                      {platform === 'all' ? 'All platforms' : platform}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  id="current-hardware-search"
-                  name="currentHardwareSearch"
-                  type="text"
-                  value={hardware.name}
-                  placeholder="Search hardware"
-                  disabled
-                  readOnly
-                  tabIndex={-1}
-                />
-                <select
-                  id="current-hardware-select"
-                  name="currentHardware"
-                  value={hardware.id}
-                  disabled
-                  tabIndex={-1}
-                  onChange={() => {}}
-                >
-                  <option value={hardware.id}>
-                    {hardware.platform} · {hardware.name}
-                  </option>
-                </select>
-              </label>
-            </div>
+          <div className="compare-setup-block">
+            <p className="compare-lane-origin">
+              Lane A is whatever you have loaded in the simulator.{' '}
+              <button
+                type="button"
+                className="compare-lane-origin-link"
+                onClick={onNavigateToSimulate}
+              >
+                Change it on Simulate
+              </button>
+            </p>
             <div className="compare-title">{hardware.name}</div>
             <div className="compare-subtitle">
               {hardware.platform} · {model.name}
