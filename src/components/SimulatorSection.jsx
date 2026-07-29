@@ -211,6 +211,7 @@ function SimulatorSection({
   modelFamilyFilter,
   setModelFamilyFilter,
   modelCoverageCounts,
+  modelFamilyCounts,
   modelCoverageFilter,
   setModelCoverageFilter,
   huggingFaceImportInput,
@@ -364,16 +365,26 @@ function SimulatorSection({
         <div className="filter-cluster">
           <div className="filter-cluster-label">Family</div>
           <div className="chip-row">
-            {modelFamilyOptions.map((family) => (
-              <button
-                key={family}
-                className={`filter-chip ${modelFamilyFilter === family ? 'active' : ''}`}
-                type="button"
-                onClick={() => setModelFamilyFilter(family)}
-              >
-                {family === 'all' ? 'All families' : family}
-              </button>
-            ))}
+            {modelFamilyOptions.map((family) => {
+              const familyCount = modelFamilyCounts?.[family] ?? 0
+
+              return (
+                <button
+                  key={family}
+                  className={`filter-chip ${modelFamilyFilter === family ? 'active' : ''}`}
+                  type="button"
+                  disabled={familyCount === 0 && modelFamilyFilter !== family}
+                  title={
+                    familyCount === 0
+                      ? 'No models in this family match the current source-quality filter'
+                      : undefined
+                  }
+                  onClick={() => setModelFamilyFilter(family)}
+                >
+                  {family === 'all' ? 'All families' : family}
+                </button>
+              )
+            })}
           </div>
         </div>
         <div className="filter-cluster filter-cluster-coverage" aria-label="Model benchmark coverage filters">
