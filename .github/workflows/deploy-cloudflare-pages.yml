@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
@@ -32,6 +32,25 @@ jobs:
       - name: Build site
         run: npm run build
 
+      # wrangler receives --commit-message as a shell argument, so a multi-line
+      # commit body used to split into bare arguments and fail the whole deploy
+      # with "Unknown arguments: ...". Collapse to the subject line here.
+      # Passing the raw message through an env var (rather than interpolating
+      # ${{ }} straight into a command) also keeps commit text out of the
+      # command line, where it would otherwise be a script-injection vector.
+      - name: Prepare deploy metadata
+        id: meta
+        env:
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          subject="$(printf '%s' "${HEAD_COMMIT_MESSAGE:-}" | head -n 1 | tr -d '"' | cut -c1-72)"
+          # workflow_dispatch has no head_commit, so fall back to the short sha.
+          if [ -z "$subject" ]; then
+            subject="Manual deploy ${GITHUB_SHA:0:7}"
+          fi
+          echo "commit_message=$subject" >> "$GITHUB_OUTPUT"
+          echo "Deploy commit message: $subject"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
@@ -42,4 +61,4 @@ jobs:
             --project-name laptime
             --branch main
             --commit-hash ${{ github.sha }}
-            --commit-message "${{ github.event.head_commit.message }}"
+            --commit-message "${{ steps.meta.outputs.commit_message }}"
