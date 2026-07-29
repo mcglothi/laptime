@@ -1,7 +1,10 @@
-name: Deploy To Cloudflare Pages
+name: Verify And Deploy
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
   workflow_dispatch:
@@ -9,8 +12,14 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# A newer push to the same branch makes an in-flight run obsolete. Production
+# deploys are allowed to finish so a merge is never left half-shipped.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +41,10 @@ jobs:
       - name: Build site
         run: npm run build
 
+      # Everything below publishes to the live site, so it is skipped for pull
+      # requests: a PR gets the same lint and build gate without touching
+      # production. Only pushes to main (and manual dispatch) deploy.
+      #
       # wrangler receives --commit-message as a shell argument, so a multi-line
       # commit body used to split into bare arguments and fail the whole deploy
       # with "Unknown arguments: ...". Collapse to the subject line here.
@@ -40,6 +53,7 @@ jobs:
       # command line, where it would otherwise be a script-injection vector.
       - name: Prepare deploy metadata
         id: meta
+        if: github.event_name != 'pull_request'
         env:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
@@ -52,6 +66,7 @@ jobs:
           echo "Deploy commit message: $subject"
 
       - name: Deploy to Cloudflare Pages
+        if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
