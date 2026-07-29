@@ -997,6 +997,26 @@ function App() {
       : familyFilteredModels.filter((option) =>
           matchesCoverageFilter(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)), modelCoverageFilter),
         )
+
+  // Mirror of modelCoverageCounts: how many models each family has *under the
+  // active coverage filter*. The coverage chips already disable themselves at
+  // zero; without the same guard on the family chips the two filters could be
+  // combined into an empty selector with no way to tell in advance.
+  const coverageFilteredAcrossFamilies =
+    modelCoverageFilter === 'all'
+      ? activeModelOptions
+      : activeModelOptions.filter((option) =>
+          matchesCoverageFilter(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)), modelCoverageFilter),
+        )
+
+  const modelFamilyCounts = coverageFilteredAcrossFamilies.reduce(
+    (counts, option) => {
+      counts.all += 1
+      if (option.family) counts[option.family] = (counts[option.family] ?? 0) + 1
+      return counts
+    },
+    { all: 0 },
+  )
   const visibleModelOptions = buildFilteredOptions(
     coverageFilteredModels,
     modelQuery,
@@ -1143,9 +1163,19 @@ function App() {
 
   function handleHardwareIdChange(nextHardwareId) {
     setHardwareId(nextHardwareId)
-    snapModelSelectionInto(
-      getVisibleModelsFor(modelFamilyFilter, modelCoverageFilter, nextHardwareId),
-    )
+
+    const nextModels = getVisibleModelsFor(modelFamilyFilter, modelCoverageFilter, nextHardwareId)
+    if (nextModels.length) {
+      snapModelSelectionInto(nextModels)
+      return
+    }
+
+    // Coverage is classified per hardware, so switching machines can empty a
+    // family + coverage combination that was valid a moment ago. The chip guards
+    // cannot prevent that. Release the coverage filter — the hardware-dependent
+    // half — and keep the family the user chose.
+    setModelCoverageFilter('all')
+    snapModelSelectionInto(getVisibleModelsFor(modelFamilyFilter, 'all', nextHardwareId))
   }
 
   function syncParsedLap(parsedLap) {
@@ -1554,6 +1584,7 @@ function App() {
         visibleModelOptions={visibleModelEntries}
         setModelId={setModelId}
         modelFamilyOptions={modelFamilyOptions}
+        modelFamilyCounts={modelFamilyCounts}
         modelFamilyFilter={modelFamilyFilter}
         setModelFamilyFilter={handleModelFamilyFilterChange}
         modelCoverageCounts={modelCoverageCounts}
