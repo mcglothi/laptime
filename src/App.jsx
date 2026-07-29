@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   benchmarkMatrix,
   communityBenchmarks,
@@ -115,6 +115,15 @@ function normalizeHuggingFaceSearchQuery(value) {
     .replace(/^huggingface\.co\//i, '')
 }
 
+// A typed value is only worth sending to the search endpoint when it is not empty,
+// not already an exact `owner/repo` reference (which imports directly instead), and
+// long enough to return anything useful.
+function shouldSearchHuggingFaceInput(trimmedInput) {
+  if (!trimmedInput) return false
+  if (parseHuggingFaceRepoReference(trimmedInput)) return false
+  return normalizeHuggingFaceSearchQuery(trimmedInput).length >= 2
+}
+
 function toTitleCase(value) {
   return String(value ?? '')
     .replace(/[_-]+/g, ' ')
@@ -184,7 +193,18 @@ function buildImportedModelOption(payload, quantOverride = '') {
   const safetensorsPrecision = safetensorsKeys[0] ?? null
   const safetensorsTotal = Number(payload.safetensors?.total ?? 0)
   const nameDerivedParams = extractParamsFromName(repoName)
-  const paramsB = safetensorsTotal > 0 ? safetensorsTotal / 1_000_000_000 : nameDerivedParams.paramsB
+  const reportedParamsB = safetensorsTotal > 0 ? safetensorsTotal / 1_000_000_000 : null
+
+  // Some repos publish a partial safetensors total: deepreinforce-ai/Ornith-1.0-9B
+  // reports 1.47M parameters for a 9B model. Taken at face value that renders a
+  // "0B" model whose speed and memory estimates are silently meaningless, so fall
+  // back to the size in the repo name when the published total is implausibly
+  // small next to it.
+  const paramsB =
+    reportedParamsB != null &&
+    (nameDerivedParams.paramsB == null || reportedParamsB >= nameDerivedParams.paramsB * 0.5)
+      ? reportedParamsB
+      : nameDerivedParams.paramsB ?? reportedParamsB
   const sourceQuant = extractQuantLabel(repoName, safetensorsPrecision)
   const quant = quantOverride || sourceQuant
   const family =
@@ -842,7 +862,6 @@ function App() {
   })
   const [huggingFaceSearchQuery, setHuggingFaceSearchQuery] = useState('')
   const [huggingFaceSearchResults, setHuggingFaceSearchResults] = useState([])
-  const [importedModel, setImportedModel] = useState(null)
   const [importedModelPayload, setImportedModelPayload] = useState(null)
   const hardwareEntries = hardwareOptions
     .map((item) => {
@@ -917,6 +936,17 @@ function App() {
     clamp(initialShareState.contextTokens, CONTEXT_TOKENS_MIN, CONTEXT_TOKENS_MAX),
   )
   const [isPromptExpanded, setIsPromptExpanded] = useState(initialShareState.isPromptExpanded)
+  // The imported model is entirely a function of the fetched payload and the chosen
+  // quant, so it is derived rather than stored. Keeping it in state meant an effect
+  // had to re-derive it every time the quant override changed.
+  const importedModel = useMemo(
+    () =>
+      importedModelPayload
+        ? buildImportedModelOption(importedModelPayload, huggingFaceQuantOverride)
+        : null,
+    [importedModelPayload, huggingFaceQuantOverride],
+  )
+
   const activeModelOptions = importedModel
     ? [importedModel, ...tieredModelOptions]
     : tieredModelOptions
@@ -1003,12 +1033,6 @@ function App() {
     benchmarkCoverage: getBenchmarkCoverage(getBenchmarkEntry(hardwareId, entry.id)),
   }))
 
-  useEffect(() => {
-    if (!coverageFilteredModels.length) return
-    if (coverageFilteredModels.some((option) => option.id === modelId)) return
-    setModelId(coverageFilteredModels[0].id)
-  }, [coverageFilteredModels, modelId])
-
   function restartSimulation() {
     setElapsedMs(0)
     setIsPlaying(true)
@@ -1046,32 +1070,82 @@ function App() {
 
     const fallbackHardware = nextOptions[0]
     if (fallbackHardware) {
-      setHardwareId(fallbackHardware.id)
+      // Route through the hardware handler so the model selection is re-checked too:
+      // coverage classification is hardware-specific.
+      handleHardwareIdChange(fallbackHardware.id)
     }
+  }
+
+  // Changing the family filter, the coverage filter, or the hardware can all push the
+  // selected model out of the visible list. That correction happens in the handlers
+  // that cause it rather than in an effect, so there is no extra render pass and the
+  // three paths cannot drift apart.
+  function getVisibleModelsFor(familyFilter, coverageFilter, hardwareEntryId) {
+    const familyFiltered =
+      familyFilter === 'all'
+        ? activeModelOptions
+        : activeModelOptions.filter((option) => option.family === familyFilter)
+
+    return coverageFilter === 'all'
+      ? familyFiltered
+      : familyFiltered.filter((option) =>
+          matchesCoverageFilter(
+            getBenchmarkCoverage(getBenchmarkEntry(hardwareEntryId, option.id)),
+            coverageFilter,
+          ),
+        )
+  }
+
+  function snapModelSelectionInto(nextModels) {
+    if (!nextModels.length) return
+    if (nextModels.some((option) => option.id === modelId)) return
+    setModelId(nextModels[0].id)
+  }
+
+  function handleHuggingFaceInputChange(nextValue) {
+    setHuggingFaceImportInput(nextValue)
+
+    const trimmedInput = nextValue.trim()
+    const exactRepo = parseHuggingFaceRepoReference(trimmedInput)
+
+    if (exactRepo) {
+      setHuggingFaceSearchQuery('')
+      setHuggingFaceSearchResults([])
+      setHuggingFaceImportState({
+        status: 'success',
+        message: `Exact repo detected: ${exactRepo}. Click import to load it.`,
+      })
+      return
+    }
+
+    if (!shouldSearchHuggingFaceInput(trimmedInput)) {
+      setHuggingFaceSearchQuery('')
+      setHuggingFaceSearchResults([])
+      setHuggingFaceImportState((current) =>
+        current.status === 'idle' && !current.message ? current : { status: 'idle', message: '' },
+      )
+      return
+    }
+
+    // Searchable input: the debounced effect issues the request and owns the status
+    // from here, so leave any existing results visible until it resolves.
   }
 
   function handleModelCoverageFilterChange(nextFilter) {
     setModelCoverageFilter(nextFilter)
+    snapModelSelectionInto(getVisibleModelsFor(modelFamilyFilter, nextFilter, hardware.id))
+  }
 
-    const nextFamilyFilteredModels =
-      modelFamilyFilter === 'all'
-        ? activeModelOptions
-        : activeModelOptions.filter((option) => option.family === modelFamilyFilter)
-    const nextCoverageFilteredModels =
-      nextFilter === 'all'
-        ? nextFamilyFilteredModels
-        : nextFamilyFilteredModels.filter((option) =>
-            matchesCoverageFilter(getBenchmarkCoverage(getBenchmarkEntry(hardware.id, option.id)), nextFilter),
-          )
+  function handleModelFamilyFilterChange(nextFilter) {
+    setModelFamilyFilter(nextFilter)
+    snapModelSelectionInto(getVisibleModelsFor(nextFilter, modelCoverageFilter, hardware.id))
+  }
 
-    if (nextCoverageFilteredModels.some((option) => option.id === modelId)) {
-      return
-    }
-
-    const fallbackModel = nextCoverageFilteredModels[0]
-    if (fallbackModel) {
-      setModelId(fallbackModel.id)
-    }
+  function handleHardwareIdChange(nextHardwareId) {
+    setHardwareId(nextHardwareId)
+    snapModelSelectionInto(
+      getVisibleModelsFor(modelFamilyFilter, modelCoverageFilter, nextHardwareId),
+    )
   }
 
   function syncParsedLap(parsedLap) {
@@ -1146,8 +1220,10 @@ function App() {
     }
   }, [])
 
-  const importHuggingFaceModel = useCallback(async (inputValue = huggingFaceImportInput, options = {}) => {
-    const { selectImportedModel = true } = options
+  // `inputValue` is required rather than defaulting to huggingFaceImportInput: a
+  // default parameter that reads state pulls that state into the dependency list,
+  // which meant this callback was rebuilt on every keystroke.
+  const importHuggingFaceModel = useCallback(async (inputValue, selectImportedModel = true) => {
     const repo = parseHuggingFaceRepoReference(inputValue)
 
     if (!repo) {
@@ -1173,7 +1249,6 @@ function App() {
 
       const nextImportedModel = buildImportedModelOption(payload, huggingFaceQuantOverride)
       setImportedModelPayload(payload)
-      setImportedModel(nextImportedModel)
       setModelFamilyFilter('all')
       setCatalogFamilyFilter('all')
       setModelQuery('')
@@ -1192,61 +1267,21 @@ function App() {
       })
       return null
     }
-  }, [huggingFaceImportInput, huggingFaceQuantOverride, searchHuggingFaceModels])
+  }, [
+    huggingFaceQuantOverride,
+    searchHuggingFaceModels,
+    setCatalogFamilyFilter,
+    setModelFamilyFilter,
+    setModelId,
+    setModelQuery,
+  ])
 
-  useEffect(() => {
-    if (!importedModelPayload) return
-
-    setImportedModel(buildImportedModelOption(importedModelPayload, huggingFaceQuantOverride))
-  }, [huggingFaceQuantOverride, importedModelPayload])
-
+  // Only the debounced network call lives in an effect now. The synchronous status
+  // and result resets moved into handleHuggingFaceInputChange, because they are a
+  // direct consequence of typing rather than something to reconcile after render.
   useEffect(() => {
     const trimmedInput = huggingFaceImportInput.trim()
-    const exactRepo = parseHuggingFaceRepoReference(trimmedInput)
-
-    if (!trimmedInput) {
-      setHuggingFaceSearchQuery('')
-      setHuggingFaceSearchResults([])
-      setHuggingFaceImportState((current) =>
-        current.status === 'idle' && !current.message
-          ? current
-          : {
-              status: 'idle',
-              message: '',
-            },
-      )
-      return undefined
-    }
-
-    if (exactRepo) {
-      setHuggingFaceSearchQuery('')
-      setHuggingFaceSearchResults([])
-      setHuggingFaceImportState((current) => {
-        const nextMessage = `Exact repo detected: ${exactRepo}. Click import to load it.`
-        if (current.status === 'success' && current.message === nextMessage) {
-          return current
-        }
-        return {
-          status: 'success',
-          message: nextMessage,
-        }
-      })
-      return undefined
-    }
-
-    if (normalizeHuggingFaceSearchQuery(trimmedInput).length < 2) {
-      setHuggingFaceSearchQuery('')
-      setHuggingFaceSearchResults([])
-      setHuggingFaceImportState((current) =>
-        current.status === 'idle' && !current.message
-          ? current
-          : {
-              status: 'idle',
-              message: '',
-            },
-      )
-      return undefined
-    }
+    if (!shouldSearchHuggingFaceInput(trimmedInput)) return undefined
 
     const timeoutId = window.setTimeout(() => {
       searchHuggingFaceModels(trimmedInput)
@@ -1282,12 +1317,29 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  useEffect(() => {
-    if (!initialShareState.huggingFaceRepo) return
-    if (importedModel?.huggingFaceRepo === initialShareState.huggingFaceRepo) return
+  // Restore a model shared via ?hf=. This runs once: the ref guard replaces the old
+  // "has it loaded yet?" dependency check, which re-ran the effect on every render
+  // until the fetch resolved. The import is dispatched in a task of its own so the
+  // request's own status updates do not cascade out of this effect's flush.
+  const hasRestoredSharedImport = useRef(false)
 
-    importHuggingFaceModel(initialShareState.huggingFaceRepo)
-  }, [importHuggingFaceModel, importedModel?.huggingFaceRepo, initialShareState.huggingFaceRepo])
+  useEffect(() => {
+    if (hasRestoredSharedImport.current) return undefined
+    if (!initialShareState.huggingFaceRepo) return undefined
+
+    hasRestoredSharedImport.current = true
+    const timeoutId = window.setTimeout(() => {
+      importHuggingFaceModel(initialShareState.huggingFaceRepo)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      // StrictMode mounts, unmounts, then remounts in development. Releasing the
+      // guard here lets the remount reschedule the import it just cancelled —
+      // without this the shared ?hf= model never loads in dev.
+      hasRestoredSharedImport.current = false
+    }
+  }, [importHuggingFaceModel, initialShareState.huggingFaceRepo])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -1492,7 +1544,7 @@ function App() {
         hardwarePlatformOptions={hardwarePlatformOptions}
         hardwarePlatformFilter={hardwarePlatformFilter}
         setHardwarePlatformFilter={handleHardwarePlatformFilterChange}
-        setHardwareId={setHardwareId}
+        setHardwareId={handleHardwareIdChange}
         customMetrics={customMetrics}
         setCustomMetrics={setCustomMetrics}
         model={model}
@@ -1503,12 +1555,12 @@ function App() {
         setModelId={setModelId}
         modelFamilyOptions={modelFamilyOptions}
         modelFamilyFilter={modelFamilyFilter}
-        setModelFamilyFilter={setModelFamilyFilter}
+        setModelFamilyFilter={handleModelFamilyFilterChange}
         modelCoverageCounts={modelCoverageCounts}
         modelCoverageFilter={modelCoverageFilter}
         setModelCoverageFilter={handleModelCoverageFilterChange}
         huggingFaceImportInput={huggingFaceImportInput}
-        setHuggingFaceImportInput={setHuggingFaceImportInput}
+        setHuggingFaceImportInput={handleHuggingFaceInputChange}
         huggingFaceQuantOptions={importedQuantOptions}
         huggingFaceQuantOverride={huggingFaceQuantOverride}
         setHuggingFaceQuantOverride={setHuggingFaceQuantOverride}

@@ -512,7 +512,7 @@ function SimulatorSection({
                 type="button"
                 disabled={huggingFaceImportState.status === 'loading'}
                 onClick={async () => {
-                  const importedModel = await importHuggingFaceModel()
+                  const importedModel = await importHuggingFaceModel(huggingFaceImportInput)
                   if (importedModel) {
                     handleRestart({ collapseMobile: true })
                   }
